@@ -1,19 +1,28 @@
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Orchestrate.API.Data;
 
-namespace Orchestrate
+namespace Orchestrate.API
 {
     public class Program
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            var host = CreateHostBuilder(args).Build();
+
+            InitDb(host);
+
+            host.Run();
+        }
+
+        private static void InitDb(IHost host)
+        {
+            using (var scope = host.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<OrchestrateContext>();
+                context.Database.EnsureCreated();
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

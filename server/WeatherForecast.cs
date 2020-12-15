@@ -1,6 +1,6 @@
 using System;
 
-namespace Orchestrate
+namespace Orchestrate.API
 {
     public class WeatherForecast
     {
