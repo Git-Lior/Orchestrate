@@ -9,7 +9,7 @@ namespace Orchestrate.API.Models
     [Table("role")]
     public class Role
     {
-        public int RoleID { get; set; }
+        public int RoleId { get; set; }
         public string Section { get; set; }
         public int RoleNum { get; set; }
 

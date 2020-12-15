@@ -10,18 +10,18 @@ namespace Orchestrate.API.Models
     [Table("sheet_music_comment")]
     public class SheetMusicComment
     {
-        public int CommentID { get; set; }
+        public int CommentId { get; set; }
 
-        public int GroupID { get; set; }
+        public int GroupId { get; set; }
         public Group Group { get; set; }
 
-        public int CompositionID { get; set; }
+        public int CompositionId { get; set; }
         public Composition Composition { get; set; }
 
-        public int RoleID { get; set; }
+        public int RoleId { get; set; }
         public Role Role { get; set; }
 
-        public int UserID { get; set; }
+        public int UserId { get; set; }
         public User User { get; set; }
 
         public string Content { get; set; }

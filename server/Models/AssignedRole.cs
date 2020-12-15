@@ -5,13 +5,13 @@ namespace Orchestrate.API.Models
     [Table("assigned_role")]
     public class AssignedRole
     {
-        public int GroupID { get; set; }
+        public int GroupId { get; set; }
         public Group Group { get; set; }
         
-        public int RoleID { get; set; }
+        public int RoleId { get; set; }
         public Role Role { get; set; }
         
-        public int UserID { get; set; }
+        public int UserId { get; set; }
         public User User { get; set; }
     }
 }

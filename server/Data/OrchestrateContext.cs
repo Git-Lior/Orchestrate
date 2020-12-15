@@ -17,13 +17,13 @@ namespace Orchestrate.API.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // composite keys
-            modelBuilder.Entity<AssignedRole>().HasKey(ar => new { ar.GroupID, ar.RoleID, ar.UserID });
-            modelBuilder.Entity<Composition>().HasKey(c => new { c.GroupID, c.CompositionID });
-            modelBuilder.Entity<Concert>().HasKey(c => new { c.GroupID, c.ConcertID });
-            modelBuilder.Entity<ConcertAttendance>().HasKey(ca => new { ca.GroupID, ca.ConcertID, ca.UserID });
-            modelBuilder.Entity<ConcertComposition>().HasKey(cc => new { cc.GroupID, cc.ConcertID, cc.CompositionID });
-            modelBuilder.Entity<SheetMusic>().HasKey(sm => new { sm.GroupID, sm.CompositionID, sm.RoleID });
-            modelBuilder.Entity<SheetMusicComment>().HasKey(smm => new { smm.GroupID, smm.CompositionID, smm.RoleID, smm.CommentID });
+            modelBuilder.Entity<AssignedRole>().HasKey(ar => new { ar.GroupId, ar.RoleId, ar.UserId });
+            modelBuilder.Entity<Composition>().HasKey(c => new { c.GroupId, c.CompositionId });
+            modelBuilder.Entity<Concert>().HasKey(c => new { c.GroupId, c.ConcertId });
+            modelBuilder.Entity<ConcertAttendance>().HasKey(ca => new { ca.GroupId, ca.ConcertId, ca.UserId });
+            modelBuilder.Entity<ConcertComposition>().HasKey(cc => new { cc.GroupId, cc.ConcertId, cc.CompositionId });
+            modelBuilder.Entity<SheetMusic>().HasKey(sm => new { sm.GroupId, sm.CompositionId, sm.RoleId });
+            modelBuilder.Entity<SheetMusicComment>().HasKey(smc => new { smc.GroupId, smc.CompositionId, smc.RoleId, smc.CommentId });
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.DirectorOfGroups)
@@ -38,17 +38,32 @@ namespace Orchestrate.API.Data
             modelBuilder.Entity<AssignedRole>()
                 .HasOne(ar => ar.User)
                 .WithMany(u => u.Roles)
-                .HasForeignKey(ar => ar.UserID);
+                .HasForeignKey(ar => ar.UserId);
 
             modelBuilder.Entity<AssignedRole>()
                 .HasOne(ar => ar.Group)
                 .WithMany(g => g.AssignedRoles)
-                .HasForeignKey(ar => ar.GroupID);
+                .HasForeignKey(ar => ar.GroupId);
 
             modelBuilder.Entity<AssignedRole>()
                 .HasOne(ar => ar.Role)
                 .WithMany()
-                .HasForeignKey(ar => ar.RoleID);
+                .HasForeignKey(ar => ar.RoleId);
+
+            modelBuilder.Entity<SheetMusic>()
+                .HasMany(sm => sm.Comments)
+                .WithOne()
+                .HasForeignKey(smc => new { smc.GroupId, smc.CompositionId, smc.RoleId });
+
+            modelBuilder.Entity<Concert>()
+                .HasMany(c => c.Attendances)
+                .WithOne(ca => ca.Concert)
+                .HasForeignKey(ca => new { ca.GroupId, ca.ConcertId });
+
+            modelBuilder.Entity<Concert>()
+                .HasMany(c => c.Compositions)
+                .WithOne(c => c.Concert)
+                .HasForeignKey(cc => new { cc.GroupId, cc.ConcertId });
         }
     }
 }

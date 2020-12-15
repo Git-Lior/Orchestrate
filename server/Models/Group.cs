@@ -9,7 +9,7 @@ namespace Orchestrate.API.Models
     [Table("group")]
     public class Group
     {
-        public int GroupID { get; set; }
+        public int GroupId { get; set; }
         public string Name { get; set; }
 
         public int ManagerId { get; set; }
@@ -17,6 +17,8 @@ namespace Orchestrate.API.Models
         public ICollection<User> Directors { get; set; }
         public ICollection<Role> AvailableRoles { get; set; }
         public ICollection<AssignedRole> AssignedRoles { get; set; }
+        
+        public ICollection<Composition> Compositions { get; set; }
         public ICollection<Concert> Concerts { get; set; }
     }
 }

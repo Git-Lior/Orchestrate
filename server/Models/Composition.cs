@@ -10,14 +10,17 @@ namespace Orchestrate.API.Models
     [Table("composition")]
     public class Composition
     {
-        public int GroupID { get; set; }
-        public int CompositionID { get; set; }
+        public int GroupId { get; set; }
+        public int CompositionId { get; set; }
         public string Title { get; set; }
         public string Composer { get; set; }
         public string Genre { get; set; }
 
-        public int UploaderID { get; set; }
+        public int UploaderId { get; set; }
         public User Uploader { get; set; }
         public Group Group { get; set; }
+
+
+        public ICollection<SheetMusic> SheetMusics;
     }
 }
