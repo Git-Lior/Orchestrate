@@ -29,6 +29,7 @@ namespace Orchestrate.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<OrchestrateContext>(builder => builder.UseNpgsql(Configuration.GetConnectionString("OrchestrateDb")));
+            services.AddSingleton<OrchestrateDbInitializer>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

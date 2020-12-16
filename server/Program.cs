@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Orchestrate.API.Data;
+using System;
 
 namespace Orchestrate.API
 {
@@ -18,10 +20,15 @@ namespace Orchestrate.API
 
         private static void InitDb(IHost host)
         {
-            using (var scope = host.Services.CreateScope())
+            using var scope = host.Services.CreateScope();
+            try
             {
-                var context = scope.ServiceProvider.GetRequiredService<OrchestrateContext>();
-                context.Database.EnsureCreated();
+                scope.ServiceProvider.GetRequiredService<OrchestrateDbInitializer>().Initialize();
+            }
+            catch (Exception ex)
+            {
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
+                logger.LogError(ex, "An error occured while initializing the DB");
             }
         }
 
