@@ -1,4 +1,14 @@
-import { createMuiTheme } from "@material-ui/core/styles";
+import { create } from "jss";
+import rtl from "jss-rtl";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import {
+  StylesProvider,
+  jssPreset,
+  createMuiTheme,
+  ThemeProvider,
+} from "@material-ui/core/styles";
+
+const jss = create({ plugins: [...jssPreset().plugins, rtl()] });
 
 // TODO: responsive font size?
 const theme = createMuiTheme({
@@ -35,4 +45,15 @@ const theme = createMuiTheme({
   },
 });
 
-export default theme;
+type Props = React.PropsWithChildren<{}>;
+
+export default function AppTheme({ children }: Props) {
+  return (
+    <StylesProvider jss={jss}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        {children}
+      </ThemeProvider>
+    </StylesProvider>
+  );
+}
