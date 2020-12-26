@@ -1,5 +1,5 @@
 import "./index.css";
-import React from "react";
+import React, { useCallback } from "react";
 
 import Container from "@material-ui/core/Container";
 import Paper from "@material-ui/core/Paper";
@@ -9,9 +9,35 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Button from "@material-ui/core/Button";
 
+import { useInputState } from "utils/hooks";
 import logo from "assets/logo.png";
 
-function LoginPage() {
+interface LoginProps {
+  onLogin: (user: orch.User) => void;
+}
+
+function LoginPage({ onLogin }: LoginProps) {
+  const [email, setEmail] = useInputState();
+  const [password, setPassword] = useInputState();
+
+  const _onFormSubmit = useCallback(
+    async (e: React.FormEvent<any>) => {
+      e.preventDefault();
+
+      const result = await fetch("/auth/login", {
+        method: "POST",
+        headers: new Headers({ "content-type": "application/json" }),
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!result.ok) return;
+
+      const user: orch.User = await result.json();
+      onLogin(user);
+    },
+    [email, password, onLogin]
+  );
+
   return (
     <Container className="login-page">
       <img src={logo} className="app-logo" alt="Orchestrate" />
@@ -20,8 +46,10 @@ function LoginPage() {
           <Typography variant="h4" align="center">
             התחברות
           </Typography>
-          <form>
+          <form onSubmit={_onFormSubmit}>
             <TextField
+              value={email}
+              onChange={setEmail}
               required
               fullWidth
               autoFocus
@@ -33,6 +61,8 @@ function LoginPage() {
               label="כתובת מייל"
             />
             <TextField
+              value={password}
+              onChange={setPassword}
               type="password"
               required
               fullWidth

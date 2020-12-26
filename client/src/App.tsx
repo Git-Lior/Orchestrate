@@ -1,10 +1,16 @@
 import "./App.css";
-import React from "react";
+import React, { useState } from "react";
 
 import LoginPage from "pages/login";
 
 function App() {
-  return <LoginPage />;
+  const [user, setUser] = useState<orch.User | null>(null);
+
+  return !user ? (
+    <LoginPage onLogin={setUser} />
+  ) : (
+    <div>ברוך הבא, {`${user.firstName} ${user.lastName}`}!</div>
+  );
 }
 
 export default App;

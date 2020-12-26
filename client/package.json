@@ -1,6 +1,7 @@
 {
   "name": "orchestrate-client",
   "version": "0.1.0",
+  "proxy": "https://localhost:44340",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.11.2",
