@@ -12,7 +12,7 @@ namespace Orchestrate.API.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Group> Groups { get; set; }
 
-        public OrchestrateContext(DbContextOptions<OrchestrateContext> options): base(options) { }
+        public OrchestrateContext(DbContextOptions<OrchestrateContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,6 +24,8 @@ namespace Orchestrate.API.Data
             modelBuilder.Entity<ConcertComposition>().HasKey(cc => new { cc.GroupId, cc.ConcertId, cc.CompositionId });
             modelBuilder.Entity<SheetMusic>().HasKey(sm => new { sm.GroupId, sm.CompositionId, sm.RoleId });
             modelBuilder.Entity<SheetMusicComment>().HasKey(smc => new { smc.GroupId, smc.CompositionId, smc.RoleId, smc.CommentId });
+
+            modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.DirectorOfGroups)
