@@ -14,5 +14,6 @@ declare namespace orch {
 
   interface RouteMatch {
     groupId?: string;
+    groupPage?: string;
   }
 }

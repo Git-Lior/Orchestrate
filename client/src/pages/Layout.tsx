@@ -2,7 +2,6 @@ import React, { useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useRouteMatch, useHistory } from "react-router";
 
-import { makeStyles } from "@material-ui/core";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Select from "@material-ui/core/Select";
@@ -16,8 +15,11 @@ import Badge from "@material-ui/core/Badge";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import Tooltip from "@material-ui/core/Tooltip";
 
+import makeStyles from "@material-ui/core/styles/makeStyles";
 import layoutStyles from "./Layout.styles";
 import smallLogo from "assets/logo-small.png";
+
+import { groupPages } from "./group";
 
 const useStyles = makeStyles(layoutStyles);
 
@@ -27,32 +29,23 @@ type Props = React.PropsWithChildren<{
   onLogout: () => void;
 }>;
 
-const GROUP_PAGES: any[] = [
-  {
-    name: "פרטי ההרכב",
-    route: "info",
-  },
-  {
-    name: "יצירות",
-    route: "sheet-music",
-  },
-  {
-    name: "הופעות",
-    route: "concerts",
-  },
-];
-
 export default function Layout({ user, groups, onLogout, children }: Props) {
   const classes = useStyles();
   const history = useHistory();
-  const { params, url } = useRouteMatch<orch.RouteMatch>();
+  const { params } = useRouteMatch<orch.RouteMatch>();
   const groupId = Number(params.groupId) || 0;
-  const tabValue = url.split("/")[3];
+  const groupPage = params.groupPage;
 
-  const _setPage = useCallback((_, value: string) => history.push(`/group/${groupId}/${value}`), [
-    history,
-    groupId,
-  ]);
+  const setGroup = useCallback(
+    (e: React.ChangeEvent<any>) =>
+      history.push(`/group/${e.target.value}/${groupPage ?? groupPages[0].route}`),
+    [history, groupId]
+  );
+
+  const setGroupPage = useCallback(
+    (_, value: string) => history.push(`/group/${groupId}/${value}`),
+    [history, groupId]
+  );
 
   return (
     <>
@@ -61,24 +54,30 @@ export default function Layout({ user, groups, onLogout, children }: Props) {
           <Link to="/" className={classes.noLineHeight}>
             <img src={smallLogo} className={classes.appLogo} alt="Orchestrate" />
           </Link>
-          <Select className={classes.groupSelect} value={groupId} displayEmpty disableUnderline>
+          <Select
+            className={classes.groupSelect}
+            value={groupId}
+            displayEmpty
+            disableUnderline
+            onChange={setGroup}
+          >
             <MenuItem value={0} disabled>
               בחר הרכב...
             </MenuItem>
             {groups.map(({ id, name }) => (
               <MenuItem key={id} value={id}>
-                <Link to={`/group/${id}/${tabValue ?? GROUP_PAGES[0].route}`}>{name}</Link>
+                <Link to={`/group/${id}/${groupPage ?? groupPages[0].route}`}>{name}</Link>
               </MenuItem>
             ))}
           </Select>
           <Tabs
             className={classes.groupTabs}
             disabled={groupId === 0}
-            value={tabValue}
-            onChange={_setPage}
+            value={groupPage}
+            onChange={setGroupPage}
             indicatorColor="secondary"
           >
-            {GROUP_PAGES.map(_ => (
+            {groupPages.map(_ => (
               <Tab
                 disableRipple
                 key={_.route}
