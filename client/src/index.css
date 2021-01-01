@@ -3,8 +3,7 @@
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: local("Assistant"), local("Assistant-Regular"),
-    url(assets/Assistant-Regular.ttf);
+  src: local("Assistant"), local("Assistant-Regular"), url(assets/Assistant-Regular.ttf);
 }
 
 @font-face {
@@ -32,7 +31,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+a {
+  color: inherit;
+  text-decoration: inherit;
 }

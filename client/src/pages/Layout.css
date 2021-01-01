@@ -1,0 +1,21 @@
+.layout-app-logo {
+  height: 50px;
+  background-color: #f5f3ede0;
+  border-radius: 5px;
+}
+
+.layout-group-select {
+  margin-right: 20px;
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  min-width: 120px;
+  padding: 10px;
+  cursor: default !important;
+}
+
+.layout-group-tabs[disabled] {
+  pointer-events: none;
+}
+
+.layout-buttons-spacer {
+  flex-grow: 1;
+}

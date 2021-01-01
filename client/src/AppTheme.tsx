@@ -1,12 +1,7 @@
 import { create } from "jss";
 import rtl from "jss-rtl";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import {
-  StylesProvider,
-  jssPreset,
-  createMuiTheme,
-  ThemeProvider,
-} from "@material-ui/core/styles";
+import { StylesProvider, jssPreset, createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 
 const jss = create({ plugins: [...jssPreset().plugins, rtl()] });
 
@@ -35,6 +30,9 @@ const theme = createMuiTheme({
   palette: {
     primary: {
       main: "#e16b3c",
+    },
+    secondary: {
+      main: "#f5f3ed",
     },
     background: {
       default: "#f5f3ed",

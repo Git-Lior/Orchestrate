@@ -40,7 +40,7 @@ function LoginPage({ onLogin }: LoginProps) {
 
   return (
     <Container className="login-page">
-      <img src={logo} className="app-logo" alt="Orchestrate" />
+      <img src={logo} className="login-app-logo" alt="Orchestrate" />
       <Container maxWidth="sm">
         <Paper className="login-container" elevation={5}>
           <Typography variant="h4" align="center">

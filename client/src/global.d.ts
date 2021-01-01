@@ -6,4 +6,13 @@ declare namespace orch {
     lastName: string;
     token: string;
   }
+
+  interface Group {
+    id: number;
+    name: string;
+  }
+
+  interface RouteMatch {
+    groupId?: string;
+  }
 }
