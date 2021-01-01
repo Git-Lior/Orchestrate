@@ -1,4 +1,3 @@
-import "./App.css";
 import React, { useCallback, useState } from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 
@@ -28,7 +27,7 @@ function App() {
   if (!user) return <LoginPage onLogin={setUser} />;
 
   const withLayout = (c: React.ReactNode) => (
-    <Layout groups={GROUPS} onLogout={logoutUser}>
+    <Layout user={user} groups={GROUPS} onLogout={logoutUser}>
       {c}
     </Layout>
   );

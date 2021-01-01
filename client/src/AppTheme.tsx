@@ -43,9 +43,11 @@ const theme = createMuiTheme({
   },
 });
 
+export type AppTheme = typeof theme;
+
 type Props = React.PropsWithChildren<{}>;
 
-export default function AppTheme({ children }: Props) {
+export default function AppThemeComponent({ children }: Props) {
   return (
     <StylesProvider jss={jss}>
       <ThemeProvider theme={theme}>

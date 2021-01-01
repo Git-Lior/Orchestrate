@@ -1,9 +1,8 @@
-import "./Layout.css";
-
 import React, { useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useRouteMatch, useHistory } from "react-router";
 
+import { makeStyles } from "@material-ui/core";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Select from "@material-ui/core/Select";
@@ -17,9 +16,13 @@ import Badge from "@material-ui/core/Badge";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import Tooltip from "@material-ui/core/Tooltip";
 
+import layoutStyles from "./Layout.styles";
 import smallLogo from "assets/logo-small.png";
 
+const useStyles = makeStyles(layoutStyles);
+
 type Props = React.PropsWithChildren<{
+  user: orch.User;
   groups: orch.Group[];
   onLogout: () => void;
 }>;
@@ -39,7 +42,8 @@ const GROUP_PAGES: any[] = [
   },
 ];
 
-export default function Layout({ groups, onLogout, children }: Props) {
+export default function Layout({ user, groups, onLogout, children }: Props) {
+  const classes = useStyles();
   const history = useHistory();
   const { params, url } = useRouteMatch<orch.RouteMatch>();
   const groupId = Number(params.groupId) || 0;
@@ -53,11 +57,11 @@ export default function Layout({ groups, onLogout, children }: Props) {
   return (
     <>
       <AppBar position="static">
-        <Toolbar>
-          <Link to="/">
-            <img src={smallLogo} className="layout-app-logo" alt="Orchestrate" />
+        <Toolbar disableGutters className={classes.toolbar}>
+          <Link to="/" className={classes.noLineHeight}>
+            <img src={smallLogo} className={classes.appLogo} alt="Orchestrate" />
           </Link>
-          <Select className="layout-group-select" value={groupId} displayEmpty>
+          <Select className={classes.groupSelect} value={groupId} displayEmpty disableUnderline>
             <MenuItem value={0} disabled>
               בחר הרכב...
             </MenuItem>
@@ -68,7 +72,7 @@ export default function Layout({ groups, onLogout, children }: Props) {
             ))}
           </Select>
           <Tabs
-            className="layout-group-tabs"
+            className={classes.groupTabs}
             disabled={groupId === 0}
             value={tabValue}
             onChange={_setPage}
@@ -83,7 +87,10 @@ export default function Layout({ groups, onLogout, children }: Props) {
               />
             ))}
           </Tabs>
-          <div className="layout-buttons-spacer" />
+          <div className={classes.buttonsSpacer} />
+          <Typography>
+            {user.firstName} {user.lastName}
+          </Typography>
           <IconButton color="inherit">
             <Badge
               badgeContent={10}

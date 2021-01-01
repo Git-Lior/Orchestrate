@@ -1,4 +1,3 @@
-import "./index.css";
 import React, { useCallback } from "react";
 
 import Container from "@material-ui/core/Container";
@@ -8,15 +7,20 @@ import TextField from "@material-ui/core/TextField";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Button from "@material-ui/core/Button";
+import makeStyles from "@material-ui/core/styles/makeStyles";
 
+import styles from "./styles";
 import { useInputState } from "utils/hooks";
 import logo from "assets/logo.png";
+
+const useStyles = makeStyles(styles);
 
 interface LoginProps {
   onLogin: (user: orch.User) => void;
 }
 
 function LoginPage({ onLogin }: LoginProps) {
+  const classes = useStyles();
   const [email, setEmail] = useInputState();
   const [password, setPassword] = useInputState();
 
@@ -39,10 +43,10 @@ function LoginPage({ onLogin }: LoginProps) {
   );
 
   return (
-    <Container className="login-page">
-      <img src={logo} className="login-app-logo" alt="Orchestrate" />
+    <div className={classes.container}>
+      <img src={logo} className={classes.appLogo} alt="Orchestrate" />
       <Container maxWidth="sm">
-        <Paper className="login-container" elevation={5}>
+        <Paper className={classes.loginArea} elevation={5}>
           <Typography variant="h4" align="center">
             התחברות
           </Typography>
@@ -82,14 +86,14 @@ function LoginPage({ onLogin }: LoginProps) {
               fullWidth
               variant="contained"
               color="primary"
-              className="login-submit"
+              className={classes.submitButton}
             >
               התחבר
             </Button>
           </form>
         </Paper>
       </Container>
-    </Container>
+    </div>
   );
 }
 
