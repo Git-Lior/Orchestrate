@@ -24,6 +24,8 @@ function LoginPage({ onLogin }: LoginProps) {
   const [email, setEmail] = useInputState();
   const [password, setPassword] = useInputState();
 
+  if (1 === 1) setTimeout(() => onLogin({ firstName: "Lior", lastName: "Kletter" } as any), 100);
+
   const _onFormSubmit = useCallback(
     async (e: React.FormEvent<any>) => {
       e.preventDefault();
@@ -47,8 +49,8 @@ function LoginPage({ onLogin }: LoginProps) {
       <img src={logo} className={classes.appLogo} alt="Orchestrate" />
       <Container maxWidth="sm">
         <Paper className={classes.loginArea} elevation={5}>
-          <Typography variant="h4" align="center">
-            התחברות
+          <Typography variant="h4" className={classes.loginTitle}>
+            Log in
           </Typography>
           <form onSubmit={_onFormSubmit}>
             <TextField
@@ -62,7 +64,7 @@ function LoginPage({ onLogin }: LoginProps) {
               id="email"
               name="email"
               autoComplete="email"
-              label="כתובת מייל"
+              label="Email address"
             />
             <TextField
               value={password}
@@ -74,12 +76,12 @@ function LoginPage({ onLogin }: LoginProps) {
               margin="normal"
               id="password"
               name="password"
-              label="סיסמה"
+              label="Password"
               autoComplete="current-password"
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
-              label="זכור אותי"
+              label="Remember me"
             />
             <Button
               type="submit"
@@ -88,7 +90,7 @@ function LoginPage({ onLogin }: LoginProps) {
               color="primary"
               className={classes.submitButton}
             >
-              התחבר
+              Log in
             </Button>
           </form>
         </Paper>
