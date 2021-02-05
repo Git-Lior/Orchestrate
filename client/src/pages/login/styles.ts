@@ -19,6 +19,9 @@ const styles: Styles<AppTheme, {}> = {
     marginTop: "30px",
     padding: "30px",
   },
+  loginTitle: {
+    textAlign: "center",
+  },
   submitButton: {
     marginTop: "15px",
   },

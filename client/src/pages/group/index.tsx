@@ -13,24 +13,26 @@ interface PageInfo {
 
 export const groupPages: PageInfo[] = [
   {
-    name: "פרטי ההרכב",
+    name: "Group Info",
     route: "info",
     Component: GroupInfoPage,
   },
   {
-    name: "יצירות",
+    name: "Compositions",
     route: "sheet-music",
     Component: GroupSheetMusicPage,
   },
   {
-    name: "הופעות",
+    name: "Concerts",
     route: "concerts",
     Component: GroupConcertsPage,
   },
 ];
 
+export const defaultGroupPage = "info";
+
 export default function GroupPage() {
-  const { groupPage } = useParams<orch.RouteMatch>();
+  const { groupPage } = useParams<orch.GroupRouteParams>();
 
   const page = groupPages.find(_ => _.route === groupPage);
 

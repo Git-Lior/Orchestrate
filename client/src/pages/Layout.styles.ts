@@ -1,26 +1,33 @@
-import { fade } from "@material-ui/core/styles/colorManipulator";
 import { Styles } from "@material-ui/core/styles/withStyles";
 
 import { AppTheme } from "AppTheme";
 
+const toolbarHeight = 50;
+
 const layoutStyles: Styles<AppTheme, {}> = theme => ({
-  toolbar: { height: "65px" },
+  toolbar: { minHeight: toolbarHeight, height: toolbarHeight },
   appLogo: {
-    height: "65px",
+    height: 0.9 * toolbarHeight,
+    borderRadius: 5,
     backgroundColor: theme.palette.secondary.main,
+    marginRight: 30,
   },
   noLineHeight: { lineHeight: 0 },
   groupSelect: {
-    backgroundColor: fade(theme.palette.secondary.main, 0.6),
+    marginLeft: 20,
+    background: "none",
     width: 200,
     padding: "2px 10px",
-    height: "100%",
     cursor: "default",
+    "&:before, &:after": { borderBottomColor: `${theme.palette.secondary.main} !important` },
+  },
+  spacer: { flexGrow: 1 },
+  username: {
+    marginRight: 10,
   },
   groupTabs: {
     "&[disabled]": { pointerEvents: "none" },
   },
-  buttonsSpacer: { flexGrow: 1 },
 });
 
 export default layoutStyles;

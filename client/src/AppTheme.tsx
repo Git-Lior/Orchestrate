@@ -1,31 +1,11 @@
-import { create } from "jss";
-import rtl from "jss-rtl";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import { StylesProvider, jssPreset, createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
-
-const jss = create({ plugins: [...jssPreset().plugins, rtl()] });
+import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 
 // TODO: responsive font size?
 const theme = createMuiTheme({
-  direction: "rtl",
   typography: {
-    fontFamily: [
-      "-apple-system",
-      "BlinkMacSystemFont",
-      '"Assistant"',
-      '"Segoe UI"',
-      '"Roboto"',
-      '"Oxygen"',
-      '"Ubuntu"',
-      '"Cantarell"',
-      '"Fira Sans"',
-      '"Droid Sans"',
-      '"Helvetica Neue"',
-      "sans-serif",
-    ].join(","),
     htmlFontSize: 10,
-    h4: { fontFamily: "Alef" },
-    button: { fontFamily: "Alef", fontWeigh: "bolder", fontSize: "1.6rem" },
+    button: { fontWeigh: "bolder", fontSize: "1.6rem" },
   },
   palette: {
     primary: {
@@ -49,11 +29,9 @@ type Props = React.PropsWithChildren<{}>;
 
 export default function AppThemeComponent({ children }: Props) {
   return (
-    <StylesProvider jss={jss}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        {children}
-      </ThemeProvider>
-    </StylesProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      {children}
+    </ThemeProvider>
   );
 }

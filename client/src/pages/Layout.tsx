@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { Link } from "react-router-dom";
-import { useRouteMatch, useHistory } from "react-router";
+import { useHistory, useParams } from "react-router";
 
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -19,7 +19,7 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import layoutStyles from "./Layout.styles";
 import smallLogo from "assets/logo-small.png";
 
-import { groupPages } from "./group";
+import { groupPages, defaultGroupPage } from "./group";
 
 const useStyles = makeStyles(layoutStyles);
 
@@ -32,13 +32,10 @@ type Props = React.PropsWithChildren<{
 export default function Layout({ user, groups, onLogout, children }: Props) {
   const classes = useStyles();
   const history = useHistory();
-  const { params } = useRouteMatch<orch.RouteMatch>();
-  const groupId = Number(params.groupId) || 0;
-  const groupPage = params.groupPage;
+  const { groupId, groupPage } = useParams<orch.GroupRouteParams>();
 
   const setGroup = useCallback(
-    (e: React.ChangeEvent<any>) =>
-      history.push(`/group/${e.target.value}/${groupPage ?? groupPages[0].route}`),
+    (e: React.ChangeEvent<any>) => history.push(`/group/${e.target.value}/${defaultGroupPage}`),
     [history, groupId]
   );
 
@@ -50,29 +47,27 @@ export default function Layout({ user, groups, onLogout, children }: Props) {
   return (
     <>
       <AppBar position="static">
-        <Toolbar disableGutters className={classes.toolbar}>
+        <Toolbar className={classes.toolbar}>
           <Link to="/" className={classes.noLineHeight}>
             <img src={smallLogo} className={classes.appLogo} alt="Orchestrate" />
           </Link>
+          <Typography>Group:</Typography>
           <Select
             className={classes.groupSelect}
-            value={groupId}
-            displayEmpty
-            disableUnderline
+            value={groupId ?? ""}
             onChange={setGroup}
+            placeholder="Select group..."
           >
-            <MenuItem value={0} disabled>
-              בחר הרכב...
-            </MenuItem>
             {groups.map(({ id, name }) => (
               <MenuItem key={id} value={id}>
-                <Link to={`/group/${id}/${groupPage ?? groupPages[0].route}`}>{name}</Link>
+                {name}
               </MenuItem>
             ))}
           </Select>
+          <div className={classes.spacer} />
           <Tabs
             className={classes.groupTabs}
-            disabled={groupId === 0}
+            disabled={!groupId}
             value={groupPage}
             onChange={setGroupPage}
             indicatorColor="secondary"
@@ -86,8 +81,8 @@ export default function Layout({ user, groups, onLogout, children }: Props) {
               />
             ))}
           </Tabs>
-          <div className={classes.buttonsSpacer} />
-          <Typography>
+          <div className={classes.spacer} />
+          <Typography className={classes.username}>
             {user.firstName} {user.lastName}
           </Typography>
           <IconButton color="inherit">
@@ -95,12 +90,12 @@ export default function Layout({ user, groups, onLogout, children }: Props) {
               badgeContent={10}
               overlap="circle"
               color="secondary"
-              anchorOrigin={{ vertical: "top", horizontal: "left" }}
+              anchorOrigin={{ vertical: "top", horizontal: "right" }}
             >
               <NotificationsIcon />
             </Badge>
           </IconButton>
-          <Tooltip title="התנתק">
+          <Tooltip title="Log out">
             <IconButton edge="end" onClick={onLogout} color="inherit">
               <ExitToAppIcon />
             </IconButton>

@@ -10,15 +10,15 @@ import PageNotFound from "pages/PageNotFound";
 const GROUPS: orch.Group[] = [
   {
     id: 123,
-    name: "רביעיית כלי מיתר",
+    name: "String Trio",
   },
   {
     id: 456,
-    name: "תזמורת סמפונית",
+    name: "Symphonic Orchestra",
   },
   {
     id: 789,
-    name: "הרכב חדש",
+    name: "New Ensemble",
   },
 ];
 
