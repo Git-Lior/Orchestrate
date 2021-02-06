@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Route, Switch, useHistory, useRouteMatch } from "react-router-dom";
 
 import { MOCK_COMPOSITIONS } from "./mock";
-import CompositionsPanel from "./Compositions";
+import CompositionsPanel from "./CompositionsPanel";
+import SheetMusicPanel from "./SheetMusicPanel";
 
 type Props = orch.group.PageProps;
 
@@ -11,7 +12,6 @@ export default function GroupCompositionsPage({ user, userInfo }: Props) {
   const { path, url } = useRouteMatch();
 
   const [compositions, setCompositions] = useState<orch.Composition[] | null>(null);
-  const [activeComposition, setActiveComposition] = useState<orch.Composition | null>(null);
   const [query, setQuery] = useState<orch.compositions.Query>({
     genre: "",
     title: "",
@@ -24,10 +24,9 @@ export default function GroupCompositionsPage({ user, userInfo }: Props) {
     }, 1000);
   }, []);
 
-  useEffect(() => {
-    if (activeComposition) history.push(`${url}/${activeComposition.id}`);
-    else history.push(`${url}`);
-  }, [activeComposition]);
+  const setCompositionId = useCallback((c: orch.Composition) => history.push(`${url}/${c.id}`), [
+    url,
+  ]);
 
   if (!compositions) return <div>Loading compositions...</div>;
 
@@ -41,12 +40,15 @@ export default function GroupCompositionsPage({ user, userInfo }: Props) {
             initialQuery={query}
             onQueryChange={setQuery}
             compositions={compositions}
-            onCompositionSelected={setActiveComposition}
+            onCompositionSelected={setCompositionId}
           />
         }
       />
-      <Route exact path={`${path}/:compositionId`} children={null} />
-      <Route path={`${path}/:compositionId/:roleId`} children={null} />
+      <Route
+        exact
+        path={`${path}/:compositionId/:?roleId`}
+        children={<SheetMusicPanel user={user} userInfo={userInfo} />}
+      />
     </Switch>
   );
 }

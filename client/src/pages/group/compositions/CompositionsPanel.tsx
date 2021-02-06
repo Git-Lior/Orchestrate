@@ -11,12 +11,12 @@ import MenuItem from "@material-ui/core/MenuItem";
 import TextField from "@material-ui/core/TextField";
 
 import { useInputState } from "utils/hooks";
-import compositionsStyles from "./Compositions.styles";
+import compositionsPanelStyles from "./CompositionsPanel.styles";
 import { MOCK_GENRES } from "./mock";
 
 import ResultsTable from "./CompositionsTable";
 
-const useStyles = makeStyles(compositionsStyles);
+const useStyles = makeStyles(compositionsPanelStyles);
 
 interface Props {
   initialQuery: orch.compositions.Query;
