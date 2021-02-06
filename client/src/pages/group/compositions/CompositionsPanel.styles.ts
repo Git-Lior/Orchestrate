@@ -1,7 +1,7 @@
 import { Styles } from "@material-ui/core/styles/withStyles";
 import { AppTheme } from "AppTheme";
 
-const compositionsPanelStyles: Styles<AppTheme, {}> = () => ({
+const compositionsPanelStyles: Styles<AppTheme, {}> = {
   panelTitle: {
     textAlign: "center",
     marginBottom: "1em",
@@ -19,6 +19,6 @@ const compositionsPanelStyles: Styles<AppTheme, {}> = () => ({
   filterRow: {
     display: "flex",
   },
-});
+};
 
 export default compositionsPanelStyles;

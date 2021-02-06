@@ -28,27 +28,41 @@ export default function GroupCompositionsPage({ user, userInfo }: Props) {
     url,
   ]);
 
-  if (!compositions) return <div>Loading compositions...</div>;
+  const editComposition = useCallback(
+    (c: orch.Composition) => history.push(`${url}/${c.id}/edit`),
+    [url]
+  );
+
+  const deleteComposition = useCallback((c: orch.Composition) => {
+    if (!window.confirm("Are you sure you want to delete this composition?")) return;
+  }, []);
 
   return (
-    <Switch>
-      <Route
-        exact
-        path={`${path}/`}
-        children={
-          <CompositionsPanel
-            initialQuery={query}
-            onQueryChange={setQuery}
-            compositions={compositions}
-            onCompositionSelected={setCompositionId}
-          />
-        }
-      />
-      <Route
-        exact
-        path={[`${path}/:compositionId/`, `${path}/:compositionId/:roleId`]}
-        children={<SheetMusicPanel user={user} userInfo={userInfo} />}
-      />
-    </Switch>
+    <>
+      <Switch>
+        <Route
+          exact
+          path={`${path}/`}
+          children={
+            <CompositionsPanel
+              isDirector={userInfo.director}
+              initialQuery={query}
+              onQueryChange={setQuery}
+              compositions={compositions}
+              onCompositionSelect={setCompositionId}
+              onCompositionEdit={editComposition}
+              onCompositionDelete={deleteComposition}
+            />
+          }
+        />
+        <Route exact path={`${path}/:compositionId/edit`} children={null} />
+        <Route exact path={`${path}/create`} children={null} />
+        <Route
+          exact
+          path={[`${path}/:compositionId/`, `${path}/:compositionId/:roleId`]}
+          children={<SheetMusicPanel user={user} userInfo={userInfo} />}
+        />
+      </Switch>
+    </>
   );
 }

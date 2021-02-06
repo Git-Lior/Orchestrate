@@ -19,17 +19,23 @@ import ResultsTable from "./CompositionsTable";
 const useStyles = makeStyles(compositionsPanelStyles);
 
 interface Props {
+  isDirector: boolean;
   initialQuery: orch.compositions.Query;
-  compositions: orch.Composition[];
-  onCompositionSelected: (composition: orch.Composition) => void;
+  compositions: orch.Composition[] | null;
   onQueryChange: (query: orch.compositions.Query) => void;
+  onCompositionSelect: (composition: orch.Composition) => void;
+  onCompositionEdit: (composition: orch.Composition) => void;
+  onCompositionDelete: (composition: orch.Composition) => void;
 }
 
 export default function CompositionsPanel({
+  isDirector,
   initialQuery,
   compositions,
-  onCompositionSelected,
   onQueryChange,
+  onCompositionSelect,
+  onCompositionEdit,
+  onCompositionDelete,
 }: Props) {
   const classes = useStyles();
 
@@ -54,44 +60,45 @@ export default function CompositionsPanel({
   );
 
   return (
-    <>
-      <Typography variant="h4" className={classes.panelTitle}>
-        Compositions
-      </Typography>
-      <div className={classes.panelsContainer}>
-        <Card className={classes.filtersPanel}>
-          <Typography variant="h5">Filter results</Typography>
+    <div className={classes.panelsContainer}>
+      <Card className={classes.filtersPanel}>
+        <Typography variant="h5">Filter results</Typography>
 
-          <FormControlLabel
-            control={
-              <Checkbox
-                disableRipple
-                color="primary"
-                checked={onlyInConcert}
-                onChange={onlyInConcertChange}
-              />
-            }
-            label="Show only compositions in upcoming concerts"
-          />
-          <div className={classes.filterRow}>
-            <Typography>Title: </Typography>
-            <TextField value={titleFilter} onChange={setTitleFilter} />
-          </div>
-          <div className={classes.filterRow}>
-            <Typography>Genre: </Typography>
-            <Select value={genreFilter} onChange={setGenreFilter as any} fullWidth>
-              {genres.map(v => (
-                <MenuItem key={v} value={v}>
-                  {v}
-                </MenuItem>
-              ))}
-            </Select>
-          </div>
-        </Card>
-        <Card className={classes.resultsPanel}>
-          <ResultsTable items={compositions} onSelected={onCompositionSelected} />
-        </Card>
-      </div>
-    </>
+        <FormControlLabel
+          control={
+            <Checkbox
+              disableRipple
+              color="primary"
+              checked={onlyInConcert}
+              onChange={onlyInConcertChange}
+            />
+          }
+          label="Show only compositions in upcoming concerts"
+        />
+        <div className={classes.filterRow}>
+          <Typography>Title: </Typography>
+          <TextField value={titleFilter} onChange={setTitleFilter} />
+        </div>
+        <div className={classes.filterRow}>
+          <Typography>Genre: </Typography>
+          <Select value={genreFilter} onChange={setGenreFilter as any} fullWidth>
+            {genres.map(v => (
+              <MenuItem key={v} value={v}>
+                {v}
+              </MenuItem>
+            ))}
+          </Select>
+        </div>
+      </Card>
+      <Card className={classes.resultsPanel}>
+        <ResultsTable
+          items={compositions}
+          showActions={isDirector}
+          onSelected={onCompositionSelect}
+          onEdit={onCompositionEdit}
+          onDelete={onCompositionDelete}
+        />
+      </Card>
+    </div>
   );
 }
