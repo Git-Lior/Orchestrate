@@ -17,6 +17,21 @@ declare namespace orch {
     composer: string;
     genre: string;
     uploader: string;
+    roles: group.Role[];
+  }
+
+  interface SheetMusic {
+    fileUrl: string;
+    comments: SheetMusicComment[];
+  }
+
+  interface SheetMusicComment {
+    commentId: number;
+    user: {
+      name: string;
+      director: boolean;
+    };
+    content: string;
   }
 
   namespace group {
@@ -32,8 +47,9 @@ declare namespace orch {
     }
 
     interface Role {
+      id: number;
       section: string;
-      num: number;
+      num?: number;
     }
 
     interface PageProps {

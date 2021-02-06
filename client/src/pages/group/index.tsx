@@ -3,19 +3,9 @@ import { useParams } from "react-router-dom";
 
 import { useApiFetch } from "utils/hooks";
 
+import { MOCK_USER_INFO } from "mocks";
 import { groupPages } from "./pages";
 export { groupPages, defaultGroupPage } from "./pages";
-
-const MOCK_USER_INFO: orch.group.UserInfo = {
-  director: false,
-  manager: false,
-  roles: [
-    {
-      section: "Trombone",
-      num: 1,
-    },
-  ],
-};
 
 interface Props {
   user: orch.User;

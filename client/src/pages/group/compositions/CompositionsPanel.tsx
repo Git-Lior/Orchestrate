@@ -10,9 +10,9 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import TextField from "@material-ui/core/TextField";
 
+import { MOCK_GENRES } from "mocks";
 import { useInputState } from "utils/hooks";
 import compositionsPanelStyles from "./CompositionsPanel.styles";
-import { MOCK_GENRES } from "./mock";
 
 import ResultsTable from "./CompositionsTable";
 

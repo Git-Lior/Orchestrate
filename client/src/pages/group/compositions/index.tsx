@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Route, Switch, useHistory, useRouteMatch } from "react-router-dom";
 
-import { MOCK_COMPOSITIONS } from "./mock";
+import { MOCK_COMPOSITIONS } from "mocks";
 import CompositionsPanel from "./CompositionsPanel";
 import SheetMusicPanel from "./SheetMusicPanel";
 
@@ -46,7 +46,7 @@ export default function GroupCompositionsPage({ user, userInfo }: Props) {
       />
       <Route
         exact
-        path={`${path}/:compositionId/:?roleId`}
+        path={[`${path}/:compositionId/`, `${path}/:compositionId/:roleId`]}
         children={<SheetMusicPanel user={user} userInfo={userInfo} />}
       />
     </Switch>
