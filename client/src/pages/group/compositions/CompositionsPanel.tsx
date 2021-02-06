@@ -54,7 +54,7 @@ export default function CompositionsPanel({
   );
 
   return (
-    <div>
+    <>
       <Typography variant="h4" className={classes.panelTitle}>
         Compositions
       </Typography>
@@ -92,6 +92,6 @@ export default function CompositionsPanel({
           <ResultsTable items={compositions} onSelected={onCompositionSelected} />
         </Card>
       </div>
-    </div>
+    </>
   );
 }

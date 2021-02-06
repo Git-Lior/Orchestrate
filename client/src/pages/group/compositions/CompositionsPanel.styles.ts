@@ -4,9 +4,9 @@ import { AppTheme } from "AppTheme";
 const compositionsPanelStyles: Styles<AppTheme, {}> = () => ({
   panelTitle: {
     textAlign: "center",
-    margin: "20px 0",
+    marginBottom: "1em",
   },
-  panelsContainer: { display: "flex", width: "100%", padding: "0 3em" },
+  panelsContainer: { display: "flex", width: "100%", height: "100%" },
   resultsPanel: { flex: 1 },
   filtersPanel: {
     width: "21em",

@@ -28,6 +28,12 @@ const layoutStyles: Styles<AppTheme, {}> = theme => ({
   groupTabs: {
     "&[disabled]": { pointerEvents: "none" },
   },
+  pageContent: {
+    display: "flex",
+    flexDirection: "column",
+    padding: "2em",
+    height: `calc(100% - ${toolbarHeight}px)`,
+  },
 });
 
 export default layoutStyles;

@@ -111,7 +111,7 @@ export default function Layout({ user, groups, onLogout, children }: Props) {
           </Tooltip>
         </Toolbar>
       </AppBar>
-      {children}
+      <div className={classes.pageContent}>{children}</div>
     </>
   );
 }
