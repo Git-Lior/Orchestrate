@@ -30,9 +30,9 @@ function LoginPage({ onLogin }: LoginProps) {
     async (e: React.FormEvent<any>) => {
       e.preventDefault();
 
-      const result = await fetch("/auth/login", {
+      const result = await fetch("/api/auth/login", {
         method: "POST",
-        headers: new Headers({ "content-type": "application/json" }),
+        headers: { "content-type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 

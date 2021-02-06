@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { Link } from "react-router-dom";
-import { useHistory, useParams } from "react-router";
+import { generatePath, useHistory, useParams } from "react-router";
 
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -29,18 +29,27 @@ type Props = React.PropsWithChildren<{
   onLogout: () => void;
 }>;
 
+const GROUP_ROUTE_PATH = "/group/:groupId/:groupPage";
+
 export default function Layout({ user, groups, onLogout, children }: Props) {
   const classes = useStyles();
-  const history = useHistory();
-  const { groupId, groupPage } = useParams<orch.GroupRouteParams>();
+  const history = useHistory<orch.group.RouteParams>();
+  const { groupId, groupPage } = useParams<orch.group.RouteParams>();
 
   const setGroup = useCallback(
-    (e: React.ChangeEvent<any>) => history.push(`/group/${e.target.value}/${defaultGroupPage}`),
+    (e: React.ChangeEvent<any>) =>
+      history.push(
+        generatePath(GROUP_ROUTE_PATH, {
+          groupId: e.target.value,
+          groupPage: defaultGroupPage,
+        })
+      ),
     [history, groupId]
   );
 
   const setGroupPage = useCallback(
-    (_, value: string) => history.push(`/group/${groupId}/${value}`),
+    (_, value: string) =>
+      history.push(generatePath(GROUP_ROUTE_PATH, { groupId, groupPage: value })),
     [history, groupId]
   );
 

@@ -2,6 +2,7 @@ import "./index.css";
 
 import React from "react";
 import ReactDOM from "react-dom";
+import { BrowserRouter } from "react-router-dom";
 
 import reportWebVitals from "./reportWebVitals";
 import AppTheme from "./AppTheme";
@@ -9,7 +10,13 @@ import App from "./App";
 
 ReactDOM.render(
   <React.StrictMode>
-    <AppTheme children={<App />} />
+    <AppTheme
+      children={
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      }
+    />
   </React.StrictMode>,
   document.getElementById("root")
 );

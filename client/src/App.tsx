@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { Redirect, Route, Switch, useLocation } from "react-router-dom";
 
 import LoginPage from "pages/login";
 import GroupPage from "pages/group";
@@ -23,6 +23,7 @@ const GROUPS: orch.Group[] = [
 ];
 
 function App() {
+  const { pathname } = useLocation();
   const [user, setUser] = useState<orch.User | null>(null);
 
   const logoutUser = useCallback(() => setUser(null), [setUser]);
@@ -34,13 +35,12 @@ function App() {
   );
 
   return (
-    <BrowserRouter>
-      <Switch>
-        <Route exact path="/" children={withLayout(<HomePage />)} />
-        <Route path="/group/:groupId/:groupPage" children={withLayout(<GroupPage />)} />
-        <Route children={withLayout(<PageNotFound />)} />
-      </Switch>
-    </BrowserRouter>
+    <Switch>
+      <Redirect from="/:url*(/+)" to={pathname.slice(0, -1)} />
+      <Route exact path="/" children={withLayout(<HomePage />)} />
+      <Route path="/group/:groupId/:groupPage" children={withLayout(<GroupPage user={user} />)} />
+      <Route children={withLayout(<PageNotFound />)} />
+    </Switch>
   );
 }
 
