@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Route, Switch, useHistory, useRouteMatch } from "react-router-dom";
 
-import Modal from "@material-ui/core/Modal";
+import Dialog from "@material-ui/core/Dialog";
 
 import { MOCK_COMPOSITIONS } from "mocks";
 import CompositionsPanel from "./CompositionsPanel";
@@ -82,7 +82,7 @@ export default function GroupCompositionsPage({ user, userInfo }: Props) {
           children={<SheetMusicPanel user={user} userInfo={userInfo} />}
         />
       </Switch>
-      <Modal open={!!editedComposition}>
+      <Dialog open={!!editedComposition}>
         {!editedComposition ? (
           <div />
         ) : (
@@ -92,7 +92,7 @@ export default function GroupCompositionsPage({ user, userInfo }: Props) {
             onSubmit={finishEdit}
           />
         )}
-      </Modal>
+      </Dialog>
     </>
   );
 }

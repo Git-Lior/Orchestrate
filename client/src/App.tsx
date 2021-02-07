@@ -10,9 +10,11 @@ import { MOCK_GROUPS } from "mocks";
 
 const TOKEN_STORAGE_KEY = "user_token";
 
+const MOCK_USER: orch.User = { id: 1, firstName: "ליאור", lastName: "קלטר", email: "", token: "" };
+
 function App() {
   const { pathname } = useLocation();
-  const [user, setUser] = useState<orch.User | null>(null);
+  const [user, setUser] = useState<orch.User | null>(MOCK_USER);
 
   useEffect(() => {
     const token = localStorage.getItem(TOKEN_STORAGE_KEY);
