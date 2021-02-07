@@ -1,11 +1,15 @@
 declare namespace orch {
-  interface User {
+  interface UserData {
     id: number;
     email: string;
     firstName: string;
     lastName: string;
+  }
+
+  interface User extends UserData {
     token: string;
   }
+
   interface Group {
     id: number;
     name: string;

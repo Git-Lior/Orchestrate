@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 
-export function useApiPromise() {
+export function useApiPromise(text: boolean = false) {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>();
 
@@ -12,7 +12,8 @@ export function useApiPromise() {
       const result = await promise;
       if (!result.ok) throw await result.text();
 
-      return await result.json();
+      if (text) return await result.text();
+      else return await result.json();
     } catch (err) {
       setError(err?.message ?? err);
       throw err;

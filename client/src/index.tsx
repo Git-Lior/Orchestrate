@@ -2,18 +2,23 @@ import "./index.css";
 
 import React from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 
 import reportWebVitals from "./reportWebVitals";
 import AppTheme from "./AppTheme";
+
 import App from "./App";
+import AdminApp from "./admin";
 
 ReactDOM.render(
   <React.StrictMode>
     <AppTheme
       children={
         <BrowserRouter>
-          <App />
+          <Switch>
+            <Route exact path="/admin-panel" children={<AdminApp />} />
+            <Route children={<App />} />
+          </Switch>
         </BrowserRouter>
       }
     />

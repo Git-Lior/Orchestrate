@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using Orchestrate.API.Services.Interfaces;
 using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Orchestrate.API.Controllers
@@ -13,10 +10,25 @@ namespace Orchestrate.API.Controllers
     public class AuthController : OrchestrateController
     {
         private readonly IUserService _userService;
+        private readonly IAdminService _adminService;
 
-        public AuthController(IUserService userService)
+        public AuthController(IUserService userService, IAdminService adminService)
         {
             _userService = userService;
+            _adminService = adminService;
+        }
+
+        [HttpGet("info")]
+        public IActionResult Info()
+        {
+            try
+            {
+                return Ok(_userService.GetById(UserId));
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         [AllowAnonymous]
@@ -33,12 +45,13 @@ namespace Orchestrate.API.Controllers
             }
         }
 
-        [HttpGet("info")]
-        public IActionResult Info()
+        [AllowAnonymous]
+        [HttpPost("admin")]
+        public IActionResult Admin([FromBody] string password)
         {
             try
             {
-                return Ok(_userService.GetById(UserId));
+                return Ok(_adminService.Authenticate(password));
             }
             catch (ArgumentException e)
             {
