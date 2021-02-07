@@ -1,3 +1,18 @@
+export const MOCK_GROUPS: orch.Group[] = [
+  {
+    id: 123,
+    name: "String Trio",
+  },
+  {
+    id: 456,
+    name: "Symphonic Orchestra",
+  },
+  {
+    id: 789,
+    name: "New Ensemble",
+  },
+];
+
 const MOCK_ROLE_ID_1 = 6151;
 const MOCK_ROLE_ID_2 = 5155;
 

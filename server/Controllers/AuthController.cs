@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Orchestrate.API.Services.Interfaces;
 using System;
@@ -10,20 +9,14 @@ using System.Threading.Tasks;
 
 namespace Orchestrate.API.Controllers
 {
-    [Authorize]
-    [ApiController]
     [Route("auth")]
-    public class AuthController : ControllerBase
+    public class AuthController : OrchestrateController
     {
         private readonly IUserService _userService;
-        private readonly SigningCredentials _signingCredentials;
 
-        public AuthController(IUserService userService, IConfiguration config)
+        public AuthController(IUserService userService)
         {
             _userService = userService;
-            var key = System.Text.Encoding.UTF8.GetBytes(config.GetValue<string>("JwtSecret"));
-            _signingCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature);
-
         }
 
         [AllowAnonymous]
@@ -32,24 +25,20 @@ namespace Orchestrate.API.Controllers
         {
             try
             {
-                var user = await _userService.Authenticate(info.Email, info.Password);
-                var tokenHandler = new JwtSecurityTokenHandler();
+                return Ok(await _userService.Authenticate(info.Email, info.Password));
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
-                var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
-                {
-                    Expires = DateTime.UtcNow.AddDays(7),
-                    Subject = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, user.UserId.ToString()) }),
-                    SigningCredentials = _signingCredentials
-                });
-
-                return Ok(new
-                {
-                    Id = user.UserId,
-                    user.Email,
-                    user.FirstName,
-                    user.LastName,
-                    Token = tokenHandler.WriteToken(token)
-                });
+        [HttpGet("info")]
+        public IActionResult Info()
+        {
+            try
+            {
+                return Ok(_userService.GetById(UserId));
             }
             catch (ArgumentException e)
             {

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Redirect, Route, Switch, useLocation } from "react-router-dom";
 
 import LoginPage from "pages/login";
@@ -6,32 +6,42 @@ import GroupPage from "pages/group";
 import HomePage from "pages/home";
 import Layout from "pages/Layout";
 import PageNotFound from "pages/PageNotFound";
+import { MOCK_GROUPS } from "mocks";
 
-const GROUPS: orch.Group[] = [
-  {
-    id: 123,
-    name: "String Trio",
-  },
-  {
-    id: 456,
-    name: "Symphonic Orchestra",
-  },
-  {
-    id: 789,
-    name: "New Ensemble",
-  },
-];
+const TOKEN_STORAGE_KEY = "user_token";
 
 function App() {
   const { pathname } = useLocation();
   const [user, setUser] = useState<orch.User | null>(null);
 
-  const logoutUser = useCallback(() => setUser(null), [setUser]);
+  useEffect(() => {
+    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+    if (token) {
+      fetch("/auth/info", {
+        headers: { authorization: "Bearer " + token },
+      })
+        .then(_ => _.json())
+        .then(u => setUser({ ...u, token }));
+    }
+  }, []);
 
-  if (!user) return <LoginPage onLogin={setUser} />;
+  const logoutUser = useCallback(() => {
+    setUser(null);
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+  }, [setUser]);
+
+  const onUserLogin = useCallback(
+    (result: orch.User, remember: boolean) => {
+      setUser(result);
+      if (remember) localStorage.setItem(TOKEN_STORAGE_KEY, result.token);
+    },
+    [setUser]
+  );
+
+  if (!user) return <LoginPage onLogin={onUserLogin} />;
 
   const withLayout = (c: React.ReactNode) => (
-    <Layout user={user} groups={GROUPS} onLogout={logoutUser} children={c} />
+    <Layout user={user} groups={MOCK_GROUPS} onLogout={logoutUser} children={c} />
   );
 
   return (

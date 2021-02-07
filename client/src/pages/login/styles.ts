@@ -25,6 +25,10 @@ const styles: Styles<AppTheme, {}> = {
   submitButton: {
     marginTop: "15px",
   },
+  loginMessage: {
+    textAlign: "center",
+    marginTop: "15px",
+  },
 };
 
 export default styles;

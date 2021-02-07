@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 
 import Container from "@material-ui/core/Container";
 import Paper from "@material-ui/core/Paper";
@@ -10,39 +10,42 @@ import Button from "@material-ui/core/Button";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 
 import styles from "./styles";
-import { useInputState } from "utils/hooks";
+import { useInputState, useApiPromise } from "utils/hooks";
 import logo from "assets/logo.png";
 
 const useStyles = makeStyles(styles);
 
 interface LoginProps {
-  onLogin: (user: orch.User) => void;
+  onLogin: (user: orch.User, remember: boolean) => void;
 }
 
 function LoginPage({ onLogin }: LoginProps) {
   const classes = useStyles();
+  const [rememberMe, setRememberMe] = useState(false);
   const [email, setEmail] = useInputState();
   const [password, setPassword] = useInputState();
-
-  if (1 === 1) setTimeout(() => onLogin({ firstName: "Lior", lastName: "Kletter" } as any), 100);
+  const [loading, error, setLoginPromise] = useApiPromise();
 
   const _onFormSubmit = useCallback(
     async (e: React.FormEvent<any>) => {
       e.preventDefault();
 
-      const result = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const result: orch.User = await setLoginPromise(
+        fetch("/auth/login", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        })
+      );
 
-      if (!result.ok) return;
-
-      const user: orch.User = await result.json();
-      onLogin(user);
+      onLogin(result, rememberMe);
     },
-    [email, password, onLogin]
+    [rememberMe, email, password, onLogin]
   );
+
+  const changeRememberMe = useCallback((_, checked: boolean) => setRememberMe(checked), [
+    setRememberMe,
+  ]);
 
   return (
     <div className={classes.container}>
@@ -80,7 +83,7 @@ function LoginPage({ onLogin }: LoginProps) {
               autoComplete="current-password"
             />
             <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
+              control={<Checkbox value="remember" color="primary" onChange={changeRememberMe} />}
               label="Remember me"
             />
             <Button
@@ -93,6 +96,16 @@ function LoginPage({ onLogin }: LoginProps) {
               Log in
             </Button>
           </form>
+          {loading && (
+            <Typography variant="body1" className={classes.loginMessage}>
+              Logging in...
+            </Typography>
+          )}
+          {error && (
+            <Typography variant="body1" color="error" className={classes.loginMessage}>
+              {error}
+            </Typography>
+          )}
         </Paper>
       </Container>
     </div>
