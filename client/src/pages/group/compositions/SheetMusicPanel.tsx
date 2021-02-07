@@ -12,7 +12,7 @@ import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 
 import sheetMusicPanelStyles from "./SheetMusicPanel.styles";
-import { MOCK_COMPOSITIONS, MOCK_SHEET_MUSIC } from "mocks";
+import { MOCK_COMMENTS, MOCK_COMPOSITIONS } from "mocks";
 import { useApiFetch } from "utils/hooks";
 
 const useStyles = makeStyles(sheetMusicPanelStyles);
@@ -30,7 +30,7 @@ export default function SheetMusicPanel({ user, userInfo }: Props) {
   const history = useHistory();
   const { url, path, params } = useRouteMatch<RouteParams>();
   const [composition, setComposition] = useState<orch.Composition | null>(null);
-  const [sheetMusic, setSheetMusic] = useState<orch.SheetMusic | null>(null);
+  const [comments, setComments] = useState<orch.SheetMusicComment[] | null>(null);
 
   useEffect(() => {
     let newComposition = composition;
@@ -40,11 +40,12 @@ export default function SheetMusicPanel({ user, userInfo }: Props) {
       return setComposition(newComposition);
     }
 
-    if (!params.roleId) return history.replace(`${url}/${newComposition.roles[0].id}`);
+    if (!params.roleId) return history.replace(`${url}/${newComposition.sheetMusic[0].role.id}`);
 
-    /* const sheetMusic = await apiFetch(`...`); */
-    const sheetMusic = MOCK_SHEET_MUSIC[params.roleId];
-    setSheetMusic(sheetMusic);
+    if (!comments) {
+      /* const comments = await apiFetch(...) */
+      setComments(MOCK_COMMENTS);
+    }
   }, [composition, params.compositionId, params.roleId]);
 
   const onRoleClick = useCallback(
@@ -62,6 +63,7 @@ export default function SheetMusicPanel({ user, userInfo }: Props) {
   if (!composition) return <div>loading composition...</div>;
 
   const hasMultipleInstruments = userInfo.director || userInfo.roles.length > 1;
+  const sheetMusic = composition.sheetMusic.find(_ => _.role.id.toString() === params.roleId);
 
   return (
     <div className={classes.container}>
@@ -69,7 +71,7 @@ export default function SheetMusicPanel({ user, userInfo }: Props) {
         <Card className={classes.instruments}>
           <Typography variant="h5">Choose Instrument:</Typography>
           <List>
-            {composition.roles.map(role => (
+            {composition.sheetMusic.map(({ role }) => (
               <ListItem
                 key={role.id}
                 button

@@ -11,18 +11,21 @@ declare namespace orch {
     name: string;
   }
 
-  interface Composition {
-    id: number;
+  interface CompositionData {
     title: string;
     composer: string;
     genre: string;
+    sheetMusic: SheetMusic[];
+  }
+
+  interface Composition extends CompositionData {
+    id: number;
     uploader: string;
-    roles: group.Role[];
   }
 
   interface SheetMusic {
+    role: group.Role;
     fileUrl: string;
-    comments: SheetMusicComment[];
   }
 
   interface SheetMusicComment {

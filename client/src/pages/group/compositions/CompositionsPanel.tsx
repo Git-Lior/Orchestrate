@@ -9,6 +9,8 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import TextField from "@material-ui/core/TextField";
+import IconButton from "@material-ui/core/IconButton";
+import AddIcon from "@material-ui/icons/Add";
 
 import { MOCK_GENRES } from "mocks";
 import { useInputState } from "utils/hooks";
@@ -22,6 +24,7 @@ interface Props {
   isDirector: boolean;
   initialQuery: orch.compositions.Query;
   compositions: orch.Composition[] | null;
+  onAddComposition: () => void;
   onQueryChange: (query: orch.compositions.Query) => void;
   onCompositionSelect: (composition: orch.Composition) => void;
   onCompositionEdit: (composition: orch.Composition) => void;
@@ -33,6 +36,7 @@ export default function CompositionsPanel({
   initialQuery,
   compositions,
   onQueryChange,
+  onAddComposition,
   onCompositionSelect,
   onCompositionEdit,
   onCompositionDelete,
@@ -61,9 +65,11 @@ export default function CompositionsPanel({
 
   return (
     <div className={classes.panelsContainer}>
+      <IconButton aria-label="create" onClick={onAddComposition}>
+        <AddIcon />
+      </IconButton>
       <Card className={classes.filtersPanel}>
         <Typography variant="h5">Filter results</Typography>
-
         <FormControlLabel
           control={
             <Checkbox

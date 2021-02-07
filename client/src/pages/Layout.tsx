@@ -82,12 +82,7 @@ export default function Layout({ user, groups, onLogout, children }: Props) {
             indicatorColor="secondary"
           >
             {groupPages.map(_ => (
-              <Tab
-                disableRipple
-                key={_.route}
-                value={_.route}
-                label={<Typography variant="h6">{_.name}</Typography>}
-              />
+              <Tab disableRipple key={_.route} value={_.route} label={_.name} />
             ))}
           </Tabs>
           <div className={classes.spacer} />

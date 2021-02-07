@@ -1,9 +1,19 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Route, Switch, useHistory, useRouteMatch } from "react-router-dom";
 
+import Modal from "@material-ui/core/Modal";
+
 import { MOCK_COMPOSITIONS } from "mocks";
 import CompositionsPanel from "./CompositionsPanel";
 import SheetMusicPanel from "./SheetMusicPanel";
+import CompositionEditor, { EditedComposition } from "./CompositionEditor";
+
+const EMPTY_COMPOSITION: EditedComposition = {
+  title: "",
+  genre: "",
+  composer: "",
+  sheetMusic: [],
+};
 
 type Props = orch.group.PageProps;
 
@@ -17,6 +27,7 @@ export default function GroupCompositionsPage({ user, userInfo }: Props) {
     title: "",
     onlyInConcert: false,
   });
+  const [editedComposition, setEditedComposition] = useState<EditedComposition | null>(null);
 
   useEffect(() => {
     setTimeout(() => {
@@ -28,13 +39,22 @@ export default function GroupCompositionsPage({ user, userInfo }: Props) {
     url,
   ]);
 
-  const editComposition = useCallback(
-    (c: orch.Composition) => history.push(`${url}/${c.id}/edit`),
-    [url]
-  );
-
   const deleteComposition = useCallback((c: orch.Composition) => {
     if (!window.confirm("Are you sure you want to delete this composition?")) return;
+  }, []);
+
+  const createComposition = useCallback(() => setEditedComposition(EMPTY_COMPOSITION), []);
+
+  const editComposition = useCallback((c: orch.Composition) => setEditedComposition(c), [url]);
+
+  const cancelEdit = useCallback(() => {
+    if (!window.confirm("Are you sure you want to cancel?")) return;
+    setEditedComposition(null);
+  }, [editedComposition]);
+
+  const finishEdit = useCallback((c: EditedComposition) => {
+    /* TODO: send to server */
+    setEditedComposition(null);
   }, []);
 
   return (
@@ -47,22 +67,32 @@ export default function GroupCompositionsPage({ user, userInfo }: Props) {
             <CompositionsPanel
               isDirector={userInfo.director}
               initialQuery={query}
-              onQueryChange={setQuery}
               compositions={compositions}
+              onQueryChange={setQuery}
+              onAddComposition={createComposition}
               onCompositionSelect={setCompositionId}
               onCompositionEdit={editComposition}
               onCompositionDelete={deleteComposition}
             />
           }
         />
-        <Route exact path={`${path}/:compositionId/edit`} children={null} />
-        <Route exact path={`${path}/create`} children={null} />
         <Route
           exact
           path={[`${path}/:compositionId/`, `${path}/:compositionId/:roleId`]}
           children={<SheetMusicPanel user={user} userInfo={userInfo} />}
         />
       </Switch>
+      <Modal open={!!editedComposition}>
+        {!editedComposition ? (
+          <div />
+        ) : (
+          <CompositionEditor
+            initialData={editedComposition}
+            onCancel={cancelEdit}
+            onSubmit={finishEdit}
+          />
+        )}
+      </Modal>
     </>
   );
 }
