@@ -1,6 +1,6 @@
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 
-export function useApiFetch(user: orch.User, baseUrl: string = "") {
+export function useApiFetch(user: { token: string }, baseUrl: string = "") {
   const apiFetch = useCallback(
     (url: string, init: RequestInit = {}) => {
       return fetch(`/api${baseUrl}${url}`, {
@@ -9,9 +9,14 @@ export function useApiFetch(user: orch.User, baseUrl: string = "") {
           ...(init.headers || {}),
           authorization: `Bearer ${user.token}`,
         },
-      }).then(_ => _.json());
+      })
+        .then(async result => {
+          if (!result.ok) throw await result.text();
+          return result;
+        })
+        .then(_ => _.json());
     },
-    [user]
+    [user.token, baseUrl]
   );
 
   return apiFetch;

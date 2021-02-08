@@ -37,7 +37,7 @@ export default function AuthPanel({ onTokenRecieved }: Props) {
     if (!adminTokenInput) return;
 
     const token: string = await setTokenPromise(
-      fetch("/auth/admin", {
+      fetch("/api/auth/admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(adminTokenInput),

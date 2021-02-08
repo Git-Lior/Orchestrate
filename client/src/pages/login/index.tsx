@@ -31,7 +31,7 @@ function LoginPage({ onLogin }: LoginProps) {
       e.preventDefault();
 
       const result: orch.User = await setLoginPromise(
-        fetch("/auth/login", {
+        fetch("/api/auth/login", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ email, password }),

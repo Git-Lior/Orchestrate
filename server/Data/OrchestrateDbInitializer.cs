@@ -33,6 +33,7 @@ namespace Orchestrate.API.Data
                     PasswordHash = "AQAAAAEAACcQAAAAEE8iFfjLAcKd4RJUnIPSV4h0XfbKOJELDHMazdN6fcwZ+Z4TieAMz/sNfX0+9X8TNQ==", // password: "test"
                     FirstName = "משתמש",
                     LastName = "בדיקה",
+                    IsPasswordTemporary = false
                 });
 
             _ctx.SaveChanges();

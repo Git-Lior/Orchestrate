@@ -1,19 +1,15 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 
-export function useApiPromise(text: boolean = false) {
+export function usePromiseStatus() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>();
 
-  const promiseAction = useCallback(async (promise: Promise<Response>) => {
+  const promiseAction = useCallback(async (promise: Promise<any>) => {
     setError(undefined);
     setLoading(true);
 
     try {
-      const result = await promise;
-      if (!result.ok) throw await result.text();
-
-      if (text) return await result.text();
-      else return await result.json();
+      return await promise;
     } catch (err) {
       setError(err?.message ?? err);
       throw err;
@@ -23,4 +19,22 @@ export function useApiPromise(text: boolean = false) {
   }, []);
 
   return [loading, error, promiseAction] as const;
+}
+
+export function useApiPromise(text: boolean = false) {
+  const [loading, error, promiseAction] = usePromiseStatus();
+
+  const extendedPromiseAction = useCallback(
+    (promise: Promise<Response>) => {
+      return promiseAction(
+        promise.then(async _ => {
+          if (!_.ok) throw await _.text();
+          return await (text ? _.text() : _.json());
+        })
+      );
+    },
+    [text, promiseAction]
+  );
+
+  return [loading, error, extendedPromiseAction] as const;
 }
