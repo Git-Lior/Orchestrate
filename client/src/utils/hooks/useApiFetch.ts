@@ -2,7 +2,7 @@ import { useCallback } from "react";
 
 export function useApiFetch(user: { token: string }, baseUrl: string = "") {
   const apiFetch = useCallback(
-    (url: string, init: RequestInit = {}) => {
+    (url: string, init: RequestInit = {}, noJson?: boolean) => {
       return fetch(`/api${baseUrl}${url}`, {
         ...init,
         headers: {
@@ -14,7 +14,7 @@ export function useApiFetch(user: { token: string }, baseUrl: string = "") {
           if (!result.ok) throw await result.text();
           return result;
         })
-        .then(_ => _.json());
+        .then(result => (noJson ? result : result.json()));
     },
     [user.token, baseUrl]
   );

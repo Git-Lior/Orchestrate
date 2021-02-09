@@ -4,6 +4,8 @@ export function usePromiseStatus() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>();
 
+  const clearError = useCallback(() => setError(undefined), [setError]);
+
   const promiseAction = useCallback(async (promise: Promise<any>) => {
     setError(undefined);
     setLoading(true);
@@ -18,11 +20,11 @@ export function usePromiseStatus() {
     }
   }, []);
 
-  return [loading, error, promiseAction] as const;
+  return [loading, error, promiseAction, clearError] as const;
 }
 
 export function useApiPromise(text: boolean = false) {
-  const [loading, error, promiseAction] = usePromiseStatus();
+  const [loading, error, promiseAction, clearError] = usePromiseStatus();
 
   const extendedPromiseAction = useCallback(
     (promise: Promise<Response>) => {
@@ -36,5 +38,5 @@ export function useApiPromise(text: boolean = false) {
     [text, promiseAction]
   );
 
-  return [loading, error, extendedPromiseAction] as const;
+  return [loading, error, extendedPromiseAction, clearError] as const;
 }

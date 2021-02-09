@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core";
 
 import AuthPanel from "./AuthPanel";
-import UsersPanel from "./UsersPanel";
+import UsersTable from "./UsersTable";
 import GroupsPanel from "./GroupsPanel";
 import { useApiFetch } from "utils/hooks";
 
@@ -46,19 +46,39 @@ export default function AdminApp() {
 
   const deleteUser = useCallback(
     async (data: orch.UserData) => {
-      // TODO
+      await apiFetch(`/users/${data.id}`, { method: "DELETE" }, true);
+      setUsers(users!.filter(_ => _.id !== data.id));
     },
     [users, adminToken]
   );
 
-  const changeUser = useCallback(async () => {}, [users]);
+  const changeUser = useCallback(
+    async (data: orch.UserData) => {
+      await apiFetch(
+        `/users/${data.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        },
+        true
+      );
+
+      const userIndex = users!.findIndex(_ => _.id === data.id);
+      const newUsers = [...users!];
+      newUsers[userIndex] = data;
+
+      setUsers(newUsers);
+    },
+    [users]
+  );
 
   if (!adminToken) return <AuthPanel onTokenRecieved={setAdminToken} />;
 
   return (
     <div className={classes.adminPanel}>
       <div className={classes.usersPanel}>
-        <UsersPanel
+        <UsersTable
           users={users}
           onUserAdd={addUser}
           onUserChange={changeUser}

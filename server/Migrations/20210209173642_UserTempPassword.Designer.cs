@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Orchestrate.API.Data;
@@ -9,9 +10,10 @@ using Orchestrate.API.Data;
 namespace Orchestrate.API.Migrations
 {
     [DbContext(typeof(OrchestrateContext))]
-    partial class OrchestrateContextModelSnapshot : ModelSnapshot
+    [Migration("20210209173642_UserTempPassword")]
+    partial class UserTempPassword
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -47,6 +47,13 @@ export default function AuthPanel({ onTokenRecieved }: Props) {
     onTokenRecieved(token);
   }, [adminTokenInput]);
 
+  const onKeyPress = useCallback(
+    (e: React.KeyboardEvent<any>) => {
+      if (e.key === "Enter") onSubmit();
+    },
+    [onSubmit]
+  );
+
   return (
     <div className={classes.authContainer}>
       <Card className={classes.authPanel}>
@@ -57,6 +64,7 @@ export default function AuthPanel({ onTokenRecieved }: Props) {
           fullWidth
           value={adminTokenInput}
           onChange={setAdminTokenInputValue}
+          onKeyPress={onKeyPress}
         />
         <Button
           type="submit"
