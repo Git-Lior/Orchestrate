@@ -5,7 +5,7 @@ import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import Card from "@material-ui/core/Card";
 import Button from "@material-ui/core/Button";
-import { useApiPromise, useInputState } from "utils/hooks";
+import { useApiFetch, useInputState, usePromiseStatus } from "utils/hooks";
 
 const useStyles = makeStyles({
   authContainer: {
@@ -30,22 +30,19 @@ interface Props {
 
 export default function AuthPanel({ onTokenRecieved }: Props) {
   const classes = useStyles();
+  const apiFetch = useApiFetch(undefined, "/auth");
   const [adminTokenInput, setAdminTokenInputValue] = useInputState();
-  const [tokenLoading, tokenError, setTokenPromise] = useApiPromise(true);
+  const [tokenLoading, tokenError, setTokenPromise] = usePromiseStatus();
 
   const onSubmit = useCallback(async () => {
     if (!adminTokenInput) return;
 
     const token: string = await setTokenPromise(
-      fetch("/api/auth/admin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(adminTokenInput),
-      })
+      apiFetch("/admin", { method: "POST", body: JSON.stringify(adminTokenInput) }, "text")
     );
 
     onTokenRecieved(token);
-  }, [adminTokenInput]);
+  }, [adminTokenInput, apiFetch, onTokenRecieved, setTokenPromise]);
 
   const onKeyPress = useCallback(
     (e: React.KeyboardEvent<any>) => {
@@ -78,7 +75,7 @@ export default function AuthPanel({ onTokenRecieved }: Props) {
         {tokenLoading && <Typography variant="body1">loading...</Typography>}
         {tokenError && (
           <Typography variant="body1" color="primary">
-            {tokenError}
+            {tokenError.error}
           </Typography>
         )}
       </Card>

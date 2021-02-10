@@ -26,8 +26,11 @@ namespace Orchestrate.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAutoMapper(typeof(Startup));
+
             services.Configure<AdminOptions>(Configuration);
             services.Configure<JwtOptions>(Configuration);
+            services.Configure<PasswordHashOptions>(Configuration);
 
             services.AddDbContext<OrchestrateContext>(builder => builder.UseNpgsql(Configuration.GetConnectionString("OrchestrateDb")));
             services.AddScoped<OrchestrateDbInitializer>();
@@ -52,6 +55,8 @@ namespace Orchestrate.API
                 options.AddPolicy("AdministratorOnly", policy => policy.RequireRole("Administrator"));
             });
 
+            services.AddMvc(o => o.EnableEndpointRouting = false);
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -59,7 +64,7 @@ namespace Orchestrate.API
             });
 
             services.AddScoped<ITokenGenerator, TokenGenerator>();
-            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IPasswordProvider, PasswordProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -73,7 +78,7 @@ namespace Orchestrate.API
             }
             else
             {
-                app.UseExceptionHandler("/error");
+                app.UseExceptionHandler("/api/error");
             }
 
             app.UseHttpsRedirection();
@@ -83,10 +88,7 @@ namespace Orchestrate.API
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseMvc();
         }
     }
 }

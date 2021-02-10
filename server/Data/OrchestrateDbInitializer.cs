@@ -1,10 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Orchestrate.API.Models;
-using System;
-using System.Collections.Generic;
+﻿using Orchestrate.API.Models;
+using Orchestrate.API.Services.Interfaces;
 using System.Threading.Tasks;
 
 namespace Orchestrate.API.Data
@@ -12,31 +7,28 @@ namespace Orchestrate.API.Data
     public class OrchestrateDbInitializer
     {
         private const string TEST_USER_EMAIL = "test@test.com";
-        private IWebHostEnvironment _env;
+        
         private OrchestrateContext _ctx;
+        private readonly IPasswordProvider _passwordProvider;
 
-        public OrchestrateDbInitializer(IWebHostEnvironment env, OrchestrateContext ctx)
+        public OrchestrateDbInitializer(OrchestrateContext ctx, IPasswordProvider passwordProvider)
         {
-            _env = env;
             _ctx = ctx;
+            _passwordProvider = passwordProvider;
         }
 
         public async Task Initialize()
         {
-            _ctx.Database.Migrate();
+            _ctx.Users.Add(new User
+            {
+                Email = TEST_USER_EMAIL,
+                PasswordHash = _passwordProvider.HashPassword("test"),
+                FirstName = "Test",
+                LastName = "User",
+                IsPasswordTemporary = false
+            });
 
-            var testUser = await _ctx.Users.FirstOrDefaultAsync(_ => _.Email == TEST_USER_EMAIL);
-            if (testUser == null)
-                _ctx.Users.Add(new User
-                {
-                    Email = TEST_USER_EMAIL,
-                    PasswordHash = "AQAAAAEAACcQAAAAEE8iFfjLAcKd4RJUnIPSV4h0XfbKOJELDHMazdN6fcwZ+Z4TieAMz/sNfX0+9X8TNQ==", // password: "test"
-                    FirstName = "משתמש",
-                    LastName = "בדיקה",
-                    IsPasswordTemporary = false
-                });
-
-            _ctx.SaveChanges();
+            await _ctx.SaveChangesAsync();
         }
     }
 }

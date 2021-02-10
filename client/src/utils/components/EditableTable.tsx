@@ -57,8 +57,8 @@ const useStyles = makeStyles<AppTheme, Props<any>>(theme => ({
 }));
 
 interface DialogProps<T> {
-  value: T;
-  onChange: <K extends keyof T>(key: K, newValue: T[K]) => void;
+  item: T;
+  onFieldChange: <K extends keyof T>(key: K, newValue: T[K]) => void;
 }
 
 interface Props<T> {
@@ -213,7 +213,7 @@ export function EditableTable<T extends RowModel>(props: Props<T>) {
               <Typography variant="h4" className={classes.dialogTitle}>
                 {!editedRow.id ? "Create" : "Edit"} {rowTypeName}
               </Typography>
-              {children({ value: editedRow, onChange: onRowFieldChange })}
+              {children({ item: editedRow, onFieldChange: onRowFieldChange })}
               <div className={classes.dialogButtons}>
                 <Button
                   className={classes.doneButton}

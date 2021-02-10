@@ -2,14 +2,20 @@ export const MOCK_GROUPS: orch.Group[] = [
   {
     id: 123,
     name: "String Trio",
+    manager: { id: 111, firstName: "Hello", lastName: "World", email: "helloworld@mail.com" },
+    directors: [],
   },
   {
     id: 456,
     name: "Symphonic Orchestra",
+    manager: { id: 111, firstName: "Hello", lastName: "World", email: "helloworld@mail.com" },
+    directors: [],
   },
   {
     id: 789,
     name: "New Ensemble",
+    manager: { id: 111, firstName: "Hello", lastName: "World", email: "helloworld@mail.com" },
+    directors: [],
   },
 ];
 

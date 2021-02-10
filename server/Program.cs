@@ -10,20 +10,26 @@ namespace Orchestrate.API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
 
-            InitDevDb(host);
+            await InitDb(host);
 
             host.Run();
         }
 
-        private static async Task InitDevDb(IHost host)
+        private static async Task InitDb(IHost host)
         {
             using var scope = host.Services.CreateScope();
+
+            var context = scope.ServiceProvider.GetRequiredService<OrchestrateContext>();
+            // should change to migrations when prototyping is done
+            bool created = await context.Database.EnsureCreatedAsync();
+            // _ctx.Database.Migrate();
+
             var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
-            if (!env.IsDevelopment()) return;
+            if (!env.IsDevelopment() || !created) return;
 
             try
             {

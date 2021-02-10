@@ -1,29 +1,20 @@
-import React, { useCallback } from "react";
+import React from "react";
 
 import TextField from "@material-ui/core/TextField";
-import { DialogRow } from "./DialogRow";
+import { DialogRow, DialogRowProps } from "./DialogRow";
 
-interface Props<T, K> {
-  label: string;
-  value: T;
-  fieldKey: K;
-  onChange: (key: K, value: string) => void;
-}
+type StringKeys<T> = {
+  [K in keyof T]: T[K] extends string ? K : never;
+}[keyof T];
 
-export function TextDialogRow<T, K extends keyof T>({
-  label,
-  fieldKey,
-  value,
-  onChange,
-}: Props<T, K>) {
-  const onValueChange = useCallback(
-    (e: React.ChangeEvent<any>) => onChange(fieldKey, e.target.value),
-    [onChange, value, fieldKey]
-  );
-
+export function TextDialogRow<TItem, TKey extends StringKeys<TItem> = StringKeys<TItem>>(
+  props: DialogRowProps<TItem, TKey>
+) {
   return (
-    <DialogRow label={label}>
-      <TextField value={value[fieldKey]} onChange={onValueChange} />
+    <DialogRow {...props}>
+      {({ value, onChange }) => (
+        <TextField value={value} onChange={e => onChange(e.target.value as any)} />
+      )}
     </DialogRow>
   );
 }

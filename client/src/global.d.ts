@@ -1,4 +1,9 @@
 declare namespace orch {
+  interface Error {
+    error?: string;
+    errors?: Record<string, string[]>;
+  }
+
   interface UserData {
     id: number;
     email: string;
@@ -11,9 +16,14 @@ declare namespace orch {
     token: string;
   }
 
-  interface Group {
+  interface GroupData {
     id: number;
     name: string;
+    manager: orch.UserData;
+  }
+
+  interface Group extends GroupData {
+    directors: orch.UserData[];
   }
 
   interface CompositionData {

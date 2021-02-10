@@ -10,7 +10,7 @@ import Button from "@material-ui/core/Button";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 
 import styles from "./styles";
-import { useInputState, useApiPromise } from "utils/hooks";
+import { useApiFetch, useInputState, usePromiseStatus } from "utils/hooks";
 import logo from "assets/logo.png";
 
 const useStyles = makeStyles(styles);
@@ -21,26 +21,26 @@ interface LoginProps {
 
 function LoginPage({ onLogin }: LoginProps) {
   const classes = useStyles();
+  const apiFetch = useApiFetch(undefined, "/auth");
   const [rememberMe, setRememberMe] = useState(false);
   const [email, setEmail] = useInputState();
   const [password, setPassword] = useInputState();
-  const [loading, error, setLoginPromise] = useApiPromise();
+  const [loading, error, setLoginPromise] = usePromiseStatus();
 
   const _onFormSubmit = useCallback(
     async (e: React.FormEvent<any>) => {
       e.preventDefault();
 
       const result: orch.User = await setLoginPromise(
-        fetch("/api/auth/login", {
+        apiFetch("/login", {
           method: "POST",
-          headers: { "content-type": "application/json" },
           body: JSON.stringify({ email, password }),
         })
       );
 
       onLogin(result, rememberMe);
     },
-    [rememberMe, email, password, onLogin]
+    [rememberMe, email, password, onLogin, apiFetch]
   );
 
   const changeRememberMe = useCallback((_, checked: boolean) => setRememberMe(checked), [
@@ -103,7 +103,7 @@ function LoginPage({ onLogin }: LoginProps) {
           )}
           {error && (
             <Typography variant="body1" color="error" className={classes.loginMessage}>
-              {error}
+              {error.error}
             </Typography>
           )}
         </Paper>

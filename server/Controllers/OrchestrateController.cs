@@ -7,6 +7,6 @@ namespace Orchestrate.API.Controllers
     [ApiController]
     public class OrchestrateController : ControllerBase
     {
-        protected int UserId => int.Parse(User.Identity.Name);
+        protected int RequestingUserId => int.Parse(User.Identity.Name);
     }
 }
