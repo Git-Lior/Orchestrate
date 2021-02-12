@@ -1,83 +1,97 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Orchestrate.API.Data;
+using Orchestrate.API.Authorization;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Orchestrate.API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Policy = "AdministratorOnly")]
     public class GroupsController : OrchestrateController
     {
-        private readonly IMapper _mapper;
-        private readonly OrchestrateContext _context;
-
-        public GroupsController(IMapper mapper, OrchestrateContext context)
-        {
-            _mapper = mapper;
-            _context = context;
-        }
+        public GroupsController(IServiceProvider provider) : base(provider) { }
 
         [HttpGet]
         public async Task<IActionResult> Groups()
         {
-            var groups = await _context.Groups
-                .AsNoTracking()
-                .Include(_ => _.Manager)
-                .ToListAsync();
+            List<Group> groups;
 
-            return Ok(_mapper.Map(groups, new List<GroupData>()));
+            if (IsUserAdmin) groups = await DbContext.Groups.AsNoTracking().Include(_ => _.Manager).ToListAsync();
+            else
+            {
+                var user = await DbContext.Users.AsNoTracking()
+                    .Include(_ => _.Roles).ThenInclude(_ => _.Group)
+                    .Include(_ => _.ManagingGroups)
+                    .Include(_ => _.DirectorOfGroups)
+                    .FirstOrDefaultAsync(_ => _.Id == RequestingUserId);
+
+                if (user == null) throw new UserNotExistException();
+
+                groups = user.Roles.Select(_ => _.Group)
+                    .Concat(user.ManagingGroups)
+                    .Concat(user.DirectorOfGroups)
+                    .ToList();
+            }
+
+            return Ok(ModelMapper.Map(groups, new List<GroupData>()));
         }
 
+        #region Administrator Routes
+
         [HttpPost]
+        [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
         public async Task<IActionResult> CreateGroup([Bind("Name,ManagerId")] Group group)
         {
             if (!ModelState.IsValid) return BadRequest(new { Error = "Invalid parameters" });
 
-            _context.Groups.Add(group);
-            await _context.SaveChangesAsync();
+            DbContext.Groups.Add(group);
+            await DbContext.SaveChangesAsync();
 
-            var dbGroup = await _context.Groups
+            var dbGroup = await DbContext.Groups
                 .AsNoTracking()
                 .Include(_ => _.Manager)
                 .FirstAsync(_ => _.Id == group.Id);
 
-            return Ok(_mapper.Map<GroupData>(dbGroup));
+            return Ok(ModelMapper.Map<GroupData>(dbGroup));
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
         public async Task<IActionResult> UpdateGroup([FromRoute] int id, [Bind("Name,ManagerId")] Group group)
         {
             if (!ModelState.IsValid) return BadRequest(new { Error = "Invalid parameters" });
 
-            if (await _context.Groups.AllAsync(_ => _.Id != group.Id)) return NotFound(new { Error = "Group not found" });
+            if (await DbContext.Groups.AllAsync(_ => _.Id != group.Id)) return NotFound(new { Error = "Group not found" });
 
-            _context.Groups.Update(group);
-            await _context.SaveChangesAsync();
+            DbContext.Groups.Update(group);
+            await DbContext.SaveChangesAsync();
 
-            var dbGroup = await _context.Groups
+            var dbGroup = await DbContext.Groups
                 .AsNoTracking()
                 .Include(_ => _.Manager)
                 .FirstAsync(_ => _.Id == group.Id);
 
-            return Ok(_mapper.Map<GroupData>(dbGroup));
+            return Ok(ModelMapper.Map<GroupData>(dbGroup));
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
         public async Task<IActionResult> DeleteGroup([FromRoute] int id)
         {
-            var group = await _context.Groups.FindAsync(id);
+            var group = await DbContext.Groups.FindAsync(id);
             if (group == null) return NotFound(new { Error = "Group not found" });
 
-            _context.Groups.Remove(group);
-            await _context.SaveChangesAsync();
+            DbContext.Groups.Remove(group);
+            await DbContext.SaveChangesAsync();
 
             return Ok();
         }
+
+        #endregion
     }
 }

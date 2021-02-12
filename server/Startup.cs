@@ -54,12 +54,12 @@ namespace Orchestrate.API
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("AdministratorOnly", policy => policy.RequireRole("Administrator"));
+                options.AddPolicy(GroupRolesPolicy.AdministratorOnly, policy => policy.RequireRole(Configuration.GetValue<string>("AdminRoleName")));
 
-                options.AddPolicy("PlayerOnly", policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Player)));
-                options.AddPolicy("DirectorOnly", policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Director)));
-                options.AddPolicy("DirectorOrPlayer", policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Director & GroupRoles.Player)));
-                options.AddPolicy("ManagerOnly", policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Manager)));
+                options.AddPolicy(GroupRolesPolicy.MemberOnly, policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Member)));
+                options.AddPolicy(GroupRolesPolicy.DirectorOnly, policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Director)));
+                options.AddPolicy(GroupRolesPolicy.DirectorOrPlayer, policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Director & GroupRoles.Member)));
+                options.AddPolicy(GroupRolesPolicy.ManagerOnly, policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Manager)));
             });
 
             services.AddSingleton<IAuthorizationHandler, GroupAuthorizationHandler>();

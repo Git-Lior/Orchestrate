@@ -10,9 +10,11 @@ namespace Orchestrate.API.Services
     public class TokenGenerator : ITokenGenerator
     {
         private readonly SigningCredentials _signingCredentials;
+        private readonly string _adminRoleName;
 
         public TokenGenerator(IOptions<JwtOptions> jwtOptions)
         {
+            _adminRoleName = jwtOptions.Value.AdminRoleName;
             _signingCredentials = new SigningCredentials(new SymmetricSecurityKey(jwtOptions.Value.JwtSecretBytes), SecurityAlgorithms.HmacSha256Signature);
         }
 
@@ -23,7 +25,7 @@ namespace Orchestrate.API.Services
 
         public string GenerateAdminToken()
         {
-            return GenerateToken(new Claim[] { new Claim(ClaimTypes.Role, "Administrator") });
+            return GenerateToken(new Claim[] { new Claim(ClaimTypes.Role, _adminRoleName) });
         }
 
         private string GenerateToken(Claim[] claims)

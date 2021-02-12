@@ -9,6 +9,7 @@ namespace Orchestrate.API
 
     public class JwtOptions
     {
+        public string AdminRoleName { get; set; }
         public string JwtSecret { get; set; }
         public byte[] JwtSecretBytes => Encoding.UTF8.GetBytes(JwtSecret);
     }

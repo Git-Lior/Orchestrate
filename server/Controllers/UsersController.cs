@@ -1,11 +1,10 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Orchestrate.API.Data;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
 using Orchestrate.API.Services.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -15,22 +14,18 @@ namespace Orchestrate.API.Controllers
     [Authorize(Policy = "AdministratorOnly")]
     public class UsersController : OrchestrateController
     {
-        private readonly IMapper _mapper;
-        private readonly OrchestrateContext _context;
         private readonly IPasswordProvider _passwordProvider;
 
-        public UsersController(IMapper mapper, OrchestrateContext context, IPasswordProvider passwordProvider)
+        public UsersController(IPasswordProvider passwordProvider, IServiceProvider provider) : base(provider)
         {
-            _mapper = mapper;
-            _context = context;
             _passwordProvider = passwordProvider;
         }
 
         [HttpGet]
         public async Task<IActionResult> Users()
         {
-            var dbUsers = await _context.Users.AsNoTracking().ToListAsync();
-            return Ok(_mapper.Map(dbUsers, new List<UserData>()));
+            var dbUsers = await DbContext.Users.AsNoTracking().ToListAsync();
+            return Ok(ModelMapper.Map(dbUsers, new List<UserData>()));
         }
 
         [HttpPost]
@@ -42,10 +37,10 @@ namespace Orchestrate.API.Controllers
             user.PasswordHash = _passwordProvider.HashPassword(password);
             user.IsPasswordTemporary = true;
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            DbContext.Users.Add(user);
+            await DbContext.SaveChangesAsync();
 
-            var userData = _mapper.Map<UserDataWithTemporaryPassword>(user);
+            var userData = ModelMapper.Map<UserDataWithTemporaryPassword>(user);
             userData.TemporaryPassword = password;
 
             return Ok(userData);
@@ -56,25 +51,25 @@ namespace Orchestrate.API.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(new { Error = "Invalid parameters" });
 
-            if (await _context.Users.AllAsync(_ => _.Id != user.Id)) return NotFound(new { Error = "User not found" });
+            if (await DbContext.Users.AllAsync(_ => _.Id != user.Id)) return NotFound(new { Error = "User not found" });
 
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
+            DbContext.Users.Update(user);
+            await DbContext.SaveChangesAsync();
 
-            return Ok(_mapper.Map<UserData>(user));
+            return Ok(ModelMapper.Map<UserData>(user));
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser([FromRoute] int id)
         {
-            if (await _context.Groups.AsNoTracking().AnyAsync(_ => _.ManagerId == id))
+            if (await DbContext.Groups.AsNoTracking().AnyAsync(_ => _.ManagerId == id))
                 return BadRequest(new { Error = "Cannot delete a user that manages a group, change the group's manager first" });
 
-            var user = await _context.Users.FindAsync(id);
+            var user = await DbContext.Users.FindAsync(id);
             if (user == null) return NotFound(new { Error = "User not found" });
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            DbContext.Users.Remove(user);
+            await DbContext.SaveChangesAsync();
 
             return Ok();
         }

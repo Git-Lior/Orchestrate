@@ -6,6 +6,7 @@
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
+        // TODO: make another subclass for temporary password
         public bool IsPasswordTemporary { get; set; }
     }
 

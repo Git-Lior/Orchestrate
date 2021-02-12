@@ -1,9 +1,7 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Orchestrate.API.Data;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Services.Interfaces;
 using System;
@@ -13,17 +11,14 @@ namespace Orchestrate.API.Controllers
 {
     [Route("api/[controller]")]
     public class AuthController : OrchestrateController
-    {
-        private readonly IMapper _mapper;
-        private readonly OrchestrateContext _context;
+    {   
         private readonly IPasswordProvider _passwordProvider;
         private readonly ITokenGenerator _tokenGenerator;
         private readonly AdminOptions _adminOptions;
 
-        public AuthController(IMapper mapper, OrchestrateContext context, IPasswordProvider passwordProvider, IOptions<AdminOptions> adminOptions, ITokenGenerator tokenGenerator)
+        public AuthController(IPasswordProvider passwordProvider, IOptions<AdminOptions> adminOptions, ITokenGenerator tokenGenerator, IServiceProvider provider)
+            : base(provider)
         {
-            _mapper = mapper;
-            _context = context;
             _passwordProvider = passwordProvider;
             _adminOptions = adminOptions.Value;
             _tokenGenerator = tokenGenerator;
@@ -33,7 +28,7 @@ namespace Orchestrate.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginPayload info)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(_ => _.Email == info.Email);
+            var user = await DbContext.Users.FirstOrDefaultAsync(_ => _.Email == info.Email);
             if (user == null) return NotFound(new { Error = "User not found" });
 
             var (success, needsUpgrade) = _passwordProvider.CheckHash(user.PasswordHash, info.Password);
@@ -43,10 +38,10 @@ namespace Orchestrate.API.Controllers
             if (needsUpgrade)
             {
                 user.PasswordHash = _passwordProvider.HashPassword(info.Password);
-                await _context.SaveChangesAsync();
+                await DbContext.SaveChangesAsync();
             }
 
-            var userData = _mapper.Map<UserDataWithToken>(user);
+            var userData = ModelMapper.Map<UserDataWithToken>(user);
             userData.Token = _tokenGenerator.GenerateUserToken(user.Id);
 
             return Ok(userData);
@@ -57,7 +52,7 @@ namespace Orchestrate.API.Controllers
         public IActionResult Admin([FromBody] string password)
         {
             if (password != _adminOptions.AdminPassword)
-                return BadRequest(new { Error = "Invalid admin credentials" });
+                return BadRequest(new { Error = "Incorrect admin credentials" });
 
             return Ok(_tokenGenerator.GenerateAdminToken());
         }
@@ -65,21 +60,19 @@ namespace Orchestrate.API.Controllers
         [HttpGet("info")]
         public async Task<IActionResult> Info()
         {
-            var user = await _context.Users.FindAsync(RequestingUserId);
-            return Ok(_mapper.Map<UserData>(user));
+            return Ok(ModelMapper.Map<UserData>(await GetRequestingUser()));
         }
 
         [HttpPost("changePassword")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordPayload payload)
         {
-            var user = await _context.Users.FindAsync(RequestingUserId);
-            if (user == null) return NotFound(new { Error = "User not found" });
+            var user = await GetRequestingUser();
 
             var (success, _) = _passwordProvider.CheckHash(user.PasswordHash, payload.OldPassword);
             if (!success) return BadRequest(new { Error = "Incorrect Password" });
 
             user.PasswordHash = _passwordProvider.HashPassword(payload.NewPassword);
-            await _context.SaveChangesAsync();
+            await DbContext.SaveChangesAsync();
 
             return Ok();
         }
