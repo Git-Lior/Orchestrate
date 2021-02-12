@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Orchestrate.API.Authorization;
 using Orchestrate.API.Data;
 using Orchestrate.API.Services;
 using Orchestrate.API.Services.Interfaces;
@@ -53,7 +55,14 @@ namespace Orchestrate.API
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("AdministratorOnly", policy => policy.RequireRole("Administrator"));
+
+                options.AddPolicy("PlayerOnly", policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Player)));
+                options.AddPolicy("DirectorOnly", policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Director)));
+                options.AddPolicy("DirectorOrPlayer", policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Director & GroupRoles.Player)));
+                options.AddPolicy("ManagerOnly", policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Manager)));
             });
+
+            services.AddSingleton<IAuthorizationHandler, GroupAuthorizationHandler>();
 
             services.AddMvc(o => o.EnableEndpointRouting = false);
 
