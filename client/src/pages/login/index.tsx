@@ -28,17 +28,15 @@ function LoginPage({ onLogin }: LoginProps) {
   const [loading, error, setLoginPromise] = usePromiseStatus();
 
   const _onFormSubmit = useCallback(
-    async (e: React.FormEvent<any>) => {
+    (e: React.FormEvent<any>) => {
       e.preventDefault();
 
-      const result: orch.User = await setLoginPromise(
+      return setLoginPromise(
         apiFetch("/login", {
           method: "POST",
           body: JSON.stringify({ email, password }),
-        })
+        }).then(result => onLogin(result, rememberMe))
       );
-
-      onLogin(result, rememberMe);
     },
     [rememberMe, email, password, onLogin, apiFetch]
   );

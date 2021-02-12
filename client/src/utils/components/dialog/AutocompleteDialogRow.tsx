@@ -1,9 +1,9 @@
 import React from "react";
 
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import TextField from "@material-ui/core/TextField";
 
 import { DialogRow, DialogRowProps } from "./DialogRow";
+import { textAutocompleteOptions } from "../textAutocompleteOptions";
 
 interface Props<TItem, TKey extends keyof TItem> extends DialogRowProps<TItem, TKey> {
   freeSolo?: TItem[TKey] extends string ? boolean : never;
@@ -21,19 +21,12 @@ export function AutocompleteDialogRow<TItem, TKey extends keyof TItem>({
     <DialogRow {...rowProps}>
       {({ value, onChange }) => (
         <Autocomplete
-          fullWidth
+          {...textAutocompleteOptions(options)}
           freeSolo={freeSolo}
-          selectOnFocus
-          clearOnBlur
-          handleHomeEndKeys
-          loading={!options}
-          loadingText="loading items..."
-          options={options ?? []}
           value={value}
           getOptionLabel={getOptionLabel}
           // as any - value can be null (when clear) or string (when freeSolo)
           onChange={(_, value) => onChange(value as any)}
-          renderInput={params => <TextField {...params} />}
         />
       )}
     </DialogRow>

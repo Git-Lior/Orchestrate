@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import TextField from "@material-ui/core/TextField";
@@ -34,14 +34,20 @@ export default function AuthPanel({ onTokenRecieved }: Props) {
   const [adminTokenInput, setAdminTokenInputValue] = useInputState();
   const [tokenLoading, tokenError, setTokenPromise] = usePromiseStatus();
 
-  const onSubmit = useCallback(async () => {
+  useEffect(() => {
+    if (tokenError) setAdminTokenInputValue(undefined);
+  }, [tokenError]);
+
+  const onSubmit = useCallback(() => {
     if (!adminTokenInput) return;
 
-    const token: string = await setTokenPromise(
-      apiFetch("/admin", { method: "POST", body: JSON.stringify(adminTokenInput) }, "text")
+    return setTokenPromise(
+      apiFetch(
+        "/admin",
+        { method: "POST", body: JSON.stringify(adminTokenInput) },
+        "text"
+      ).then(token => onTokenRecieved(token))
     );
-
-    onTokenRecieved(token);
   }, [adminTokenInput, apiFetch, onTokenRecieved, setTokenPromise]);
 
   const onKeyPress = useCallback(

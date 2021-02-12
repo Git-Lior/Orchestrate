@@ -1,4 +1,6 @@
 declare namespace orch {
+  type OptionalId<T> = Omit<T, "id"> & { id?: T["id"] };
+
   interface Error {
     error?: string;
     errors?: Record<string, string[]>;
@@ -12,7 +14,7 @@ declare namespace orch {
   }
 
   interface User extends UserData {
-    isPasswordTemporary: boolean;
+    isPasswordTemporary?: number;
     token: string;
   }
 
@@ -20,6 +22,11 @@ declare namespace orch {
     id: number;
     name: string;
     manager: orch.UserData;
+  }
+
+  interface GroupPayload {
+    name: string;
+    managerId: number;
   }
 
   interface Group extends GroupData {

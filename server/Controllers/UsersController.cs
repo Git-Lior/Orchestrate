@@ -61,7 +61,7 @@ namespace Orchestrate.API.Controllers
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
-            return Ok();
+            return Ok(_mapper.Map<UserData>(user));
         }
 
         [HttpDelete("{id}")]

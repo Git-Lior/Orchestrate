@@ -64,15 +64,15 @@ interface DialogProps<T> {
 interface Props<T> {
   rowTypeName: string;
   rows: T[] | undefined;
-  emptyRow: T;
+  emptyRow: orch.OptionalId<T>;
   columns: ColDef[];
   search?: boolean;
   disableActions?: boolean;
   dialogButtons?: React.ReactNode;
   onRowClick?: (value: T) => void;
-  onRowChange: (value: T) => Promise<void>;
-  onRowDelete: (value: T) => Promise<void>;
-  children: (props: DialogProps<T>) => void;
+  onRowChange: (value: orch.OptionalId<T>) => Promise<any>;
+  onRowDelete: (itemId: number) => Promise<void>;
+  children: (props: DialogProps<orch.OptionalId<T>>) => void;
 }
 
 export function EditableTable<T extends RowModel>(props: Props<T>) {
@@ -91,7 +91,7 @@ export function EditableTable<T extends RowModel>(props: Props<T>) {
   } = props;
   const classes = useStyles(props);
 
-  const [editedRow, setEditedRow] = useState<T>();
+  const [editedRow, setEditedRow] = useState<orch.OptionalId<T>>();
   const [searchFilter, setSearchFilter] = useInputState();
   const [loading, error, setPromise, clearError] = usePromiseStatus();
 
@@ -116,13 +116,14 @@ export function EditableTable<T extends RowModel>(props: Props<T>) {
     clearError();
   }, [clearError]);
 
-  const onEditDone = useCallback(() => {
-    setPromise(onRowChange(editedRow!)).then(() => setEditedRow(undefined));
-  }, [editedRow, onRowChange, setEditedRow, setPromise]);
+  const onEditDone = useCallback(
+    () => setPromise(onRowChange(editedRow!).then(() => setEditedRow(undefined))),
+    [editedRow, onRowChange, setEditedRow, setPromise]
+  );
 
   const onRowFieldChange = useCallback(
-    <K extends keyof T>(field: K, value: T[K]) => {
-      setEditedRow({ ...editedRow, [field]: value } as T);
+    <K extends keyof orch.OptionalId<T>>(field: K, value: orch.OptionalId<T>[K]) => {
+      setEditedRow({ ...editedRow, [field]: value } as any);
     },
     [editedRow, setEditedRow]
   );
@@ -143,7 +144,7 @@ export function EditableTable<T extends RowModel>(props: Props<T>) {
                 <>
                   <IconButton
                     aria-label="delete"
-                    onClick={() => !loading && setPromise(onRowDelete(params.row as any))}
+                    onClick={() => !loading && setPromise(onRowDelete(params.row.id as any))}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -180,7 +181,7 @@ export function EditableTable<T extends RowModel>(props: Props<T>) {
               {loading && <CircularProgress size="2rem" color="secondary" />}
               {error && (
                 <Typography variant="body1" color="secondary" className={classes.titleError}>
-                  {error}
+                  {error.error}
                 </Typography>
               )}
             </div>
@@ -229,7 +230,7 @@ export function EditableTable<T extends RowModel>(props: Props<T>) {
                 {loading && <CircularProgress size="2rem" color="primary" />}
                 {error && (
                   <Typography variant="body1" color="primary" className={classes.dialogError}>
-                    {error}
+                    {error.error}
                   </Typography>
                 )}
               </div>

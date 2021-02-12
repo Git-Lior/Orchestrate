@@ -4,47 +4,42 @@ import { useApiFetch } from "./useApiFetch";
 
 type CRUDItem = { id: number };
 
-type CRUDApi<T> = [
-  items: T[] | undefined,
+type CRUDApi<TData, TPayload> = [
+  items: TData[] | undefined,
   refresh: () => Promise<void>,
-  add: (item: T) => Promise<void>,
-  change: (item: T) => Promise<void>,
-  remove: (item: T) => Promise<void>
+  change: (item: orch.OptionalId<TPayload>) => Promise<TData>,
+  remove: (id: number) => Promise<void>
 ];
 
-export function useCRUDApi<T extends CRUDItem>(token: string, apiRoute: string): CRUDApi<T> {
-  const [items, setItems] = useState<T[]>();
+export function useCRUDApi<TData extends CRUDItem, TPayload = TData>(
+  token: string,
+  apiRoute: string
+): CRUDApi<TData, TPayload> {
+  const [items, setItems] = useState<TData[]>();
   const apiFetch = useApiFetch({ token }, apiRoute);
 
   const refresh = useCallback(async () => {
-    const items: T[] = await apiFetch("");
+    const items: TData[] = await apiFetch("");
     setItems(items);
   }, [apiFetch]);
 
   const add = useCallback(
-    async (item: T) => {
-      const result: T = await apiFetch("", {
+    async (item: orch.OptionalId<TPayload>) => {
+      const result: TData = await apiFetch("", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(item),
       });
 
       setItems([...items!, result]);
+      return result;
     },
-    [items]
+    [items, apiFetch]
   );
 
-  const remove = useCallback(
-    async (item: T) => {
-      await apiFetch(`/${item.id}`, { method: "DELETE" }, "none");
-      setItems(items!.filter(_ => _.id !== item.id));
-    },
-    [items]
-  );
-
-  const change = useCallback(
-    async (item: T) => {
-      await apiFetch(
+  const update = useCallback(
+    async (item: TPayload & CRUDItem) => {
+      const resultItem: TData = await apiFetch(
         `/${item.id}`,
         {
           method: "PUT",
@@ -56,12 +51,26 @@ export function useCRUDApi<T extends CRUDItem>(token: string, apiRoute: string):
 
       const itemIndex = items!.findIndex(_ => _.id === item.id);
       const newItems = [...items!];
-      newItems[itemIndex] = item;
+      newItems[itemIndex] = resultItem;
 
       setItems(newItems);
+      return resultItem;
     },
-    [items]
+    [items, apiFetch]
   );
 
-  return [items, refresh, add, change, remove];
+  const change = useCallback(
+    (item: orch.OptionalId<TPayload>) => (item.id ? update(item as any) : add(item)),
+    [add, update]
+  );
+
+  const remove = useCallback(
+    async (id: number) => {
+      await apiFetch(`/${id}`, { method: "DELETE" }, "none");
+      setItems(items!.filter(_ => _.id !== id));
+    },
+    [items, apiFetch]
+  );
+
+  return [items, refresh, change, remove];
 }

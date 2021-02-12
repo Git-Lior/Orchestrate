@@ -5,37 +5,33 @@ import { AutocompleteDialogRow, ColDef, EditableTable, TextDialogRow } from "uti
 const DATA_COLUMNS: ColDef[] = [
   { field: "id", headerName: "ID", width: 75 },
   { field: "name", headerName: "Group Name", flex: 1.25 },
-  { field: "manager", headerName: "Manager", flex: 1 },
+  {
+    field: "manager",
+    headerName: "Manager",
+    flex: 1,
+    valueGetter: _ => _getUserName(_.row.manager),
+  },
 ];
 
-const EMPTY_GROUP: orch.GroupData = {
+const EMPTY_GROUP: orch.OptionalId<orch.GroupData> = {
   name: "",
-  manager: undefined,
-} as any;
+  manager: null as any,
+};
 
 interface Props {
   groups?: orch.GroupData[];
   users?: orch.UserData[];
-  onGroupAdd: (data: orch.GroupData) => Promise<void>;
-  onGroupChange: (data: orch.GroupData) => Promise<void>;
-  onGroupDelete: (data: orch.GroupData) => Promise<void>;
+  onGroupChange: (data: orch.OptionalId<orch.GroupPayload>) => Promise<any>;
+  onGroupDelete: (groupId: number) => Promise<void>;
 }
 
-export default function GroupsTable({
-  groups,
-  users,
-  onGroupAdd,
-  onGroupChange,
-  onGroupDelete,
-}: Props) {
+export default function GroupsTable({ groups, users, onGroupChange, onGroupDelete }: Props) {
   const onEditDone = useCallback(
-    (value: orch.GroupData) => (value.id ? onGroupChange(value) : onGroupAdd(value)),
-    [onGroupAdd, onGroupChange]
-  );
-
-  const getUserName = useCallback(
-    (user: orch.UserData) => `${user.firstName} ${user.lastName}`,
-    []
+    ({ manager, ...value }: orch.OptionalId<orch.GroupData>) => {
+      if (!manager?.id) throw { error: "Must select a manager" } as orch.Error;
+      return onGroupChange({ ...value, managerId: manager.id });
+    },
+    [onGroupChange]
   );
 
   return (
@@ -55,11 +51,15 @@ export default function GroupsTable({
             fieldKey="manager"
             label="Manager"
             options={users}
-            getOptionLabel={getUserName}
+            getOptionLabel={_getUserName}
             {...rowProps}
           />
         </>
       )}
     </EditableTable>
   );
+}
+
+function _getUserName({ firstName, lastName }: orch.UserData) {
+  return `${firstName} ${lastName}`;
 }

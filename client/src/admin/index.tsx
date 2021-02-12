@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 
 import { makeStyles } from "@material-ui/core";
 
+import { useCRUDApi } from "utils/hooks";
+
 import AuthPanel from "./AuthPanel";
 import UsersTable from "./UsersTable";
 import GroupsTable from "./GroupsTable";
-import { useCRUDApi } from "utils/hooks";
+import Typography from "@material-ui/core/Typography";
 
 export default function AdminApp() {
   const [adminToken, setAdminToken] = useState<string>();
@@ -16,9 +18,22 @@ export default function AdminApp() {
 }
 
 const useStyles = makeStyles({
-  adminPanel: { display: "flex", height: "100%" },
-  dataTables: { display: "flex", flexDirection: "column", width: 700, padding: "2em" },
-  spacer: { height: "2em" },
+  adminPanel: {
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    height: "100%",
+    padding: "2rem",
+  },
+  panelTitle: { textAlign: "center", marginBottom: "2rem" },
+  tables: {
+    flex: 1,
+    display: "flex",
+    "& > *": {
+      flex: 1,
+      "&:not(:last-child)": { marginRight: "2em" },
+    },
+  },
 });
 
 interface ContentProps {
@@ -27,36 +42,30 @@ interface ContentProps {
 
 function AdminAppContent({ token }: ContentProps) {
   const classes = useStyles();
-
-  const [users, refreshUsers, addUser, changeUser, deleteUser] = useCRUDApi<orch.UserData>(
-    token,
-    "/users"
-  );
-  const [groups, refreshGroups, addGroup, changeGroup, deleteGroup] = useCRUDApi<orch.GroupData>(
-    token,
-    "/groups"
-  );
+  const [users, refreshUsers, changeUser, deleteUser] = useCRUDApi<orch.UserData>(token, "/users");
+  const [groups, refreshGroups, changeGroup, deleteGroup] = useCRUDApi<
+    orch.GroupData,
+    orch.GroupPayload
+  >(token, "/groups");
 
   useEffect(() => {
+    if (!refreshUsers || !refreshGroups) return;
+
     (async function fetchFromApi() {
       await Promise.all([refreshUsers(), refreshGroups()]);
     })();
-  }, []);
+  }, [refreshUsers, refreshGroups]);
 
   return (
     <div className={classes.adminPanel}>
-      <div className={classes.dataTables}>
-        <UsersTable
-          users={users}
-          onUserAdd={addUser}
-          onUserChange={changeUser}
-          onUserDelete={deleteUser}
-        />
-        <div className={classes.spacer} />
+      <Typography variant="h4" color="primary" className={classes.panelTitle}>
+        Admin Panel
+      </Typography>
+      <div className={classes.tables}>
+        <UsersTable users={users} onUserChange={changeUser} onUserDelete={deleteUser} />
         <GroupsTable
           groups={groups}
           users={users}
-          onGroupAdd={addGroup}
           onGroupChange={changeGroup}
           onGroupDelete={deleteGroup}
         />

@@ -1,24 +1,30 @@
 import { useCallback, useState } from "react";
 
-export function usePromiseStatus() {
+type PromiseStatus = readonly [
+  loading: boolean,
+  error: orch.Error | undefined,
+  setPromise: (promise: Promise<any>) => Promise<void>,
+  clearError: () => void
+];
+
+export function usePromiseStatus(): PromiseStatus {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<orch.Error>();
 
   const clearError = useCallback(() => setError(undefined), [setError]);
 
-  const promiseAction = useCallback(async (promise: Promise<any>) => {
+  const setPromise = useCallback(async (promise: Promise<any>) => {
     setError(undefined);
     setLoading(true);
 
     try {
-      return await promise;
+      await promise;
     } catch (err) {
       setError(err);
-      throw err;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  return [loading, error, promiseAction, clearError] as const;
+  return [loading, error, setPromise, clearError];
 }

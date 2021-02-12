@@ -35,18 +35,23 @@ namespace Orchestrate.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateGroup([Bind("Name,Manager")] Group group)
+        public async Task<IActionResult> CreateGroup([Bind("Name,ManagerId")] Group group)
         {
             if (!ModelState.IsValid) return BadRequest(new { Error = "Invalid parameters" });
 
             _context.Groups.Add(group);
             await _context.SaveChangesAsync();
 
-            return Ok(_mapper.Map<GroupData>(group));
+            var dbGroup = await _context.Groups
+                .AsNoTracking()
+                .Include(_ => _.Manager)
+                .FirstAsync(_ => _.Id == group.Id);
+
+            return Ok(_mapper.Map<GroupData>(dbGroup));
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateGroup([FromRoute] int id, [Bind("Name,Manager")] Group group)
+        public async Task<IActionResult> UpdateGroup([FromRoute] int id, [Bind("Name,ManagerId")] Group group)
         {
             if (!ModelState.IsValid) return BadRequest(new { Error = "Invalid parameters" });
 
@@ -55,7 +60,12 @@ namespace Orchestrate.API.Controllers
             _context.Groups.Update(group);
             await _context.SaveChangesAsync();
 
-            return Ok();
+            var dbGroup = await _context.Groups
+                .AsNoTracking()
+                .Include(_ => _.Manager)
+                .FirstAsync(_ => _.Id == group.Id);
+
+            return Ok(_mapper.Map<GroupData>(dbGroup));
         }
 
         [HttpDelete("{id}")]
