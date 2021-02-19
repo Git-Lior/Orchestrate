@@ -1,28 +1,7 @@
-export const MOCK_GROUPS: orch.Group[] = [
-  {
-    id: 123,
-    name: "String Trio",
-    manager: { id: 111, firstName: "Hello", lastName: "World", email: "helloworld@mail.com" },
-    directors: [],
-  },
-  {
-    id: 456,
-    name: "Symphonic Orchestra",
-    manager: { id: 111, firstName: "Hello", lastName: "World", email: "helloworld@mail.com" },
-    directors: [],
-  },
-  {
-    id: 789,
-    name: "New Ensemble",
-    manager: { id: 111, firstName: "Hello", lastName: "World", email: "helloworld@mail.com" },
-    directors: [],
-  },
-];
-
 const MOCK_ROLE_ID_1 = 6151;
 const MOCK_ROLE_ID_2 = 5155;
 
-const MOCK_ROLES: orch.group.Role[] = [
+const MOCK_ROLES: orch.Role[] = [
   {
     id: MOCK_ROLE_ID_1,
     section: "Trombone",
@@ -85,7 +64,7 @@ export const MOCK_COMPOSITIONS: orch.Composition[] = [
 
 export const MOCK_GENRES = Array.from(new Set(MOCK_COMPOSITIONS.map(_ => _.genre)));
 
-function _getMockSheetMusic(role: orch.group.Role): orch.SheetMusic {
+function _getMockSheetMusic(role: orch.Role): orch.SheetMusic {
   return {
     fileUrl:
       "http://waltercosand.com/CosandScores/Composers%20A-D/Cortot,%20Alfred/Chopin-Cortot_Etudes_Op.10(Engl).pdf",

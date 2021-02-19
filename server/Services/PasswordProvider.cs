@@ -45,7 +45,12 @@ namespace Orchestrate.API.Services
             var rnd = new Random();
             var sb = new StringBuilder(size);
 
-            for (int i = 0; i < size; i++) sb.Append((char)rnd.Next(65, 123));
+            for (int i = 0; i < size; i++)
+            {
+                int rndInt = rnd.Next(0, 52);
+                int letterCode = rndInt + (rndInt / 26) * 6;
+                sb.Append((char)(letterCode + 65));
+            }
 
             return sb.ToString();
         }

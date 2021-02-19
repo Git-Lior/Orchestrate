@@ -6,7 +6,6 @@ import GroupPage from "pages/group";
 import HomePage from "pages/home";
 import Layout from "pages/Layout";
 import PageNotFound from "pages/PageNotFound";
-import { MOCK_GROUPS } from "mocks";
 
 const TOKEN_STORAGE_KEY = "user_token";
 
@@ -40,16 +39,19 @@ function App() {
 
   if (!user) return <LoginPage onLogin={onUserLogin} />;
 
-  const withLayout = (c: React.ReactNode) => (
-    <Layout user={user} groups={MOCK_GROUPS} onLogout={logoutUser} children={c} />
-  );
-
   return (
     <Switch>
       <Redirect from="/:url*(/+)" to={pathname.slice(0, -1)} />
-      <Route exact path="/" children={withLayout(<HomePage />)} />
-      <Route path="/group/:groupId/:groupPage" children={withLayout(<GroupPage user={user} />)} />
-      <Route children={withLayout(<PageNotFound />)} />
+      <Route
+        exact
+        path="/"
+        children={<Layout user={user} onLogout={logoutUser} page={HomePage} />}
+      />
+      <Route
+        path="/group/:groupId/:groupPage"
+        children={<Layout user={user} onLogout={logoutUser} page={GroupPage} />}
+      />
+      <Route children={<Layout user={user} onLogout={logoutUser} page={PageNotFound} />} />
     </Switch>
   );
 }

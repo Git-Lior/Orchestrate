@@ -1,14 +1,11 @@
 import React, { useCallback, useMemo, useState } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
-import Dialog from "@material-ui/core/Dialog";
-import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
-import CloseIcon from "@material-ui/icons/Close";
 import AddIcon from "@material-ui/icons/Add";
 import Paper from "@material-ui/core/Paper";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -18,6 +15,8 @@ import { DataGrid, ColDef, CellParams, RowParams, RowModel } from "@material-ui/
 import { useInputState, usePromiseStatus } from "utils/hooks";
 import { AppTheme } from "AppTheme";
 
+import { FormDialog } from "./dialog/FormDialog";
+
 export type { ColDef } from "@material-ui/data-grid";
 
 const useStyles = makeStyles<AppTheme, Props<any>>(theme => ({
@@ -25,13 +24,6 @@ const useStyles = makeStyles<AppTheme, Props<any>>(theme => ({
   dataGrid: {
     height: "calc(100% - 45px)",
     "& .MuiDataGrid-row": props => ({ cursor: props.onRowClick ? "pointer" : "default" }),
-  },
-  dialogContainer: {
-    position: "relative",
-    backgroundColor: theme.palette.background.default,
-    borderRadius: 5,
-    boxShadow: "0 0 20px",
-    padding: "4em",
   },
   tableHeader: {
     height: 45,
@@ -72,7 +64,7 @@ interface Props<T> {
   onRowClick?: (value: T) => void;
   onRowChange: (value: orch.OptionalId<T>) => Promise<any>;
   onRowDelete: (itemId: number) => Promise<void>;
-  children: (props: DialogProps<orch.OptionalId<T>>) => void;
+  children: (props: DialogProps<orch.OptionalId<T>>) => React.ReactNode;
 }
 
 export function EditableTable<T extends RowModel>(props: Props<T>) {
@@ -202,42 +194,17 @@ export function EditableTable<T extends RowModel>(props: Props<T>) {
           />
         </div>
       </Paper>
-      {!disableActions && (
-        <Dialog open={!!editedRow} onEscapeKeyDown={onEditCancel}>
-          {!editedRow ? (
-            <div />
-          ) : (
-            <div className={classes.dialogContainer}>
-              <IconButton aria-label="close" className={classes.cancelEdit} onClick={onEditCancel}>
-                <CloseIcon />
-              </IconButton>
-              <Typography variant="h4" className={classes.dialogTitle}>
-                {!editedRow.id ? "Create" : "Edit"} {rowTypeName}
-              </Typography>
-              {children({ item: editedRow, onFieldChange: onRowFieldChange })}
-              <div className={classes.dialogButtons}>
-                <Button
-                  className={classes.doneButton}
-                  variant="contained"
-                  color="primary"
-                  onClick={onEditDone}
-                >
-                  Done
-                </Button>
-                {dialogButtons}
-              </div>
-              <div className={classes.dialogStatus}>
-                {loading && <CircularProgress size="2rem" color="primary" />}
-                {error && (
-                  <Typography variant="body1" color="primary" className={classes.dialogError}>
-                    {error.error}
-                  </Typography>
-                )}
-              </div>
-            </div>
-          )}
-        </Dialog>
-      )}
+      <FormDialog
+        open={!!editedRow}
+        title={`${!editedRow?.id ? "Create" : "Edit"} ${rowTypeName}`}
+        error={error}
+        loading={loading}
+        dialogButtons={dialogButtons}
+        onClose={onEditCancel}
+        onDone={onEditDone}
+      >
+        {children({ item: editedRow!, onFieldChange: onRowFieldChange })}
+      </FormDialog>
     </>
   );
 }

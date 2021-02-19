@@ -6,6 +6,14 @@ declare namespace orch {
     errors?: Record<string, string[]>;
   }
 
+  interface PageProps {
+    user: orch.User;
+    groups?: orch.GroupData[];
+    group?: orch.Group;
+    userInfo?: orch.group.UserInfo;
+    setGroup: (action: React.SetStateAction<orch.Group | undefined>) => void;
+  }
+
   interface UserData {
     id: number;
     email: string;
@@ -31,6 +39,17 @@ declare namespace orch {
 
   interface Group extends GroupData {
     directors: orch.UserData[];
+    roles: RoleWithMembers[];
+  }
+
+  interface Role {
+    id: number;
+    section: string;
+    num?: number;
+  }
+
+  interface RoleWithMembers extends Role {
+    members: UserData[];
   }
 
   interface CompositionData {
@@ -71,21 +90,10 @@ declare namespace orch {
       roles: Role[];
     }
 
-    interface Role {
-      id: number;
-      section: string;
-      num?: number;
-    }
-
-    interface PageProps {
-      user: User;
-      userInfo: group.UserInfo;
-    }
-
     interface PageInfo {
       name: string;
       route: string;
-      Component: React.ComponentType<group.PageProps>;
+      Component: React.ComponentType<Required<PageProps>>;
     }
   }
 

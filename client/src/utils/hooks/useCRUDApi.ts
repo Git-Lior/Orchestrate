@@ -27,7 +27,6 @@ export function useCRUDApi<TData extends CRUDItem, TPayload = TData>(
     async (item: orch.OptionalId<TPayload>) => {
       const result: TData = await apiFetch("", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(item),
       });
 
@@ -39,15 +38,10 @@ export function useCRUDApi<TData extends CRUDItem, TPayload = TData>(
 
   const update = useCallback(
     async (item: TPayload & CRUDItem) => {
-      const resultItem: TData = await apiFetch(
-        `/${item.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(item),
-        },
-        "none"
-      );
+      const resultItem: TData = await apiFetch(item.id.toString(), {
+        method: "PUT",
+        body: JSON.stringify(item),
+      });
 
       const itemIndex = items!.findIndex(_ => _.id === item.id);
       const newItems = [...items!];
@@ -66,7 +60,7 @@ export function useCRUDApi<TData extends CRUDItem, TPayload = TData>(
 
   const remove = useCallback(
     async (id: number) => {
-      await apiFetch(`/${id}`, { method: "DELETE" }, "none");
+      await apiFetch(id.toString(), { method: "DELETE" }, "none");
       setItems(items!.filter(_ => _.id !== id));
     },
     [items, apiFetch]

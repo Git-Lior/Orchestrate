@@ -27,9 +27,9 @@ interface Props {
 
 export default function GroupsTable({ groups, users, onGroupChange, onGroupDelete }: Props) {
   const onEditDone = useCallback(
-    ({ manager, ...value }: orch.OptionalId<orch.GroupData>) => {
+    async ({ manager, ...value }: orch.OptionalId<orch.GroupData>) => {
       if (!manager?.id) throw { error: "Must select a manager" } as orch.Error;
-      return onGroupChange({ ...value, managerId: manager.id });
+      return await onGroupChange({ ...value, managerId: manager.id });
     },
     [onGroupChange]
   );

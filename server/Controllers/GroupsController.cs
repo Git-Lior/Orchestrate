@@ -17,7 +17,7 @@ namespace Orchestrate.API.Controllers
         public GroupsController(IServiceProvider provider) : base(provider) { }
 
         [HttpGet]
-        public async Task<IActionResult> Groups()
+        public async Task<IActionResult> GetGroups()
         {
             List<Group> groups;
 
@@ -35,10 +35,38 @@ namespace Orchestrate.API.Controllers
                 groups = user.Roles.Select(_ => _.Group)
                     .Concat(user.ManagingGroups)
                     .Concat(user.DirectorOfGroups)
+                    .OrderBy(_ => _.Name)
                     .ToList();
             }
 
-            return Ok(ModelMapper.Map(groups, new List<GroupData>()));
+            return Ok(ModelMapper.Map<IEnumerable<GroupData>>(groups));
+        }
+
+        [HttpGet("{groupId}")]
+        public async Task<IActionResult> GetGroupInfo(int groupId)
+        {
+            var group = await DbContext.Groups.AsNoTracking()
+                .Include(_ => _.Manager)
+                .Include(_ => _.Directors)
+                .Include(_ => _.AvailableRoles)
+                .Include(_ => _.AssignedRoles).ThenInclude(_ => _.User)
+                .FirstAsync(_ => _.Id == groupId);
+
+            return Ok(new FullGroupData()
+            {
+                Id = group.Id,
+                Name = group.Name,
+                Manager = ModelMapper.Map<UserData>(group.Manager),
+                Directors = ModelMapper.Map<IEnumerable<UserData>>(group.Directors),
+                Roles = group.AvailableRoles.GroupJoin(group.AssignedRoles, _ => _.Id, _ => _.RoleId,
+                    (role, assignedRoles) => new AssignedRoleData
+                    {
+                        Id = role.Id,
+                        Section = role.Section,
+                        Num = role.Num,
+                        Members = ModelMapper.Map<IEnumerable<UserData>>(assignedRoles.Select(_ => _.User))
+                    })
+            });
         }
 
         #region Administrator Routes
@@ -60,9 +88,9 @@ namespace Orchestrate.API.Controllers
             return Ok(ModelMapper.Map<GroupData>(dbGroup));
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{groupId}")]
         [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
-        public async Task<IActionResult> UpdateGroup([FromRoute] int id, [Bind("Name,ManagerId")] Group group)
+        public async Task<IActionResult> UpdateGroup([FromRoute] int groupId, [Bind("Name,ManagerId")] Group group)
         {
             if (!ModelState.IsValid) return BadRequest(new { Error = "Invalid parameters" });
 
@@ -79,11 +107,11 @@ namespace Orchestrate.API.Controllers
             return Ok(ModelMapper.Map<GroupData>(dbGroup));
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{groupId}")]
         [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
-        public async Task<IActionResult> DeleteGroup([FromRoute] int id)
+        public async Task<IActionResult> DeleteGroup([FromRoute] int groupId)
         {
-            var group = await DbContext.Groups.FindAsync(id);
+            var group = await DbContext.Groups.FindAsync(groupId);
             if (group == null) return NotFound(new { Error = "Group not found" });
 
             DbContext.Groups.Remove(group);

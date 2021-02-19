@@ -5,7 +5,8 @@ type ResultTypes = "json" | "text" | "none";
 export function useApiFetch(user?: { token: string }, baseUrl: string = "") {
   const apiFetch = useCallback(
     (url: string, init: RequestInit = {}, type: ResultTypes = "json") => {
-      return fetch(`/api${baseUrl}${url}`, {
+      const resolvedUrl = url.startsWith("/") ? url : `${baseUrl}/${url}`;
+      return fetch("/api" + resolvedUrl, {
         ...init,
         headers: {
           ...(!user ? {} : { authorization: `Bearer ${user.token}` }),

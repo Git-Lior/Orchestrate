@@ -10,6 +10,11 @@ export function textAutocompleteOptions<T>(options: T[] | undefined) {
     loading: !options,
     loadingText: "loading items...",
     options: options ?? [],
+    getOptionSelected: isOptionSelected,
     renderInput: (params: any) => <TextField {...params} />,
   };
+}
+
+export function isOptionSelected(option: any, value: any) {
+  return typeof option === "string" ? option === value : option.id === value.id;
 }

@@ -43,7 +43,7 @@ export default function AuthPanel({ onTokenRecieved }: Props) {
 
     return setTokenPromise(
       apiFetch(
-        "/admin",
+        "admin",
         { method: "POST", body: JSON.stringify(adminTokenInput) },
         "text"
       ).then(token => onTokenRecieved(token))

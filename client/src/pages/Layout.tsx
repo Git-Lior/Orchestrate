@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { generatePath, useHistory, useParams } from "react-router";
 
@@ -19,24 +19,56 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import layoutStyles from "./Layout.styles";
 import smallLogo from "assets/logo-small.png";
 
+import { useApiFetch } from "utils/hooks";
 import { groupPages, defaultGroupPage } from "./group";
 
 const useStyles = makeStyles(layoutStyles);
 
-type Props = React.PropsWithChildren<{
+interface Props {
   user: orch.User;
-  groups: orch.Group[];
   onLogout: () => void;
-}>;
+  page: React.ComponentType<orch.PageProps>;
+}
 
 const GROUP_ROUTE_PATH = "/group/:groupId/:groupPage";
 
-export default function Layout({ user, groups, onLogout, children }: Props) {
+export default function Layout({ user, onLogout, page: Page }: Props) {
   const classes = useStyles();
+  const apiFetch = useApiFetch(user, "/groups");
   const history = useHistory<orch.group.RouteParams>();
-  const { groupId, groupPage } = useParams<orch.group.RouteParams>();
 
-  const setGroup = useCallback(
+  const { groupId, groupPage } = useParams<orch.group.RouteParams>();
+  const [groups, setGroups] = useState<orch.GroupData[]>();
+  const [group, setGroup] = useState<orch.Group>();
+
+  useEffect(() => {
+    (async function () {
+      setGroups(await apiFetch(""));
+    })();
+  }, [apiFetch]);
+
+  useEffect(() => {
+    (async function () {
+      setGroup(undefined);
+      if (groupId) setGroup(await apiFetch(groupId.toString()));
+    })();
+  }, [groupId, apiFetch]);
+
+  const userInfo: orch.group.UserInfo | undefined = useMemo(
+    () =>
+      group && {
+        manager: group.manager.id === user.id,
+        director: group.directors.some(_ => _.id === user.id),
+        roles: group.roles
+          .map(({ members, ...role }) =>
+            members.some(_ => _.id === user.id) ? role : (null as any)
+          )
+          .filter(Boolean),
+      },
+    [group, user.id]
+  );
+
+  const setGroupId = useCallback(
     (e: React.ChangeEvent<any>) =>
       history.push(
         generatePath(GROUP_ROUTE_PATH, {
@@ -44,7 +76,7 @@ export default function Layout({ user, groups, onLogout, children }: Props) {
           groupPage: defaultGroupPage,
         })
       ),
-    [history, groupId]
+    [history]
   );
 
   const setGroupPage = useCallback(
@@ -63,11 +95,13 @@ export default function Layout({ user, groups, onLogout, children }: Props) {
           <Typography>Group:</Typography>
           <Select
             className={classes.groupSelect}
-            value={groupId ?? ""}
-            onChange={setGroup}
+            value={(groups && groupId) || ""}
+            onChange={setGroupId}
             placeholder="Select group..."
+            disabled={groups?.length === 0}
           >
-            {groups.map(({ id, name }) => (
+            {!groups && <MenuItem disabled>Loading Groups...</MenuItem>}
+            {groups?.map(({ id, name }) => (
               <MenuItem key={id} value={id}>
                 {name}
               </MenuItem>
@@ -106,7 +140,9 @@ export default function Layout({ user, groups, onLogout, children }: Props) {
           </Tooltip>
         </Toolbar>
       </AppBar>
-      <div className={classes.pageContent}>{children}</div>
+      <div className={classes.pageContent}>
+        <Page user={user} groups={groups} group={group} userInfo={userInfo} setGroup={setGroup} />
+      </div>
     </>
   );
 }

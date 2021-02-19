@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Orchestrate.API.Authorization;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
 using Orchestrate.API.Services.Interfaces;
@@ -11,7 +12,6 @@ using System.Threading.Tasks;
 namespace Orchestrate.API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Policy = "AdministratorOnly")]
     public class UsersController : OrchestrateController
     {
         private readonly IPasswordProvider _passwordProvider;
@@ -25,10 +25,11 @@ namespace Orchestrate.API.Controllers
         public async Task<IActionResult> Users()
         {
             var dbUsers = await DbContext.Users.AsNoTracking().ToListAsync();
-            return Ok(ModelMapper.Map(dbUsers, new List<UserData>()));
+            return Ok(ModelMapper.Map<IEnumerable<UserData>>(dbUsers));
         }
 
         [HttpPost]
+        [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
         public async Task<IActionResult> CreateUser([Bind("FirstName,LastName,Email")] User user)
         {
             if (!ModelState.IsValid) return BadRequest(new { Error = "Invalid parameters" });
@@ -47,6 +48,7 @@ namespace Orchestrate.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
         public async Task<IActionResult> UpdateUser([FromRoute] int id, [Bind("FirstName,LastName,Email")] User user)
         {
             if (!ModelState.IsValid) return BadRequest(new { Error = "Invalid parameters" });
@@ -60,6 +62,7 @@ namespace Orchestrate.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
         public async Task<IActionResult> DeleteUser([FromRoute] int id)
         {
             if (await DbContext.Groups.AsNoTracking().AnyAsync(_ => _.ManagerId == id))

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
@@ -10,21 +10,32 @@ import { textAutocompleteOptions } from "../textAutocompleteOptions";
 
 interface Props {
   users: orch.UserData[] | undefined;
-  selectedUsers: orch.UserData[] | undefined;
+  optionsProvider: () => Promise<orch.UserData[]>;
+  disabled?: boolean;
   onAdded: (user: orch.UserData) => Promise<any>;
+  onRemoved: (user: orch.UserData) => Promise<any>;
 }
 
-export function UsersListInput({ users, selectedUsers, onAdded }: Props) {
-  const remainingUsers = useMemo(
-    () => (!users || !selectedUsers ? users : users.filter(u => !selectedUsers.includes(u))),
-    [users, selectedUsers]
+export function UsersListInput({ users, optionsProvider, ...listProps }: Props) {
+  const [options, setOptions] = useState<orch.UserData[]>();
+
+  const filteredOptions = useMemo(
+    () => (!users || !options ? options : options.filter(u => !users.some(_ => _.id == u.id))),
+    [users, options]
   );
 
+  useEffect(() => {
+    (async function () {
+      setOptions(await optionsProvider());
+    })();
+  }, [optionsProvider]);
+
   return (
-    <ListInput items={selectedUsers} onAdded={onAdded} getListItem={getUserListItem}>
+    <ListInput {...listProps} items={users} getListItem={getUserListItem}>
       {({ onAdded }) => (
         <Autocomplete
-          {...textAutocompleteOptions(remainingUsers)}
+          {...textAutocompleteOptions(filteredOptions)}
+          getOptionLabel={user => `${user.firstName} ${user.lastName}`}
           value={null}
           onChange={(_, item) => onAdded(item!)}
         />

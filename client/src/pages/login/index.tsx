@@ -32,7 +32,7 @@ function LoginPage({ onLogin }: LoginProps) {
       e.preventDefault();
 
       return setLoginPromise(
-        apiFetch("/login", {
+        apiFetch("login", {
           method: "POST",
           body: JSON.stringify({ email, password }),
         }).then(result => onLogin(result, rememberMe))

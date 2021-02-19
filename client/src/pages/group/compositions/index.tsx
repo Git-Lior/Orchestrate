@@ -15,7 +15,7 @@ const EMPTY_COMPOSITION: EditedComposition = {
   sheetMusic: [],
 };
 
-type Props = orch.group.PageProps;
+type Props = Required<orch.PageProps>;
 
 export default function GroupCompositionsPage({ user, userInfo }: Props) {
   const history = useHistory();
