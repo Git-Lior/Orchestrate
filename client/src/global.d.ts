@@ -89,12 +89,6 @@ declare namespace orch {
       director: boolean;
       roles: Role[];
     }
-
-    interface PageInfo {
-      name: string;
-      route: string;
-      Component: React.ComponentType<Required<PageProps>>;
-    }
   }
 
   namespace compositions {

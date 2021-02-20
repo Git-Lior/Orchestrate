@@ -116,7 +116,13 @@ export default function Layout({ user, onLogout, page: Page }: Props) {
             indicatorColor="secondary"
           >
             {groupPages.map(_ => (
-              <Tab disableRipple key={_.route} value={_.route} label={_.name} />
+              <Tab
+                disabled={!userInfo || !_.isEnabled(userInfo)}
+                disableRipple
+                key={_.route}
+                value={_.route}
+                label={_.name}
+              />
             ))}
           </Tabs>
           <div className={classes.spacer} />

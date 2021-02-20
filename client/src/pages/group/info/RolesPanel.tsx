@@ -85,10 +85,14 @@ export default function RolesPanel({ user, group, userInfo, setGroup, getAllUser
 
   const addMember = useCallback(
     (roleId: number, member: orch.UserData) => {
-      return apiFetch(`${roleId}/members`, {
-        method: "POST",
-        body: JSON.stringify(member.id),
-      }).then(() => {
+      return apiFetch(
+        `${roleId}/members`,
+        {
+          method: "POST",
+          body: JSON.stringify(member.id),
+        },
+        "none"
+      ).then(() => {
         setGroup(group => {
           const roles = [...group!.roles];
           const roleIndex = roles.findIndex(_ => _.id === roleId);

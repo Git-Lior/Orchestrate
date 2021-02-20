@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { Redirect, useParams } from "react-router-dom";
 
 import { groupPages } from "./pages";
 export { groupPages, defaultGroupPage } from "./pages";
@@ -11,7 +11,11 @@ export default function GroupPage({ user, group, userInfo, groups, setGroup }: o
 
   if (!group) return <div>loading group info...</div>;
 
-  return !page ? null : (
+  if (!page) return null;
+
+  if (!page.isEnabled(userInfo!)) return <Redirect to="" />;
+
+  return (
     <page.Component
       user={user}
       groups={groups!}
