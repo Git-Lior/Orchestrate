@@ -1,7 +1,7 @@
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import Slider from "react-slick";
 
 import { Breakpoint } from "@material-ui/core/styles/createBreakpoints";
@@ -11,9 +11,10 @@ import Container from "@material-ui/core/Container";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import DeleteIcon from "@material-ui/icons/DeleteOutline";
+import TextField from "@material-ui/core/TextField";
 
 import { UsersListInput } from "utils/components";
-import { useApiFetch, useWidth } from "utils/hooks";
+import { useApiFetch, useInputState, useWidth } from "utils/hooks";
 
 interface Props extends Required<orch.PageProps> {
   getAllUsers: () => Promise<orch.UserData[]>;
@@ -53,12 +54,25 @@ const useStyles = makeStyles(theme => ({
     "& :not(:last-child)": { marginRight: "1rem" },
   },
   roleTitle: { fontWeight: "bold" },
+  roleFilter: {
+    position: "absolute",
+    top: "3rem",
+    left: "4rem",
+  },
 }));
 
 export default function RolesPanel({ user, group, userInfo, setGroup, getAllUsers }: Props) {
   const classes = useStyles();
   const width = useWidth();
   const apiFetch = useApiFetch(user, `/groups/${group.id}/roles`);
+  const [roleFilter, setRoleFilter] = useInputState();
+
+  const filteredRoles = useMemo(() => {
+    return group.roles.filter(({ section, num }) => {
+      const roleText = !num ? section : `${section} ${num}`;
+      return roleText.toLowerCase().includes(roleFilter.toLowerCase());
+    });
+  }, [group.roles, roleFilter]);
 
   const removeRole = useCallback(
     (roleId: number) => {
@@ -109,34 +123,42 @@ export default function RolesPanel({ user, group, userInfo, setGroup, getAllUser
   );
 
   return (
-    <Slider
-      className={classes.rolesSlider}
-      arrows
-      infinite={false}
-      draggable={false}
-      nextArrow={<ChevronRightIcon color="primary" fontSize="large" />}
-      prevArrow={<ChevronLeftIcon color="primary" fontSize="large" />}
-      speed={500}
-      rows={2}
-      slidesPerRow={SLIDER_BREAKPOINTS[width]}
-    >
-      {group.roles.map(({ id, section, num, members }) => (
-        <Container key={id} maxWidth="sm" disableGutters className={classes.roleContainer}>
-          <div className={classes.roleHeader}>
-            <Typography variant="body1" className={classes.roleTitle}>
-              {section} {num}
-            </Typography>
-            <DeleteIcon color="primary" cursor="pointer" onClick={() => removeRole(id)} />
-          </div>
-          <UsersListInput
-            disabled={!userInfo.manager}
-            users={members}
-            optionsProvider={getAllUsers}
-            onAdded={user => addMember(id, user)}
-            onRemoved={user => removeMember(id, user)}
-          />
-        </Container>
-      ))}
-    </Slider>
+    <>
+      <TextField
+        className={classes.roleFilter}
+        placeholder="Filter Roles..."
+        value={roleFilter}
+        onChange={setRoleFilter}
+      />
+      <Slider
+        className={classes.rolesSlider}
+        arrows
+        infinite={false}
+        draggable={false}
+        nextArrow={<ChevronRightIcon color="primary" fontSize="large" />}
+        prevArrow={<ChevronLeftIcon color="primary" fontSize="large" />}
+        speed={500}
+        rows={2}
+        slidesPerRow={SLIDER_BREAKPOINTS[width]}
+      >
+        {filteredRoles.map(({ id, section, num, members }) => (
+          <Container key={id} maxWidth="sm" disableGutters className={classes.roleContainer}>
+            <div className={classes.roleHeader}>
+              <Typography variant="body1" className={classes.roleTitle}>
+                {section} {num}
+              </Typography>
+              <DeleteIcon color="primary" cursor="pointer" onClick={() => removeRole(id)} />
+            </div>
+            <UsersListInput
+              disabled={!userInfo.manager}
+              users={members}
+              optionsProvider={getAllUsers}
+              onAdded={user => addMember(id, user)}
+              onRemoved={user => removeMember(id, user)}
+            />
+          </Container>
+        ))}
+      </Slider>
+    </>
   );
 }

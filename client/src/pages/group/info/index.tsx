@@ -28,7 +28,13 @@ const useStyles = makeStyles({
     height: "50%",
     minHeight: "20rem",
   },
-  rolesPanel: { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" },
+  rolesPanel: {
+    position: "relative",
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+  },
   rolesPanelContent: { flex: 1 },
 });
 

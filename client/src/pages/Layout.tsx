@@ -111,7 +111,7 @@ export default function Layout({ user, onLogout, page: Page }: Props) {
           <Tabs
             className={classes.groupTabs}
             disabled={!groupId}
-            value={groupPage}
+            value={groupPage ?? false}
             onChange={setGroupPage}
             indicatorColor="secondary"
           >
