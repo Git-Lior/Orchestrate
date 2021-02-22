@@ -58,7 +58,7 @@ namespace Orchestrate.API
 
                 options.AddPolicy(GroupRolesPolicy.MemberOnly, policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Member)));
                 options.AddPolicy(GroupRolesPolicy.DirectorOnly, policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Director)));
-                options.AddPolicy(GroupRolesPolicy.DirectorOrPlayer, policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Director | GroupRoles.Member)));
+                options.AddPolicy(GroupRolesPolicy.DirectorOrMember, policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Director | GroupRoles.Member)));
                 options.AddPolicy(GroupRolesPolicy.ManagerOnly, policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Manager)));
             });
 

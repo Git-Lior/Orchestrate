@@ -8,7 +8,7 @@ import { textAutocompleteOptions } from "../textAutocompleteOptions";
 interface Props<TItem, TKey extends keyof TItem> extends DialogRowProps<TItem, TKey> {
   freeSolo?: TItem[TKey] extends string ? boolean : never;
   options: TItem[TKey][] | undefined;
-  getOptionLabel: (option: TItem[TKey]) => string;
+  getOptionLabel?: (option: TItem[TKey]) => string;
 }
 
 export function AutocompleteDialogRow<TItem, TKey extends keyof TItem>({

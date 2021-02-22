@@ -151,7 +151,9 @@ export default function RolesPanel({ user, group, userInfo, setGroup, getAllUser
               <Typography variant="body1" className={classes.roleTitle}>
                 {section} {num}
               </Typography>
-              <DeleteIcon color="primary" cursor="pointer" onClick={() => removeRole(id)} />
+              {userInfo.manager && (
+                <DeleteIcon color="primary" cursor="pointer" onClick={() => removeRole(id)} />
+              )}
             </div>
             <UsersListInput
               disabled={!userInfo.manager}

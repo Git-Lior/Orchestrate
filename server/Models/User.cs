@@ -9,10 +9,10 @@ namespace Orchestrate.API.Models
     {
         public int Id { get; set; }
         
-        [Required, StringLength(50, MinimumLength = 2)]
+        [Required, StringLength(20, MinimumLength = 1)]
         public string FirstName { get; set; }
         
-        [Required, StringLength(50, MinimumLength = 2)]
+        [Required, StringLength(20, MinimumLength = 1)]
         public string LastName { get; set; }
         
         [EmailAddress]

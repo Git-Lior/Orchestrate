@@ -24,7 +24,7 @@ namespace Orchestrate.API.Authorization
         public const string AdministratorOnly = "AdministratorOnly";
         public const string MemberOnly = "MemberOnly";
         public const string DirectorOnly = "DirectorOnly";
-        public const string DirectorOrPlayer = "DirectorOrPlayer";
+        public const string DirectorOrMember = "DirectorOrMember";
         public const string ManagerOnly = "ManagerOnly";
     }
 }
