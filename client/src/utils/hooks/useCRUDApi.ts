@@ -6,7 +6,7 @@ type CRUDItem = { id: number };
 
 type CRUDApi<TData, TPayload> = [
   items: TData[] | undefined,
-  refresh: () => Promise<void>,
+  refresh: (query?: any) => Promise<void>,
   change: (item: orch.OptionalId<TPayload>) => Promise<TData>,
   remove: (id: number) => Promise<void>
 ];
@@ -18,10 +18,18 @@ export function useCRUDApi<TData extends CRUDItem, TPayload = TData>(
   const [items, setItems] = useState<TData[]>();
   const apiFetch = useApiFetch({ token }, apiRoute);
 
-  const refresh = useCallback(async () => {
-    const items: TData[] = await apiFetch("");
-    setItems(items);
-  }, [apiFetch]);
+  const refresh = useCallback(
+    async (query: any = {}) => {
+      const queryStr = Object.entries(query)
+        .filter(v => !!v[1])
+        .map(([k, v]) => `${k}=${v}`)
+        .join("&");
+
+      const items: TData[] = await apiFetch(!queryStr ? "" : `?${queryStr}`);
+      setItems(items);
+    },
+    [apiFetch]
+  );
 
   const add = useCallback(
     async (item: orch.OptionalId<TPayload>) => {

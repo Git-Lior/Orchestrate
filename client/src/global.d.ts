@@ -53,15 +53,15 @@ declare namespace orch {
   }
 
   interface CompositionData {
+    id: number;
     title: string;
     composer: string;
     genre: string;
-    sheetMusic: SheetMusic[];
+    uploader: orch.UserData;
   }
 
   interface Composition extends CompositionData {
-    id: number;
-    uploader: string;
+    sheetMusics: SheetMusic[];
   }
 
   interface SheetMusic {
@@ -98,9 +98,9 @@ declare namespace orch {
     }
 
     interface Query {
-      genre: string;
-      title: string;
-      onlyInConcert: boolean;
+      genre?: string;
+      title?: string;
+      onlyInConcert?: boolean;
     }
   }
 }

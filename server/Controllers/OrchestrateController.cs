@@ -7,6 +7,7 @@ using Orchestrate.API.Authorization;
 using Orchestrate.API.Data;
 using Orchestrate.API.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Orchestrate.API.Controllers
@@ -19,9 +20,12 @@ namespace Orchestrate.API.Controllers
 
         protected IMapper ModelMapper { get; }
         protected OrchestrateContext DbContext { get; }
-        
-        protected bool IsUserAdmin => User.IsInRole(_adminRoleName);
+
         protected int RequestingUserId => int.Parse(User.Identity.Name);
+        protected bool IsUserAdmin => User.IsInRole(_adminRoleName);
+        protected bool IsUserManager => (bool)HttpContext.Items["IsUserManager"];
+        protected bool IsUserDirector => (bool)HttpContext.Items["IsUserDirector"];
+        protected IEnumerable<Role> MemberRoles => (IEnumerable<Role>)HttpContext.Items["MemberRoles"];
 
         public OrchestrateController(IServiceProvider provider)
         {

@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 
-type ChangeCallback = (e?: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+type ChangeCallback = (e?: { target: { value: string } }) => void;
 
 export function useInputState(
   initialState: string | (() => string) = ""

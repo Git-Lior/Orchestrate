@@ -19,7 +19,7 @@ namespace Orchestrate.API.Data
         {
             // composite keys
             modelBuilder.Entity<AssignedRole>().HasKey(ar => new { ar.GroupId, ar.RoleId, ar.UserId });
-            modelBuilder.Entity<Composition>().HasKey(c => new { c.GroupId, c.CompositionId });
+            modelBuilder.Entity<Composition>().HasKey(c => new { c.GroupId, c.Id });
             modelBuilder.Entity<Concert>().HasKey(c => new { c.GroupId, c.ConcertId });
             modelBuilder.Entity<ConcertAttendance>().HasKey(ca => new { ca.GroupId, ca.ConcertId, ca.UserId });
             modelBuilder.Entity<ConcertComposition>().HasKey(cc => new { cc.GroupId, cc.ConcertId, cc.CompositionId });
@@ -52,6 +52,11 @@ namespace Orchestrate.API.Data
                 .HasOne(ar => ar.Role)
                 .WithMany()
                 .HasForeignKey(ar => ar.RoleId);
+
+            modelBuilder.Entity<Composition>()
+                .HasMany(c => c.SheetMusics)
+                .WithOne(sm => sm.Composition)
+                .HasForeignKey(sm => new { sm.GroupId, sm.CompositionId });
 
             modelBuilder.Entity<SheetMusic>()
                 .HasMany(sm => sm.Comments)

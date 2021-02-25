@@ -7,11 +7,15 @@ const compositionsPanelStyles: Styles<AppTheme, {}> = {
     marginBottom: "1em",
   },
   panelsContainer: { display: "flex", width: "100%", height: "100%" },
-  resultsPanel: { flex: 1 },
+  compositionsTable: { flex: 1 },
   filtersPanel: {
     width: "21em",
     marginRight: "3em",
     padding: "2em",
+    "& > *": { marginBottom: "2rem" },
+  },
+  filtersTitle: {
+    textAlign: "center",
   },
   compositionInfo: {
     padding: "1em",

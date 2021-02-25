@@ -12,41 +12,33 @@ import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 
 import sheetMusicPanelStyles from "./SheetMusicPanel.styles";
-import { MOCK_COMMENTS, MOCK_COMPOSITIONS } from "mocks";
+import { MOCK_COMMENTS } from "mocks";
 import { useApiFetch } from "utils/hooks";
 
 const useStyles = makeStyles(sheetMusicPanelStyles);
 
 interface Props {
   user: orch.User;
+  group: orch.Group;
   userInfo: orch.group.UserInfo;
 }
 
 type RouteParams = Required<orch.compositions.RouteParams>;
 
-export default function SheetMusicPanel({ user, userInfo }: Props) {
+export default function SheetMusicPanel({ user, group, userInfo }: Props) {
   const classes = useStyles();
-  const apiFetch = useApiFetch(user);
   const history = useHistory();
   const { url, path, params } = useRouteMatch<RouteParams>();
+  const apiFetch = useApiFetch(user, `/groups/${group.id}/compositions/${params.compositionId}`);
   const [composition, setComposition] = useState<orch.Composition | null>(null);
-  const [comments, setComments] = useState<orch.SheetMusicComment[] | null>(null);
+  // const [comments, setComments] = useState<orch.SheetMusicComment[] | null>(null);
 
   useEffect(() => {
-    let newComposition = composition;
-    if (params.compositionId !== newComposition?.id.toString()) {
-      /* const newComposition = await apiFetch(`...`); */
-      newComposition = MOCK_COMPOSITIONS.find(_ => _.id.toString() === params.compositionId)!;
-      return setComposition(newComposition);
-    }
-
-    if (!params.roleId) return history.replace(`${url}/${newComposition.sheetMusic[0].role.id}`);
-
-    if (!comments) {
-      /* const comments = await apiFetch(...) */
-      setComments(MOCK_COMMENTS);
-    }
-  }, [composition, params.compositionId, params.roleId]);
+    (async function () {
+      if (!composition || params.compositionId !== composition.id.toString())
+        return setComposition(await apiFetch(""));
+    })();
+  }, [composition, params.compositionId]);
 
   const onRoleClick = useCallback(
     (e: React.MouseEvent) => {
@@ -63,7 +55,7 @@ export default function SheetMusicPanel({ user, userInfo }: Props) {
   if (!composition) return <div>loading composition...</div>;
 
   const hasMultipleInstruments = userInfo.director || userInfo.roles.length > 1;
-  const sheetMusic = composition.sheetMusic.find(_ => _.role.id.toString() === params.roleId);
+  const sheetMusic = composition.sheetMusics.find(_ => _.role.id.toString() === params.roleId);
 
   return (
     <div className={classes.container}>
@@ -71,7 +63,7 @@ export default function SheetMusicPanel({ user, userInfo }: Props) {
         <Card className={classes.instruments}>
           <Typography variant="h5">Choose Instrument:</Typography>
           <List>
-            {composition.sheetMusic.map(({ role }) => (
+            {composition.sheetMusics.map(({ role }) => (
               <ListItem
                 key={role.id}
                 button

@@ -13,6 +13,11 @@ namespace Orchestrate.API
             CreateMap<User, UserDataWithTemporaryPassword>();
 
             CreateMap<Group, GroupData>();
+
+            CreateMap<Composition, CompositionData>();
+            CreateMap<Composition, FullCompositionData>();
+
+            CreateMap<SheetMusic, SheetMusicData>();
         }
     }
 }

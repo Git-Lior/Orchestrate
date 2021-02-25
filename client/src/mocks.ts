@@ -19,59 +19,6 @@ export const MOCK_USER_INFO: orch.group.UserInfo = {
   roles: MOCK_ROLES,
 };
 
-export const MOCK_COMPOSITIONS: orch.Composition[] = [
-  {
-    id: 11111,
-    title: "Symphony 9",
-    composer: "Beethoven",
-    genre: "Classical",
-    uploader: "Zubin Mehta",
-    sheetMusic: [_getMockSheetMusic(MOCK_ROLES[0])],
-  },
-  {
-    id: 22222,
-    title: "Israeli Songs",
-    composer: "Israel Cohen",
-    genre: "Israeli",
-    uploader: "Director 1",
-    sheetMusic: MOCK_ROLES.map(_getMockSheetMusic),
-  },
-  {
-    id: 33333,
-    title: "All the things you are",
-    composer: "Jerome Kern",
-    genre: "Jazz",
-    uploader: "Director 2",
-    sheetMusic: [_getMockSheetMusic(MOCK_ROLES[1])],
-  },
-  {
-    id: 44444,
-    title: "temp",
-    composer: "temp",
-    genre: "Classical",
-    uploader: "Director 1",
-    sheetMusic: MOCK_ROLES.map(_getMockSheetMusic),
-  },
-  {
-    id: 55555,
-    title: "Harry Potter Medley",
-    composer: "John Williams",
-    genre: "Movies",
-    uploader: "Director 2",
-    sheetMusic: MOCK_ROLES.map(_getMockSheetMusic),
-  },
-];
-
-export const MOCK_GENRES = Array.from(new Set(MOCK_COMPOSITIONS.map(_ => _.genre)));
-
-function _getMockSheetMusic(role: orch.Role): orch.SheetMusic {
-  return {
-    fileUrl:
-      "http://waltercosand.com/CosandScores/Composers%20A-D/Cortot,%20Alfred/Chopin-Cortot_Etudes_Op.10(Engl).pdf",
-    role,
-  };
-}
-
 export const MOCK_COMMENTS: orch.SheetMusicComment[] = [
   {
     commentId: 1321312,
