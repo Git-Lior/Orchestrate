@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { EditableTable, ColDef, TextDialogRow, textAutocompleteOptions } from "utils/components";
@@ -33,7 +33,7 @@ export default function UsersTable({
 }: Props) {
   const onGroupFilterChange = useCallback(
     (_, group: orch.GroupData | null) => setGroupFilter(group ?? undefined),
-    []
+    [setGroupFilter]
   );
 
   return (

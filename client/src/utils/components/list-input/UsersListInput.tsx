@@ -23,7 +23,7 @@ export function UsersListInput({ users, optionsProvider, ...listProps }: Props) 
   const filteredOptionsProvider = useCallback(
     async text => {
       const options = await optionsProvider(text);
-      return !users || !options ? options : options.filter(u => !users.some(_ => _.id == u.id));
+      return !users || !options ? options : options.filter(u => !users.some(_ => _.id === u.id));
     },
     [optionsProvider, users]
   );

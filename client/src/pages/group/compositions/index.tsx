@@ -14,7 +14,7 @@ export default function GroupCompositionsPage({ user, userInfo, group }: Props) 
 
   const setCompositionId = useCallback(
     (c: orch.CompositionData) => history.push(`${url}/${c.id}`),
-    [url]
+    [url, history]
   );
 
   return (

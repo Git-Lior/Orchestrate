@@ -47,14 +47,14 @@ export default function AddRoleDialogButton({ user, group, setGroup }: Props) {
       setAddRoleOpen(false);
     }
     setPromise(addRoleWorker());
-  }, [newRoleSection, newRoleNum, setGroup]);
+  }, [newRoleSection, newRoleNum, apiFetch, setPromise, setGroup]);
 
   useEffect(() => {
     if (!addRoleOpen) {
       setNewRoleSection();
       setNewRoleNum();
     }
-  }, [addRoleOpen]);
+  }, [addRoleOpen, setNewRoleNum, setNewRoleSection]);
 
   const toggleAddRoleDialog = useCallback(() => setAddRoleOpen(v => !v), []);
 

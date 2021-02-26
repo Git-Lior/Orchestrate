@@ -9,7 +9,7 @@ export function useApiFetch(user?: { token: string }, baseUrl: string = "") {
       return fetch("/api" + resolvedUrl, {
         ...init,
         headers: {
-          ...(!user ? {} : { authorization: `Bearer ${user.token}` }),
+          ...(!user?.token ? {} : { authorization: `Bearer ${user.token}` }),
           ...(!init.body ? {} : { "Content-Type": "application/json" }),
           ...(init.headers || {}),
         },

@@ -38,7 +38,7 @@ function LoginPage({ onLogin }: LoginProps) {
         }).then(result => onLogin(result, rememberMe))
       );
     },
-    [rememberMe, email, password, onLogin, apiFetch]
+    [rememberMe, email, password, setLoginPromise, onLogin, apiFetch]
   );
 
   const changeRememberMe = useCallback((_, checked: boolean) => setRememberMe(checked), [

@@ -36,7 +36,7 @@ export default function AuthPanel({ onTokenRecieved }: Props) {
 
   useEffect(() => {
     if (tokenError) setAdminTokenInputValue(undefined);
-  }, [tokenError]);
+  }, [tokenError, setAdminTokenInputValue]);
 
   const onSubmit = useCallback(() => {
     if (!adminTokenInput) return;
