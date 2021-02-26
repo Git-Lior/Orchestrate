@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 
-import { EditableTable, ColDef, TextDialogRow } from "utils/components";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import { EditableTable, ColDef, TextDialogRow, textAutocompleteOptions } from "utils/components";
 
 const DATA_COLUMNS: ColDef[] = [
   { field: "id", headerName: "ID", width: 75 },
@@ -17,11 +18,24 @@ const EMPTY_USER: orch.UserData = {
 
 interface Props {
   users?: orch.UserData[];
+  groups?: orch.GroupData[];
+  setGroupFilter: (group?: orch.GroupData) => void;
   onUserChange: (data: orch.OptionalId<orch.UserData>) => Promise<any>;
   onUserDelete: (userId: number) => Promise<void>;
 }
 
-export default function UsersTable({ users, onUserChange, onUserDelete }: Props) {
+export default function UsersTable({
+  users,
+  groups,
+  setGroupFilter,
+  onUserChange,
+  onUserDelete,
+}: Props) {
+  const onGroupFilterChange = useCallback(
+    (_, group: orch.GroupData | null) => setGroupFilter(group ?? undefined),
+    []
+  );
+
   return (
     <EditableTable
       rowTypeName="User"
@@ -31,6 +45,14 @@ export default function UsersTable({ users, onUserChange, onUserDelete }: Props)
       emptyRow={EMPTY_USER}
       onRowChange={onUserChange}
       onRowDelete={onUserDelete}
+      filters={
+        <Autocomplete
+          {...textAutocompleteOptions(groups)}
+          placeholder="group..."
+          getOptionLabel={g => g.name}
+          onChange={onGroupFilterChange}
+        />
+      }
     >
       {rowProps => (
         <>

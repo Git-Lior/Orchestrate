@@ -61,6 +61,7 @@ interface Props<T> {
   search?: boolean;
   disableActions?: boolean;
   dialogButtons?: React.ReactNode;
+  filters?: React.ReactNode;
   onRowClick?: (value: T) => void;
   onRowChange: (value: orch.OptionalId<T>) => Promise<any>;
   onRowDelete: (itemId: number) => Promise<void>;
@@ -76,6 +77,7 @@ export function EditableTable<T extends RowModel>(props: Props<T>) {
     search,
     disableActions,
     dialogButtons,
+    filters,
     onRowDelete,
     onRowChange,
     onRowClick,
@@ -167,6 +169,7 @@ export function EditableTable<T extends RowModel>(props: Props<T>) {
             {search && (
               <TextField color="secondary" placeholder="search..." onChange={setSearchFilter} />
             )}
+            {filters}
           </div>
           {!editedRow && (
             <div>

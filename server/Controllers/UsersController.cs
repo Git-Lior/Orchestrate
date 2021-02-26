@@ -7,6 +7,7 @@ using Orchestrate.API.Models;
 using Orchestrate.API.Services.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Orchestrate.API.Controllers
@@ -22,10 +23,23 @@ namespace Orchestrate.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Users()
+        public async Task<IActionResult> Users([FromQuery] int groupId)
         {
-            var dbUsers = await DbContext.Users.AsNoTracking().ToListAsync();
-            return Ok(ModelMapper.Map<IEnumerable<UserData>>(dbUsers));
+            if (groupId <= 0)
+                return Ok(ModelMapper.Map<IEnumerable<UserData>>(await DbContext.Users.AsNoTracking().ToListAsync()));
+
+            var group = await DbContext.Groups.AsNoTracking()
+                .Include(_ => _.Manager)
+                .Include(_ => _.Directors)
+                .Include(_ => _.AssignedRoles).ThenInclude(_ => _.User)
+                .FirstOrDefaultAsync(_ => _.Id == groupId);
+
+            var users = new List<User> { group.Manager }
+                .Concat(group.Directors)
+                .Concat(group.AssignedRoles.Select(_ => _.User))
+                .Distinct();
+
+            return Ok(ModelMapper.Map<IEnumerable<UserData>>(users));
         }
 
         [HttpPost]

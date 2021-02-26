@@ -50,6 +50,7 @@ interface ContentProps {
 
 function AdminAppContent({ token }: ContentProps) {
   const classes = useStyles();
+  const [userGroupFilter, setUserGroupFilter] = useState<orch.GroupData>();
   const [createdUser, setCreatedUser] = useState<Required<UserDataWithTempPassword>>();
   const [users, refreshUsers, changeUser, deleteUser] = useCRUDApi<orch.UserData>(token, "/users");
   const [groups, refreshGroups, changeGroup, deleteGroup] = useCRUDApi<
@@ -58,12 +59,12 @@ function AdminAppContent({ token }: ContentProps) {
   >(token, "/groups");
 
   useEffect(() => {
-    if (!refreshUsers || !refreshGroups) return;
+    refreshGroups?.();
+  }, [refreshGroups]);
 
-    (async function fetchFromApi() {
-      await Promise.all([refreshUsers(), refreshGroups()]);
-    })();
-  }, [refreshUsers, refreshGroups]);
+  useEffect(() => {
+    refreshUsers?.({ groupId: userGroupFilter?.id });
+  }, [refreshUsers, userGroupFilter]);
 
   const onUserChange = useCallback(
     async (user: orch.OptionalId<orch.UserData>) => {
@@ -85,7 +86,13 @@ function AdminAppContent({ token }: ContentProps) {
         Admin Panel
       </Typography>
       <div className={classes.tables}>
-        <UsersTable users={users} onUserChange={onUserChange} onUserDelete={deleteUser} />
+        <UsersTable
+          groups={groups}
+          users={users}
+          setGroupFilter={setUserGroupFilter}
+          onUserChange={onUserChange}
+          onUserDelete={deleteUser}
+        />
         <GroupsTable
           groups={groups}
           users={users}
