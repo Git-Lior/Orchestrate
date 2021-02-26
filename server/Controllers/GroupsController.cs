@@ -19,25 +19,25 @@ namespace Orchestrate.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetGroups()
         {
-            List<Group> groups;
-
-            if (IsUserAdmin) groups = await DbContext.Groups.AsNoTracking().Include(_ => _.Manager).ToListAsync();
-            else
+            if (IsUserAdmin)
             {
-                var user = await DbContext.Users.AsNoTracking()
-                    .Include(_ => _.Roles).ThenInclude(_ => _.Group)
-                    .Include(_ => _.ManagingGroups)
-                    .Include(_ => _.DirectorOfGroups)
-                    .FirstOrDefaultAsync(_ => _.Id == RequestingUserId);
-
-                if (user == null) throw new UserNotExistException();
-
-                groups = user.Roles.Select(_ => _.Group)
-                    .Concat(user.ManagingGroups)
-                    .Concat(user.DirectorOfGroups)
-                    .OrderBy(_ => _.Name)
-                    .ToList();
+                var allGroups = await DbContext.Groups.AsNoTracking().Include(_ => _.Manager).ToListAsync();
+                Ok(ModelMapper.Map<IEnumerable<GroupData>>(allGroups));
             }
+
+            var user = await DbContext.Users.AsNoTracking()
+                .Include(_ => _.Roles).ThenInclude(_ => _.Group)
+                .Include(_ => _.ManagingGroups)
+                .Include(_ => _.DirectorOfGroups)
+                .FirstOrDefaultAsync(_ => _.Id == RequestingUserId);
+
+            if (user == null) throw new UserNotExistException();
+
+            var groups = user.Roles.Select(_ => _.Group)
+                .Concat(user.ManagingGroups)
+                .Concat(user.DirectorOfGroups)
+                .OrderBy(_ => _.Name)
+                .Distinct();
 
             return Ok(ModelMapper.Map<IEnumerable<GroupData>>(groups));
         }
