@@ -60,7 +60,7 @@ export default function CompositionsPanel({
   const classes = useStyles();
 
   const apiFetch = useApiFetch(user, `/groups/${group.id}/compositions`);
-  const [onlyInConcert, setOnlyInConcert] = useState<boolean>(!!initialQuery.onlyInConcert);
+  const [onlyInUpcomingConcert, setOnlyInConcert] = useState<boolean>(!!initialQuery.onlyInConcert);
   const [genreFilter, setGenreFilter] = useState(initialQuery.genre);
   const [titleFilter, setTitleFilter] = useInputState(initialQuery.title);
 
@@ -76,8 +76,8 @@ export default function CompositionsPanel({
   ]);
 
   const query: orch.compositions.Query = useMemo(
-    () => ({ genre: genreFilter, title: titleFilter, onlyInConcert }),
-    [genreFilter, titleFilter, onlyInConcert]
+    () => ({ genre: genreFilter, title: titleFilter, onlyInUpcomingConcert }),
+    [genreFilter, titleFilter, onlyInUpcomingConcert]
   );
 
   const getGenres: (text: string) => Promise<string[]> = useCallback(
@@ -106,7 +106,7 @@ export default function CompositionsPanel({
             <Checkbox
               disableRipple
               color="primary"
-              checked={onlyInConcert}
+              checked={onlyInUpcomingConcert}
               onChange={onlyInConcertChange}
             />
           }

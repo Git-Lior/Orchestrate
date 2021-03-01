@@ -6,16 +6,19 @@
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
-        // TODO: make another subclass for temporary password
+    }
+
+    public class FullUserData
+    {
         public bool IsPasswordTemporary { get; set; }
     }
 
-    public class UserDataWithToken : UserData
+    public class LoggedInUserData : FullUserData
     {
         public string Token { get; set; }
     }
 
-    public class UserDataWithTemporaryPassword : UserData
+    public class CreatedUserData : FullUserData
     {
         public string TemporaryPassword { get; set; }
     }

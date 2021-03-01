@@ -59,7 +59,7 @@ namespace Orchestrate.API.Data
                 Name = "Group One",
                 Manager = manager1,
                 Directors = new List<User> { users[0], users[1] },
-                AvailableRoles = roles[..2]
+                Roles = roles[..2]
             };
 
             _ctx.Groups.Add(group1);
@@ -69,22 +69,22 @@ namespace Orchestrate.API.Data
                 Name = "Group Two",
                 Manager = users[0],
                 Directors = new List<User> { users[2], users[3] },
-                AvailableRoles = roles[1..]
+                Roles = roles[1..]
             };
 
             _ctx.Groups.Add(group2);
 
             await _ctx.SaveChangesAsync();
 
-            group1.AssignedRoles = new List<AssignedRole> {
-                new AssignedRole { Group = group1, Role = roles[0], User = users[0] },
-                new AssignedRole { Group = group1, Role = roles[0], User = users[4] },
-                new AssignedRole { Group = group1, Role = roles[1], User = users[2] }
+            group1.Members = new List<GroupMember> {
+                new GroupMember { Group = group1, Role = roles[0], User = users[0] },
+                new GroupMember { Group = group1, Role = roles[0], User = users[4] },
+                new GroupMember { Group = group1, Role = roles[1], User = users[2] }
             };
 
-            group1.AssignedRoles = new List<AssignedRole> {
-                new AssignedRole { Group = group2, Role = roles[1], User = users[5] },
-                new AssignedRole { Group = group2, Role = roles[2], User = users[1] }
+            group1.Members = new List<GroupMember> {
+                new GroupMember { Group = group2, Role = roles[1], User = users[5] },
+                new GroupMember { Group = group2, Role = roles[2], User = users[1] }
             };
 
             await _ctx.SaveChangesAsync();

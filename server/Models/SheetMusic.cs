@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Orchestrate.API.Models
@@ -15,7 +16,9 @@ namespace Orchestrate.API.Models
         public int RoleId { get; set; }
         public Role Role { get; set; }
 
+        [Required, Url]
         public string FileUrl { get; set; }
+
         public ICollection<SheetMusicComment> Comments { get; set; }
     }
 }

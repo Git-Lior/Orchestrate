@@ -18,46 +18,6 @@ namespace Orchestrate.API.Controllers
         {
         }
 
-        [HttpGet("")]
-        [Authorize(Policy = GroupRolesPolicy.DirectorOrMember)]
-        public async Task<IActionResult> GetCompositions([FromRoute] int groupId, [FromQuery] string title, [FromQuery] string genre, [FromQuery] bool onlyInConcert)
-        {
-            var group = await DbContext.Groups
-                .Include(_ => _.Concerts)
-                .Include(_ => _.Compositions).ThenInclude(_ => _.Uploader)
-                .Include(_ => _.Compositions).ThenInclude(_ => _.SheetMusics)
-                .FirstAsync(_ => _.Id == groupId);
-
-            IEnumerable<Composition> compositions = group.Compositions;
-
-            // for members - show only compositions with relevant sheet music
-            if (!IsUserDirector) compositions = compositions.Where(c => GetRelevantSheetMusic(c).Any());
-
-            if (title != null) compositions = compositions.Where(_ => _.Title.Contains(title));
-            if (genre != null) compositions = compositions.Where(_ => _.Genre == genre);
-
-            if (onlyInConcert) { } /* TODO */
-
-            return Ok(ModelMapper.Map<IEnumerable<CompositionData>>(compositions));
-        }
-
-        [HttpGet("{compositionId}")]
-        [Authorize(Policy = GroupRolesPolicy.DirectorOrMember)]
-        public async Task<IActionResult> GetFullComposition([FromRoute] int groupId, [FromRoute] int compositionId)
-        {
-            var group = await DbContext.Groups
-                .Include(_ => _.Concerts)
-                .Include(_ => _.Compositions).ThenInclude(_ => _.Uploader)
-                .Include(_ => _.Compositions).ThenInclude(_ => _.SheetMusics)
-                .FirstAsync(_ => _.Id == groupId);
-
-            var composition = group.Compositions.FirstOrDefault(_ => _.Id == compositionId);
-
-            if (composition == null) throw new ArgumentException("Composition does not exist");
-
-            return Ok(ModelMapper.Map<FullCompositionData>(composition));
-        }
-
         [HttpGet("genres")]
         [Authorize(Policy = GroupRolesPolicy.DirectorOrMember)]
         public async Task<IActionResult> GetGenres([FromRoute] int groupId)
@@ -67,12 +27,65 @@ namespace Orchestrate.API.Controllers
             return Ok(group.Compositions.Select(_ => _.Genre).Distinct());
         }
 
-        [HttpPost("")]
+        [HttpGet]
+        [Authorize(Policy = GroupRolesPolicy.DirectorOrMember)]
+        public async Task<IActionResult> GetCompositions([FromRoute] int groupId, CompositionsQuery query)
+        {
+            var group = await DbContext.Groups
+                .Include(_ => _.Compositions).ThenInclude(_ => _.Uploader)
+                .Include(_ => _.Concerts.Where(c => c.Date > DateTime.Now))
+                    .ThenInclude(_ => _.ConcertCompositions)
+                .FirstAsync(_ => _.Id == groupId);
+
+            IEnumerable<Composition> compositions = group.Compositions;
+
+            // for members - show only compositions with relevant sheet music
+            if (!IsUserDirector) compositions = compositions.Where(c => GetRelevantSheetMusic(c).Any());
+
+            if (query.Title != null) compositions = compositions.Where(_ => _.Title.Contains(query.Title));
+            if (query.Genre != null) compositions = compositions.Where(_ => _.Genre == query.Genre);
+
+            if (query.OnlyInUpcomingConcert)
+            {
+                var upcomingConcertIds = group.Concerts.SelectMany(_ => _.ConcertCompositions.Select(_ => _.CompositionId)).ToHashSet();
+                compositions = compositions.Where(_ => upcomingConcertIds.Contains(_.Id));
+            }
+
+            return Ok(ModelMapper.Map<IEnumerable<CompositionData>>(compositions));
+        }
+
+        [HttpGet("{compositionId}")]
+        [Authorize(Policy = GroupRolesPolicy.DirectorOrMember)]
+        public async Task<IActionResult> GetFullComposition([FromRoute] int groupId, [FromRoute] int compositionId)
+        {
+            var composition = await DbContext.Compositions
+                .Include(_ => _.Uploader)
+                .Include(_ => _.SheetMusics)
+                .FirstOrDefaultAsync(_ => _.Id == compositionId && _.GroupId == groupId);
+
+            if (composition == null) throw new ArgumentException("Composition does not exist");
+
+            return Ok(ModelMapper.Map<FullCompositionData>(composition));
+        }
+
+        [HttpPost]
         [Authorize(Policy = GroupRolesPolicy.DirectorOnly)]
         public async Task<IActionResult> AddComposition([FromRoute] int groupId, [Bind("Title,Composer,Genre")] Composition composition)
         {
-            if (!ModelState.IsValid) return BadRequest(new { Error = "Invalid parameters" });
+            composition.UploaderId = RequestingUserId;
 
+            var group = await DbContext.Groups.FindAsync(groupId);
+
+            group.Compositions.Add(composition);
+            await DbContext.SaveChangesAsync();
+
+            return Ok(ModelMapper.Map<CompositionData>(composition));
+        }
+
+        [HttpDelete("{compositionId}")]
+        [Authorize(Policy = GroupRolesPolicy.DirectorOnly)]
+        public async Task<IActionResult> UpdateComposition([FromRoute] int groupId, [Bind("Title,Composer,Genre")] Composition composition)
+        {
             composition.UploaderId = RequestingUserId;
 
             var group = await DbContext.Groups.FindAsync(groupId);
@@ -103,5 +116,12 @@ namespace Orchestrate.API.Controllers
             var rolesSet = new HashSet<int>(MemberRoles.Select(_ => _.Id));
             return c.SheetMusics.Where(_ => rolesSet.Contains(_.RoleId));
         }
+    }
+
+    public class CompositionsQuery
+    {
+        public string Title { get; set; }
+        public string Genre { get; set; }
+        public bool OnlyInUpcomingConcert { get; set; }
     }
 }

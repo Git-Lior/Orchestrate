@@ -2,7 +2,7 @@
 
 namespace Orchestrate.API.DTOs
 {
-    public class AssignedRoleData
+    public class GroupRoleData
     {
         public int Id { get; set; }
         public string Section { get; set; }

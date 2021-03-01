@@ -52,11 +52,14 @@ function AdminAppContent({ token }: ContentProps) {
   const classes = useStyles();
   const [userGroupFilter, setUserGroupFilter] = useState<orch.GroupData>();
   const [createdUser, setCreatedUser] = useState<Required<UserDataWithTempPassword>>();
-  const [users, refreshUsers, changeUser, deleteUser] = useCRUDApi<orch.UserData>(token, "/users");
+  const [users, refreshUsers, changeUser, deleteUser] = useCRUDApi<orch.UserData>(
+    token,
+    "/admin/users"
+  );
   const [groups, refreshGroups, changeGroup, deleteGroup] = useCRUDApi<
     orch.GroupData,
     orch.GroupPayload
-  >(token, "/groups");
+  >(token, "/admin/groups");
 
   useEffect(() => {
     refreshGroups?.();

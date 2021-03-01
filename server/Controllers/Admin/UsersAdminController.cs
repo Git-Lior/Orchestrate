@@ -10,14 +10,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Orchestrate.API.Controllers
+namespace Orchestrate.API.Controllers.Admin
 {
-    [Route("api/[controller]")]
-    public class UsersController : OrchestrateController
+    [Route("api/admin/users")]
+    [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
+    public class UsersAdminController : OrchestrateController
     {
         private readonly IPasswordProvider _passwordProvider;
 
-        public UsersController(IPasswordProvider passwordProvider, IServiceProvider provider) : base(provider)
+        public UsersAdminController(IPasswordProvider passwordProvider, IServiceProvider provider) : base(provider)
         {
             _passwordProvider = passwordProvider;
         }
@@ -26,28 +27,25 @@ namespace Orchestrate.API.Controllers
         public async Task<IActionResult> Users([FromQuery] int groupId)
         {
             if (groupId <= 0)
-                return Ok(ModelMapper.Map<IEnumerable<UserData>>(await DbContext.Users.AsNoTracking().ToListAsync()));
+                return Ok(ModelMapper.Map<IEnumerable<FullUserData>>(await DbContext.Users.AsNoTracking().ToListAsync()));
 
             var group = await DbContext.Groups.AsNoTracking()
                 .Include(_ => _.Manager)
                 .Include(_ => _.Directors)
-                .Include(_ => _.AssignedRoles).ThenInclude(_ => _.User)
+                .Include(_ => _.Members).ThenInclude(_ => _.User)
                 .FirstOrDefaultAsync(_ => _.Id == groupId);
 
             var users = new List<User> { group.Manager }
                 .Concat(group.Directors)
-                .Concat(group.AssignedRoles.Select(_ => _.User))
+                .Concat(group.Members.Select(_ => _.User))
                 .Distinct();
 
-            return Ok(ModelMapper.Map<IEnumerable<UserData>>(users));
+            return Ok(ModelMapper.Map<IEnumerable<FullUserData>>(users));
         }
 
         [HttpPost]
-        [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
         public async Task<IActionResult> CreateUser([Bind("FirstName,LastName,Email")] User user)
         {
-            if (!ModelState.IsValid) return BadRequest(new { Error = "Invalid parameters" });
-
             string password = _passwordProvider.GenerateTemporaryPassword(16);
             user.PasswordHash = _passwordProvider.HashPassword(password);
             user.IsPasswordTemporary = true;
@@ -55,18 +53,15 @@ namespace Orchestrate.API.Controllers
             DbContext.Users.Add(user);
             await DbContext.SaveChangesAsync();
 
-            var userData = ModelMapper.Map<UserDataWithTemporaryPassword>(user);
+            var userData = ModelMapper.Map<CreatedUserData>(user);
             userData.TemporaryPassword = password;
 
             return Ok(userData);
         }
 
         [HttpPut("{id}")]
-        [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
-        public async Task<IActionResult> UpdateUser([FromRoute] int id, [Bind("FirstName,LastName,Email")] User user)
+        public async Task<IActionResult> UpdateUser([Bind("FirstName,LastName,Email")] User user)
         {
-            if (!ModelState.IsValid) return BadRequest(new { Error = "Invalid parameters" });
-
             if (await DbContext.Users.AllAsync(_ => _.Id != user.Id)) return NotFound(new { Error = "User not found" });
 
             DbContext.Users.Update(user);
@@ -76,7 +71,6 @@ namespace Orchestrate.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
         public async Task<IActionResult> DeleteUser([FromRoute] int id)
         {
             if (await DbContext.Groups.AsNoTracking().AnyAsync(_ => _.ManagerId == id))

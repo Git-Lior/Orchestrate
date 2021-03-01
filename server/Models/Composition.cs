@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace Orchestrate.API.Models
 {
@@ -25,6 +26,7 @@ namespace Orchestrate.API.Models
         public int? UploaderId { get; set; }
         public User Uploader { get; set; }
 
-        public ICollection<SheetMusic> SheetMusics;
+        public ICollection<SheetMusic> SheetMusics { get; set; }
+        public ICollection<ConcertComposition> ConcertCompositions { get; set; }
     }
 }

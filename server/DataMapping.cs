@@ -9,8 +9,8 @@ namespace Orchestrate.API
         public DataMapping()
         {
             CreateMap<User, UserData>();
-            CreateMap<User, UserDataWithToken>();
-            CreateMap<User, UserDataWithTemporaryPassword>();
+            CreateMap<User, LoggedInUserData>();
+            CreateMap<User, CreatedUserData>();
 
             CreateMap<Group, GroupData>();
 

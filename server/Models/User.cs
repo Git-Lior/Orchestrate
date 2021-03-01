@@ -25,8 +25,10 @@ namespace Orchestrate.API.Models
 
         [InverseProperty("Manager")]
         public ICollection<Group> ManagingGroups { get; set; }
+
+        [InverseProperty("Directors")]
         public ICollection<Group> DirectorOfGroups { get; set; }
-        public ICollection<AssignedRole> Roles { get; set; }
+        public ICollection<GroupMember> MemberOfGroups { get; set; }
 
         public bool Equals(User other) => Id == other.Id;
         public override int GetHashCode() => Id.GetHashCode();

@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Orchestrate.API.Authorization;
 using Orchestrate.API.DTOs;
+using Orchestrate.API.Models;
 using Orchestrate.API.Services.Interfaces;
 using System;
 using System.Threading.Tasks;
@@ -11,7 +13,7 @@ namespace Orchestrate.API.Controllers
 {
     [Route("api/[controller]")]
     public class AuthController : OrchestrateController
-    {   
+    {
         private readonly IPasswordProvider _passwordProvider;
         private readonly ITokenGenerator _tokenGenerator;
         private readonly AdminOptions _adminOptions;
@@ -22,6 +24,16 @@ namespace Orchestrate.API.Controllers
             _passwordProvider = passwordProvider;
             _adminOptions = adminOptions.Value;
             _tokenGenerator = tokenGenerator;
+        }
+
+        [AllowAnonymous]
+        [HttpPost("admin")]
+        public IActionResult Admin([FromBody] string password)
+        {
+            if (password != _adminOptions.AdminPassword)
+                return BadRequest(new { Error = "Incorrect admin credentials" });
+
+            return Ok(_tokenGenerator.GenerateAdminToken());
         }
 
         [AllowAnonymous]
@@ -41,26 +53,16 @@ namespace Orchestrate.API.Controllers
                 await DbContext.SaveChangesAsync();
             }
 
-            var userData = ModelMapper.Map<UserDataWithToken>(user);
+            var userData = ModelMapper.Map<LoggedInUserData>(user);
             userData.Token = _tokenGenerator.GenerateUserToken(user.Id);
 
             return Ok(userData);
         }
 
-        [AllowAnonymous]
-        [HttpPost("admin")]
-        public IActionResult Admin([FromBody] string password)
-        {
-            if (password != _adminOptions.AdminPassword)
-                return BadRequest(new { Error = "Incorrect admin credentials" });
-
-            return Ok(_tokenGenerator.GenerateAdminToken());
-        }
-
         [HttpGet("info")]
         public async Task<IActionResult> Info()
         {
-            return Ok(ModelMapper.Map<UserData>(await GetRequestingUser()));
+            return Ok(ModelMapper.Map<LoggedInUserData>(await GetRequestingUser()));
         }
 
         [HttpPost("changePassword")]
@@ -75,6 +77,14 @@ namespace Orchestrate.API.Controllers
             await DbContext.SaveChangesAsync();
 
             return Ok();
+        }
+
+        private async Task<User> GetRequestingUser()
+        {
+            var user = await DbContext.Users.FindAsync(RequestingUserId);
+            if (user == null) throw new UserNotExistException();
+
+            return user;
         }
     }
 

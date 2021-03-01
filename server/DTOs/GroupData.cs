@@ -12,6 +12,6 @@ namespace Orchestrate.API.DTOs
     public class FullGroupData : GroupData
     {
         public IEnumerable<UserData> Directors { get; set; }
-        public IEnumerable<AssignedRoleData> Roles { get; set; }
+        public IEnumerable<GroupRoleData> Roles { get; set; }
     }
 }

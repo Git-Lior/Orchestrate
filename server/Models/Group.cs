@@ -17,8 +17,8 @@ namespace Orchestrate.API.Models
         public User Manager { get; set; }
 
         public ICollection<User> Directors { get; set; }
-        public ICollection<Role> AvailableRoles { get; set; }
-        public ICollection<AssignedRole> AssignedRoles { get; set; }
+        public ICollection<Role> Roles { get; set; }
+        public ICollection<GroupMember> Members { get; set; }
 
         public ICollection<Composition> Compositions { get; set; }
         public ICollection<Concert> Concerts { get; set; }

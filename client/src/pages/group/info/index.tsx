@@ -46,7 +46,7 @@ export default function GroupInfoPage(props: Props) {
   const classes = useStyles();
   const apiFetch = useApiFetch(user);
 
-  const getAllUsers = useCallback(() => apiFetch(`/users`), [apiFetch]);
+  const getAllUsers = useCallback(() => apiFetch(`/groups/${group.id}/users`), [apiFetch]);
 
   return (
     <>

@@ -22,7 +22,7 @@ declare namespace orch {
   }
 
   interface User extends UserData {
-    isPasswordTemporary?: number;
+    isPasswordTemporary: boolean;
     token: string;
   }
 
