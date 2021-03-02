@@ -24,12 +24,16 @@ namespace Orchestrate.API.Data
             modelBuilder.Entity<ConcertComposition>().HasKey(c => new { c.GroupId, c.CompositionId, c.ConcertId });
 
             modelBuilder.Entity<User>().HasAlternateKey(u => u.Email);
-            modelBuilder.Entity<Role>().HasAlternateKey(r => new { r.Section, r.Num });
 
             modelBuilder.Entity<Group>()
                 .HasMany(g => g.Directors)
                 .WithMany(u => u.DirectorOfGroups)
                 .UsingEntity(j => j.ToTable("group_director"));
+
+            modelBuilder.Entity<Group>()
+                .HasMany(_ => _.Roles)
+                .WithMany(_ => _.InGroups)
+                .UsingEntity(j => j.ToTable("group_role"));
 
             modelBuilder.Entity<Composition>()
                 .HasMany(c => c.SheetMusics)

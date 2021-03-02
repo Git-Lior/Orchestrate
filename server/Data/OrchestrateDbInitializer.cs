@@ -82,7 +82,7 @@ namespace Orchestrate.API.Data
                 new GroupMember { Group = group1, Role = roles[1], User = users[2] }
             };
 
-            group1.Members = new List<GroupMember> {
+            group2.Members = new List<GroupMember> {
                 new GroupMember { Group = group2, Role = roles[1], User = users[5] },
                 new GroupMember { Group = group2, Role = roles[2], User = users[1] }
             };

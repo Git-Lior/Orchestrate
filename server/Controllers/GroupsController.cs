@@ -42,6 +42,7 @@ namespace Orchestrate.API.Controllers
                 .Include(_ => _.Directors)
                 .Include(_ => _.Roles)
                 .Include(_ => _.Members).ThenInclude(_ => _.Role)
+                .Include(_ => _.Members).ThenInclude(_ => _.User)
                 .FirstAsync(_ => _.Id == groupId);
 
             return Ok(new FullGroupData()
@@ -51,12 +52,12 @@ namespace Orchestrate.API.Controllers
                 Manager = ModelMapper.Map<UserData>(group.Manager),
                 Directors = ModelMapper.Map<IEnumerable<UserData>>(group.Directors),
                 Roles = group.Roles.GroupJoin(group.Members, _ => _.Id, _ => _.RoleId,
-                    (role, assignedRoles) => new GroupRoleData
+                    (role, groupMember) => new GroupRoleData
                     {
                         Id = role.Id,
                         Section = role.Section,
                         Num = role.Num,
-                        Members = ModelMapper.Map<IEnumerable<UserData>>(assignedRoles.Select(_ => _.User))
+                        Members = ModelMapper.Map<IEnumerable<UserData>>(groupMember.Select(_ => _.User))
                     })
             });
         }

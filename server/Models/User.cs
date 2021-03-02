@@ -5,11 +5,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Orchestrate.API.Models
 {
-    [Table("user")]
-    public class User : IEquatable<User>
+    public class UserPayload
     {
-        public int Id { get; set; }
-
         [Required, StringLength(20, MinimumLength = 1)]
         public string FirstName { get; set; }
 
@@ -18,7 +15,14 @@ namespace Orchestrate.API.Models
 
         [EmailAddress]
         public string Email { get; set; }
+    }
 
+    [Table("user")]
+    public class User : UserPayload, IEquatable<User>
+    {
+        public int Id { get; set; }
+
+        [Required]
         public string PasswordHash { get; set; }
 
         public bool IsPasswordTemporary { get; set; }

@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useApiFetch } from "./useApiFetch";
 
@@ -6,73 +6,85 @@ type CRUDItem = { id: number };
 
 type CRUDApi<TData, TPayload> = [
   items: TData[] | undefined,
-  refresh: (query?: any) => Promise<void>,
-  change: (item: orch.OptionalId<TPayload>) => Promise<TData>,
-  remove: (id: number) => Promise<void>
+  refresh: () => Promise<void>,
+  change: <THasResult extends boolean>(
+    item: orch.OptionalId<TPayload>,
+    hasResult?: THasResult
+  ) => Promise<THasResult extends true ? TData : void>,
+  remove: (id: number) => Promise<void>,
+  setQuery: (query?: any) => void
 ];
 
 export function useCRUDApi<TData extends CRUDItem, TPayload = TData>(
   token: string,
-  apiRoute: string
+  apiRoute: string,
+  initialQuery?: any
 ): CRUDApi<TData, TPayload> {
   const [items, setItems] = useState<TData[]>();
+  const [query, setQuery] = useState<any>(initialQuery);
   const apiFetch = useApiFetch({ token }, apiRoute);
 
-  const refresh = useCallback(
-    async (query: any = {}) => {
-      const queryStr = Object.entries(query)
+  const queryStr = useMemo(
+    () =>
+      query &&
+      Object.entries(query)
         .filter(v => !!v[1])
         .map(([k, v]) => `${k}=${v}`)
-        .join("&");
-
-      const items: TData[] = await apiFetch(!queryStr ? "" : `?${queryStr}`);
-      setItems(items);
-    },
-    [apiFetch]
+        .join("&"),
+    [query]
   );
 
-  const add = useCallback(
-    async (item: orch.OptionalId<TPayload>) => {
-      const result: TData = await apiFetch("", {
-        method: "POST",
-        body: JSON.stringify(item),
-      });
+  const refresh = useCallback(async () => {
+    const items: TData[] = await apiFetch(!queryStr ? "" : `?${queryStr}`);
+    setItems(items);
+  }, [apiFetch, queryStr]);
 
-      setItems([...items!, result]);
+  useEffect(() => {
+    refresh();
+  }, [queryStr, refresh]);
+
+  const add = useCallback(
+    async (item: orch.OptionalId<TPayload>, hasResult?: boolean) => {
+      const result = await apiFetch(
+        "",
+        { method: "POST", body: JSON.stringify(item) },
+        hasResult ? "json" : "none"
+      );
+      refresh();
       return result;
     },
-    [items, apiFetch]
+    [items, apiFetch, refresh]
   );
 
   const update = useCallback(
-    async (item: TPayload & CRUDItem) => {
-      const resultItem: TData = await apiFetch(item.id.toString(), {
-        method: "PUT",
-        body: JSON.stringify(item),
-      });
-
-      const itemIndex = items!.findIndex(_ => _.id === item.id);
-      const newItems = [...items!];
-      newItems[itemIndex] = resultItem;
-
-      setItems(newItems);
-      return resultItem;
+    async (item: TPayload & CRUDItem, hasResult?: boolean) => {
+      const result = await apiFetch(
+        item.id.toString(),
+        {
+          method: "PUT",
+          body: JSON.stringify(item),
+        },
+        hasResult ? "json" : "none"
+      );
+      refresh();
+      return result;
     },
-    [items, apiFetch]
+    [items, apiFetch, refresh]
   );
 
   const change = useCallback(
-    (item: orch.OptionalId<TPayload>) => (item.id ? update(item as any) : add(item)),
+    (item: orch.OptionalId<TPayload>, hasResult?: boolean) =>
+      item.id ? update(item as any, hasResult) : add(item, hasResult),
     [add, update]
   );
 
   const remove = useCallback(
     async (id: number) => {
       await apiFetch(id.toString(), { method: "DELETE" }, "none");
-      setItems(items!.filter(_ => _.id !== id));
+      await refresh();
     },
-    [items, apiFetch]
+    [items, apiFetch, refresh]
   );
 
-  return [items, refresh, change, remove];
+  return [items, refresh, change, remove, setQuery];
 }

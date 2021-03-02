@@ -29,7 +29,7 @@ namespace Orchestrate.API.Authorization
             if (_httpContextAccessor.HttpContext == null
                 || !_httpContextAccessor.HttpContext.Request.RouteValues.TryGetValue("groupId", out object groupIdObj)) return;
 
-            var user = await _context.Users.FindAsync(int.Parse(userIdStr));
+            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(_ => _.Id == int.Parse(userIdStr));
             if (user == null) throw new UserNotExistException();
 
             var group = await _context.Groups

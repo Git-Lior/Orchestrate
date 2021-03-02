@@ -44,8 +44,10 @@ namespace Orchestrate.API.Controllers.Admin
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser([Bind("FirstName,LastName,Email")] User user)
+        public async Task<IActionResult> CreateUser([FromBody] UserPayload payload)
         {
+            var user = ModelMapper.Map<User>(payload);
+
             string password = _passwordProvider.GenerateTemporaryPassword(16);
             user.PasswordHash = _passwordProvider.HashPassword(password);
             user.IsPasswordTemporary = true;
@@ -60,14 +62,15 @@ namespace Orchestrate.API.Controllers.Admin
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser([Bind("FirstName,LastName,Email")] User user)
+        public async Task<IActionResult> UpdateUser([FromRoute] int id, [FromBody] UserPayload payload)
         {
-            if (await DbContext.Users.AllAsync(_ => _.Id != user.Id)) return NotFound(new { Error = "User not found" });
+            var dbUser = await DbContext.Users.FindAsync(id);
+            if (dbUser == null) return NotFound(new { Error = "User not found" });
 
-            DbContext.Users.Update(user);
+            ModelMapper.Map(payload, dbUser);
             await DbContext.SaveChangesAsync();
 
-            return Ok(ModelMapper.Map<UserData>(user));
+            return Ok(ModelMapper.Map<UserData>(dbUser));
         }
 
         [HttpDelete("{id}")]

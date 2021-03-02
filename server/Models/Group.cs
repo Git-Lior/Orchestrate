@@ -5,15 +5,19 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Orchestrate.API.Models
 {
-    [Table("group")]
-    public class Group : IEquatable<Group>
+    public class GroupPayload
     {
-        public int Id { get; set; }
-
         [Required, StringLength(100, MinimumLength = 2)]
         public string Name { get; set; }
 
         public int ManagerId { get; set; }
+    }
+
+    [Table("group")]
+    public class Group : GroupPayload, IEquatable<Group>
+    {
+        public int Id { get; set; }
+
         public User Manager { get; set; }
 
         public ICollection<User> Directors { get; set; }

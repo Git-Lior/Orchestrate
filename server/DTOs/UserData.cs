@@ -8,7 +8,7 @@
         public string Email { get; set; }
     }
 
-    public class FullUserData
+    public class FullUserData : UserData
     {
         public bool IsPasswordTemporary { get; set; }
     }

@@ -20,7 +20,7 @@ namespace Orchestrate.API.Controllers
         [HttpGet("users")]
         public async Task<IActionResult> GetAllUsers()
         {
-            return Ok(ModelMapper.Map<UserData>(await DbContext.Users.AsNoTracking().ToListAsync()));
+            return Ok(ModelMapper.Map<IEnumerable<UserData>>(await DbContext.Users.AsNoTracking().ToListAsync()));
         }
 
         [HttpPost("directors")]
@@ -53,7 +53,7 @@ namespace Orchestrate.API.Controllers
         }
 
         [HttpPost("roles")]
-        public async Task<IActionResult> AddRole([FromRoute] int groupId, [Bind("Section,Num")] Role role)
+        public async Task<IActionResult> AddRole([FromRoute] int groupId, [FromBody] RolePayload role)
         {
             var group = await DbContext.Groups.Include(_ => _.Roles).FirstAsync(_ => _.Id == groupId);
 
@@ -64,9 +64,9 @@ namespace Orchestrate.API.Controllers
 
             if (dbRole == null)
             {
-                DbContext.Roles.Add(role);
+                dbRole = ModelMapper.Map<Role>(role);
+                DbContext.Roles.Add(dbRole);
                 await DbContext.SaveChangesAsync();
-                dbRole = role;
             }
 
             group.Roles.Add(dbRole);
@@ -89,11 +89,11 @@ namespace Orchestrate.API.Controllers
                 .Include(_ => _.Members.Where(m => m.RoleId == roleId))
                 .FirstAsync(_ => _.Id == groupId);
 
-            var role = group.Roles.FirstOrDefault(r => r.Id == roleId);
+            var dbRole = group.Roles.FirstOrDefault(r => r.Id == roleId);
 
-            if (role == null) throw new ArgumentException("Role doesn't exist");
+            if (dbRole == null) throw new ArgumentException("Role doesn't exist");
 
-            group.Roles.Remove(role);
+            group.Roles.Remove(dbRole);
             DbContext.RemoveRange(group.Members);
             await DbContext.SaveChangesAsync();
 

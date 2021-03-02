@@ -24,24 +24,25 @@ namespace Orchestrate.API.Controllers.Admin
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateGroup([Bind("Name,ManagerId")] Group group)
+        public async Task<IActionResult> CreateGroup([FromBody] GroupPayload payload)
         {
-            DbContext.Groups.Add(group);
+            DbContext.Groups.Add(ModelMapper.Map<Group>(payload));
             await DbContext.SaveChangesAsync();
 
-            return Ok(await GetGroupData(group.Id));
+            return Ok();
         }
 
         [HttpPut("{groupId}")]
-        public async Task<IActionResult> UpdateGroup([Bind("Name,ManagerId")] Group group)
+        public async Task<IActionResult> UpdateGroup([FromRoute] int groupId, [FromBody] GroupPayload payload)
         {
-            var dbGroup = await DbContext.Groups.FindAsync(group.Id);
-            if (dbGroup == null) return NotFound(new { Error = "Group not found" });
+            var group = await DbContext.Groups.FindAsync(groupId);
 
-            DbContext.Groups.Update(group);
+            if (group == null) return NotFound(new { Error = "Group not found" });
+
+            ModelMapper.Map(payload, group);
             await DbContext.SaveChangesAsync();
 
-            return Ok(await GetGroupData(group.Id));
+            return Ok();
         }
 
         [HttpDelete("{groupId}")]
@@ -54,16 +55,6 @@ namespace Orchestrate.API.Controllers.Admin
             await DbContext.SaveChangesAsync();
 
             return Ok();
-        }
-
-        private async Task<GroupData> GetGroupData(int groupId)
-        {
-            var dbGroup = await DbContext.Groups
-                .AsNoTracking()
-                .Include(_ => _.Manager)
-                .FirstAsync(_ => _.Id == groupId);
-
-            return ModelMapper.Map<GroupData>(dbGroup);
         }
     }
 }

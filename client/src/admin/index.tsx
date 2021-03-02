@@ -50,28 +50,24 @@ interface ContentProps {
 
 function AdminAppContent({ token }: ContentProps) {
   const classes = useStyles();
-  const [userGroupFilter, setUserGroupFilter] = useState<orch.GroupData>();
   const [createdUser, setCreatedUser] = useState<Required<UserDataWithTempPassword>>();
   const [users, refreshUsers, changeUser, deleteUser] = useCRUDApi<orch.UserData>(
     token,
     "/admin/users"
   );
-  const [groups, refreshGroups, changeGroup, deleteGroup] = useCRUDApi<
+  const [groups, refreshGroups, changeGroup, deleteGroup, setUsersQuery] = useCRUDApi<
     orch.GroupData,
     orch.GroupPayload
   >(token, "/admin/groups");
 
-  useEffect(() => {
-    refreshGroups?.();
-  }, [refreshGroups]);
-
-  useEffect(() => {
-    refreshUsers?.({ groupId: userGroupFilter?.id });
-  }, [refreshUsers, userGroupFilter]);
+  const setUserGroupFilter = useCallback(
+    (group?: orch.GroupData) => setUsersQuery({ groupId: group?.id }),
+    [setUsersQuery]
+  );
 
   const onUserChange = useCallback(
     async (user: orch.OptionalId<orch.UserData>) => {
-      const result: UserDataWithTempPassword = await changeUser(user);
+      const result: UserDataWithTempPassword = await changeUser(user, true);
       if (result.id && result.temporaryPassword) setCreatedUser(result as any);
     },
     [changeUser]

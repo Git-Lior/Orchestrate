@@ -1,16 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 
 namespace Orchestrate.API.Models
 {
-    [Table("composition")]
-    public class Composition
+    public class CompositionPayload
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
-
         [Required, StringLength(50, MinimumLength = 1)]
         public string Title { get; set; }
 
@@ -19,6 +14,13 @@ namespace Orchestrate.API.Models
 
         [Required, StringLength(20, MinimumLength = 1)]
         public string Genre { get; set; }
+    }
+
+    [Table("composition")]
+    public class Composition : CompositionPayload
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
 
         public int GroupId { get; set; }
         public Group Group { get; set; }

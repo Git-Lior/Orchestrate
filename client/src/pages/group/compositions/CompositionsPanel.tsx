@@ -64,31 +64,35 @@ export default function CompositionsPanel({
   const [genreFilter, setGenreFilter] = useState(initialQuery.genre);
   const [titleFilter, setTitleFilter] = useInputState(initialQuery.title);
 
-  const [
-    compositions,
-    refreshComposition,
-    changeComposition,
-    removeComposition,
-  ] = useCRUDApi<orch.CompositionData>(user.token, `/groups/${group.id}/compositions`);
-
-  const onlyInConcertChange = useCallback((_, checked: boolean) => setOnlyInConcert(checked), [
-    setOnlyInConcert,
-  ]);
-
   const query: orch.compositions.Query = useMemo(
     () => ({ genre: genreFilter, title: titleFilter, onlyInUpcomingConcert }),
     [genreFilter, titleFilter, onlyInUpcomingConcert]
   );
+
+  const [
+    compositions,
+    _refreshComposition,
+    changeComposition,
+    removeComposition,
+    setCompositionsQuery,
+  ] = useCRUDApi<orch.CompositionData>(
+    user.token,
+    `/groups/${group.id}/compositions`,
+    initialQuery
+  );
+
+  const onlyInConcertChange = useCallback((_, checked: boolean) => setOnlyInConcert(checked), [
+    setOnlyInConcert,
+  ]);
 
   const getGenres: (text: string) => Promise<string[]> = useCallback(
     text => apiFetch("genres" + (!text ? "" : "?query=" + text)),
     [apiFetch]
   );
 
-  const debouncedGetConcerts = useMemo(
-    () => debounce(250, (query: orch.compositions.Query) => refreshComposition(query)),
-    [refreshComposition]
-  );
+  const debouncedGetConcerts = useMemo(() => debounce(250, setCompositionsQuery), [
+    setCompositionsQuery,
+  ]);
 
   useEffect(() => {
     onQueryChanged(query);
