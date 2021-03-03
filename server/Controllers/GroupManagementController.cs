@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
@@ -20,7 +21,7 @@ namespace Orchestrate.API.Controllers
         [HttpGet("users")]
         public async Task<IActionResult> GetAllUsers()
         {
-            return Ok(ModelMapper.Map<IEnumerable<UserData>>(await DbContext.Users.AsNoTracking().ToListAsync()));
+            return Ok(await DbContext.Users.AsNoTracking().ProjectTo<UserData>(MapperConfig).ToListAsync());
         }
 
         [HttpPost("directors")]

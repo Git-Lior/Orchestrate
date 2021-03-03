@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
 using Orchestrate.API.DTOs;
@@ -17,21 +18,14 @@ namespace Orchestrate.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetGroups()
         {
-            var user = await DbContext.Users.AsNoTracking()
-                .Include(_ => _.MemberOfGroups).ThenInclude(_ => _.Group)
-                .Include(_ => _.ManagingGroups)
-                .Include(_ => _.DirectorOfGroups)
-                .FirstOrDefaultAsync(_ => _.Id == RequestingUserId);
+            if (await DbContext.Users.AllAsync(_ => _.Id != RequestingUserId)) throw new UserNotExistException();
 
-            if (user == null) throw new UserNotExistException();
-
-            var groups = user.MemberOfGroups.Select(_ => _.Group)
-                .Concat(user.ManagingGroups)
-                .Concat(user.DirectorOfGroups)
+            return Ok(await DbContext.Groups.Where(_ => _.ManagerId == RequestingUserId)
+                .Union(DbContext.Groups.Where(_ => _.Directors.Any(_ => _.Id == RequestingUserId)))
+                .Union(DbContext.Groups.Where(_ => _.Members.Any(_ => _.UserId == RequestingUserId)))
                 .OrderBy(_ => _.Name)
-                .Distinct();
-
-            return Ok(ModelMapper.Map<IEnumerable<GroupData>>(groups));
+                .ProjectTo<GroupData>(MapperConfig)
+                .ToListAsync());
         }
 
         [HttpGet("{groupId}")]

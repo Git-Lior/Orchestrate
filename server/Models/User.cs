@@ -18,7 +18,7 @@ namespace Orchestrate.API.Models
     }
 
     [Table("user")]
-    public class User : UserPayload, IEquatable<User>
+    public class User : UserPayload
     {
         public int Id { get; set; }
 
@@ -33,8 +33,5 @@ namespace Orchestrate.API.Models
         [InverseProperty("Directors")]
         public ICollection<Group> DirectorOfGroups { get; set; }
         public ICollection<GroupMember> MemberOfGroups { get; set; }
-
-        public bool Equals(User other) => Id == other.Id;
-        public override int GetHashCode() => Id.GetHashCode();
     }
 }

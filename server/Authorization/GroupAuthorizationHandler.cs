@@ -34,14 +34,14 @@ namespace Orchestrate.API.Authorization
 
             var group = await _context.Groups
                 .AsNoTracking()
-                .Include(_ => _.Directors)
-                .Include(_ => _.Members).ThenInclude(_ => _.Role)
+                .Include(_ => _.Directors.Where(_ => _.Id == user.Id))
+                .Include(_ => _.Members.Where(_ => _.UserId == user.Id)).ThenInclude(_ => _.Role)
                 .FirstOrDefaultAsync(_ => _.Id == Convert.ToInt32(groupIdObj));
             if (group == null) throw new ArgumentException("Group does not exist");
 
             var isUserManager = group.ManagerId == user.Id;
-            var isUserDirector = group.Directors.Any(_ => _.Id == user.Id);
-            var memberRoles = group.Members.Where(_ => _.UserId == user.Id).Select(_ => _.Role);
+            var isUserDirector = group.Directors.Any();
+            var memberRoles = group.Members.Select(_ => _.Role);
 
             _httpContextAccessor.HttpContext.Items["IsUserManager"] = isUserManager;
             _httpContextAccessor.HttpContext.Items["IsUserDirector"] = isUserDirector;

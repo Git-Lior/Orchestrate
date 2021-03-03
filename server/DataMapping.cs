@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
+using System.Linq;
 
 namespace Orchestrate.API
 {
@@ -19,9 +20,10 @@ namespace Orchestrate.API
             CreateMap<User, CreatedUserData>();
 
             CreateMap<Group, GroupData>();
-            
+
             CreateMap<Composition, CompositionData>();
-            CreateMap<Composition, FullCompositionData>();
+            CreateMap<Composition, FullCompositionData>()
+                .ForMember(f => f.Roles, o => o.MapFrom(c => c.SheetMusics.Select(s => s.Role)));
 
             CreateMap<SheetMusic, SheetMusicData>();
         }

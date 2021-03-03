@@ -16,8 +16,7 @@ namespace Orchestrate.API.Models
         public int RoleId { get; set; }
         public Role Role { get; set; }
 
-        [Required, Url]
-        public string FileUrl { get; set; }
+        public byte[] File { get; set; }
 
         public ICollection<SheetMusicComment> Comments { get; set; }
     }

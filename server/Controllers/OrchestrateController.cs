@@ -19,6 +19,8 @@ namespace Orchestrate.API.Controllers
         protected IMapper ModelMapper { get; }
         protected OrchestrateContext DbContext { get; }
 
+        protected IConfigurationProvider MapperConfig => ModelMapper.ConfigurationProvider;
+
         protected int RequestingUserId => int.Parse(User.Identity.Name);
         protected bool IsUserAdmin => User.IsInRole(_adminRoleName);
         protected bool IsUserManager => (bool)HttpContext.Items["IsUserManager"];

@@ -15,13 +15,10 @@ namespace Orchestrate.API.Models
     }
 
     [Table("role")]
-    public class Role : RolePayload, IEquatable<Role>
+    public class Role : RolePayload
     {
         public int Id { get; set; }
 
-        public IEnumerable<Group> InGroups { get; set; }
-
-        public bool Equals(Role other) => Id == other.Id;
-        public override int GetHashCode() => Id.GetHashCode();
+        public ICollection<Group> InGroups { get; set; }
     }
 }

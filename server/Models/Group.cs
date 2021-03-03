@@ -14,7 +14,7 @@ namespace Orchestrate.API.Models
     }
 
     [Table("group")]
-    public class Group : GroupPayload, IEquatable<Group>
+    public class Group : GroupPayload
     {
         public int Id { get; set; }
 
@@ -26,8 +26,5 @@ namespace Orchestrate.API.Models
 
         public ICollection<Composition> Compositions { get; set; }
         public ICollection<Concert> Concerts { get; set; }
-
-        public bool Equals(Group other) => Id == other.Id;
-        public override int GetHashCode() => Id.GetHashCode();
     }
 }
