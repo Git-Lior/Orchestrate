@@ -25,7 +25,7 @@ namespace Orchestrate.API
             CreateMap<Composition, FullCompositionData>()
                 .ForMember(f => f.Roles, o => o.MapFrom(c => c.SheetMusics.Select(s => s.Role)));
 
-            CreateMap<SheetMusic, SheetMusicData>();
+            CreateMap<SheetMusicComment, SheetMusicCommentData>();
         }
     }
 }

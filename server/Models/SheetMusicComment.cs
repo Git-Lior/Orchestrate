@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Orchestrate.API.Models
@@ -13,5 +14,11 @@ namespace Orchestrate.API.Models
 
         [Required, StringLength(300, MinimumLength = 1)]
         public string Content { get; set; }
+
+        [Required]
+        public DateTime CreatedAt { get; set; }
+        
+        [Required]
+        public DateTime UpdatedAt { get; set; }
     }
 }

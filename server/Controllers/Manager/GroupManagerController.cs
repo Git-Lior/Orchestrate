@@ -10,13 +10,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Orchestrate.API.Controllers
+namespace Orchestrate.API.Controllers.Manager
 {
     [Route("api/groups/{groupId}")]
     [Authorize(Policy = GroupRolesPolicy.ManagerOnly)]
-    public class GroupManagementController : OrchestrateController
+    public class GroupManagerController : OrchestrateController
     {
-        public GroupManagementController(IServiceProvider provider) : base(provider) { }
+        public GroupManagerController(IServiceProvider provider) : base(provider) { }
 
         [HttpGet("users")]
         public async Task<IActionResult> GetAllUsers()

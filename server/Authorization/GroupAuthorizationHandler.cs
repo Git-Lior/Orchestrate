@@ -26,8 +26,8 @@ namespace Orchestrate.API.Authorization
             string userIdStr = context.User.Identity.Name;
             if (userIdStr == null) return;
 
-            if (_httpContextAccessor.HttpContext == null
-                || !_httpContextAccessor.HttpContext.Request.RouteValues.TryGetValue("groupId", out object groupIdObj)) return;
+            if (!TryGetHttpRouteParam("groupId", out int groupId)) return;
+            TryGetHttpRouteParam("roleId", out int roleId);
 
             var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(_ => _.Id == int.Parse(userIdStr));
             if (user == null) throw new UserNotExistException();
@@ -36,7 +36,7 @@ namespace Orchestrate.API.Authorization
                 .AsNoTracking()
                 .Include(_ => _.Directors.Where(_ => _.Id == user.Id))
                 .Include(_ => _.Members.Where(_ => _.UserId == user.Id)).ThenInclude(_ => _.Role)
-                .FirstOrDefaultAsync(_ => _.Id == Convert.ToInt32(groupIdObj));
+                .FirstOrDefaultAsync(_ => _.Id == groupId);
             if (group == null) throw new ArgumentException("Group does not exist");
 
             var isUserManager = group.ManagerId == user.Id;
@@ -53,16 +53,29 @@ namespace Orchestrate.API.Authorization
 
             bool noRequirements = pendingRequirements.Count == 0;
 
-            // if route has groupId and authorized roles are not specified, check all roles
+            // if route has groupId and no requirements specified, check all roles
             var roles = noRequirements ? _allRoles : pendingRequirements[0].Roles;
 
             if (HasRole(roles, GroupRoles.Manager) && isUserManager
                 || HasRole(roles, GroupRoles.Director) && isUserDirector
-                || HasRole(roles, GroupRoles.Member) && memberRoles.Any())
+                || HasRole(roles, GroupRoles.Member) && memberRoles.Any(r => roleId == 0 || r.Id == roleId))
             {
                 if (!noRequirements) context.Succeed(pendingRequirements[0]);
             }
             else context.Fail();
+        }
+
+        private bool TryGetHttpRouteParam(string param, out int value)
+        {
+            object paramObj = null;
+            if (_httpContextAccessor.HttpContext?.Request.RouteValues.TryGetValue(param, out paramObj) != true)
+            {
+                value = 0;
+                return false;
+            }
+
+            value = Convert.ToInt32(paramObj);
+            return true;
         }
 
         private bool HasRole(GroupRoles roles, GroupRoles role) => (roles & role) == role;
