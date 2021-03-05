@@ -82,20 +82,29 @@ namespace Orchestrate.API.Controllers.Manager
             });
         }
 
+        // TODO
         [HttpDelete("roles/{roleId}")]
         public async Task<IActionResult> RemoveRole([FromRoute] int groupId, [FromRoute] int roleId)
         {
             var group = await DbContext.Groups
-                .Include(_ => _.Roles)
+                .Include(_ => _.Roles.Where(r => r.Id == roleId)).ThenInclude(_ => _.InGroups)
                 .Include(_ => _.Members.Where(m => m.RoleId == roleId))
                 .FirstAsync(_ => _.Id == groupId);
 
-            var dbRole = group.Roles.FirstOrDefault(r => r.Id == roleId);
+            var dbRole = group.Roles.FirstOrDefault();
 
             if (dbRole == null) throw new ArgumentException("Role doesn't exist");
 
-            group.Roles.Remove(dbRole);
-            DbContext.RemoveRange(group.Members);
+            if (dbRole.InGroups.Count == 1)
+            {
+                DbContext.Remove(dbRole);
+            }
+            else
+            {
+                group.Roles.Remove(dbRole);
+                DbContext.RemoveRange(group.Members);
+            }
+
             await DbContext.SaveChangesAsync();
 
             return Ok();

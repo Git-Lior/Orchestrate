@@ -1,7 +1,7 @@
 export { textAutocompleteOptions } from "./textAutocompleteOptions";
 export { AsyncAutocomplete } from "./AsyncAutocomplete";
 export { EditableTable } from "./EditableTable";
-export { getUserName, UserAvatar } from "./UserAvatar";
+export { UserAvatar } from "./UserAvatar";
 export type { ColDef } from "./EditableTable";
 
 export { FormDialog } from "./dialog/FormDialog";

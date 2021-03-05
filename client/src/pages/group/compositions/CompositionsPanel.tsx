@@ -16,9 +16,9 @@ import {
   AutocompleteDialogRow,
   ColDef,
   EditableTable,
-  getUserName,
   TextDialogRow,
 } from "utils/components";
+import { userToText } from "utils/general";
 
 const COLUMNS: ColDef[] = [
   { field: "title", headerName: "Title", flex: 3 },
@@ -28,7 +28,7 @@ const COLUMNS: ColDef[] = [
     field: "uploader",
     headerName: "Uploaded by",
     flex: 1,
-    valueGetter: _ => getUserName(_.row.uploader),
+    valueGetter: _ => userToText(_.row.uploader),
   },
 ];
 
@@ -154,15 +154,6 @@ export default function CompositionsPanel({
           )}
         </EditableTable>
       </div>
-      {/* <Card className={classes.resultsPanel}>
-        <ResultsTable
-          items={compositions}
-          showActions={isDirector}
-          onSelected={onCompositionSelect}
-          onEdit={onCompositionEdit}
-          onDelete={onCompositionDelete}
-        />
-      </Card> */}
     </div>
   );
 }

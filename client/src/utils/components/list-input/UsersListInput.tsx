@@ -6,8 +6,9 @@ import ListItemText from "@material-ui/core/ListItemText";
 import { useInputState } from "utils/hooks";
 
 import { ListInput } from "./ListInput";
-import { getUserName, UserAvatar } from "../UserAvatar";
+import { UserAvatar } from "../UserAvatar";
 import { AsyncAutocomplete } from "../AsyncAutocomplete";
+import { userToText } from "utils/general";
 
 interface Props {
   users: orch.UserData[] | undefined;
@@ -33,7 +34,7 @@ export function UsersListInput({ users, optionsProvider, ...listProps }: Props) 
       {({ onAdded }) => (
         <AsyncAutocomplete
           optionsProvider={filteredOptionsProvider}
-          getOptionLabel={getUserName}
+          getOptionLabel={userToText}
           value={null}
           inputValue={inputValue}
           onInputChange={setInputValue as any}
@@ -55,7 +56,7 @@ function getUserListItem(user: orch.UserData) {
       <ListItemAvatar key={user.id}>
         <UserAvatar user={user} />
       </ListItemAvatar>
-      <ListItemText primary={`${user.firstName} ${user.lastName}`} />
+      <ListItemText primary={userToText(user)} />
     </>
   );
 }

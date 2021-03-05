@@ -56,27 +56,7 @@ namespace Orchestrate.API.Controllers.Director
             return Ok();
         }
 
-        [HttpPut("{compositionId}/roles")]
-        public async Task<IActionResult> SetCompositionRoles([FromRoute] int groupId, [FromRoute] int compositionId, [FromBody] int[] roleIds)
-        {
-            var composition = await DbContext.Compositions
-                .Include(_ => _.SheetMusics)
-                .FirstOrDefaultAsync(_ => _.GroupId == groupId && _.Id == compositionId);
-
-            if (composition == null) throw new ArgumentException("Composition does not exist");
-
-            composition.SheetMusics = roleIds.GroupJoin(composition.SheetMusics, _ => _, _ => _.RoleId,
-                (roleId, sheetmusics) => sheetmusics.SingleOrDefault() ?? new SheetMusic
-                {
-                    RoleId = roleId
-                }).ToList();
-
-            await DbContext.SaveChangesAsync();
-
-            return Ok();
-        }
-
-        [HttpPost("{compositionId}/{roleId}/file")]
+        [HttpPost("{compositionId}/{roleId}")]
         public async Task<IActionResult> UploadSheetMusicFile([FromRoute] int groupId, [FromRoute] int compositionId, [FromRoute] int roleId, IFormFile file)
         {
             using var stream = new MemoryStream((int)file.Length);
@@ -90,8 +70,7 @@ namespace Orchestrate.API.Controllers.Director
                 {
                     GroupId = groupId,
                     CompositionId = compositionId,
-                    RoleId = roleId,
-                    File = stream.ToArray()
+                    RoleId = roleId
                 };
                 DbContext.SheetMusics.Add(sheetMusic);
             }

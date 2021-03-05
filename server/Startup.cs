@@ -34,7 +34,9 @@ namespace Orchestrate.API
             services.Configure<JwtOptions>(Configuration);
             services.Configure<PasswordHashOptions>(Configuration);
 
-            services.AddDbContext<OrchestrateContext>(builder => builder.UseNpgsql(Configuration.GetConnectionString("OrchestrateDb")));
+            services.AddDbContext<OrchestrateContext>(builder =>
+                builder.UseNpgsql(Configuration.GetConnectionString("OrchestrateDb"))
+                       .UseSnakeCaseNamingConvention());
             services.AddScoped<OrchestrateDbInitializer>();
 
             services.AddAuthentication(c =>

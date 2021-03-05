@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Dialog from "@material-ui/core/Dialog";
@@ -51,11 +51,11 @@ interface ContentProps {
 function AdminAppContent({ token }: ContentProps) {
   const classes = useStyles();
   const [createdUser, setCreatedUser] = useState<Required<UserDataWithTempPassword>>();
-  const [users, refreshUsers, changeUser, deleteUser] = useCRUDApi<orch.UserData>(
+  const [users, _refreshUsers, changeUser, deleteUser] = useCRUDApi<orch.UserData>(
     token,
     "/admin/users"
   );
-  const [groups, refreshGroups, changeGroup, deleteGroup, setUsersQuery] = useCRUDApi<
+  const [groups, _refreshGroups, changeGroup, deleteGroup, setUsersQuery] = useCRUDApi<
     orch.GroupData,
     orch.GroupPayload
   >(token, "/admin/groups");

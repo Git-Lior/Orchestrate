@@ -2,7 +2,7 @@ import React, { useState, useCallback } from "react";
 import { Route, Switch, useHistory, useRouteMatch } from "react-router-dom";
 
 import CompositionsPanel from "./CompositionsPanel";
-import SheetMusicPanel from "./SheetMusicPanel";
+import SheetMusicsPanel from "./SheetMusicsPanel";
 
 type Props = Required<orch.PageProps>;
 
@@ -35,8 +35,8 @@ export default function GroupCompositionsPage({ user, userInfo, group }: Props) 
       />
       <Route
         exact
-        path={[`${path}/:compositionId/`, `${path}/:compositionId/:roleId`]}
-        children={<SheetMusicPanel user={user} group={group} userInfo={userInfo} />}
+        path={`${path}/:compositionId/:roleId?`}
+        children={<SheetMusicsPanel user={user} group={group} userInfo={userInfo} />}
       />
     </Switch>
   );

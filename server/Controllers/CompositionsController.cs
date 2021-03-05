@@ -52,8 +52,8 @@ namespace Orchestrate.API.Controllers
         public async Task<IActionResult> GetFullComposition([FromRoute] int groupId, [FromRoute] int compositionId)
         {
             var composition = await DbContext.Compositions
-                .Where(c => c.GroupId == groupId && c.Id == compositionId
-                            && (IsUserDirector || IsCompositionRelevantToMember(c)))
+                .Where(c => c.GroupId == groupId && c.Id == compositionId)
+                .Include(c => c.SheetMusics.Where(s => MemberRoles.Any(r => r.Id == s.RoleId)))
                 .ProjectTo<FullCompositionData>(MapperConfig)
                 .FirstOrDefaultAsync();
 

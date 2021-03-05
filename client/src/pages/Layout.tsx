@@ -21,6 +21,7 @@ import smallLogo from "assets/logo-small.png";
 
 import { useApiFetch } from "utils/hooks";
 import { groupPages, defaultGroupPage } from "./group";
+import { userToText } from "utils/general";
 
 const useStyles = makeStyles(layoutStyles);
 
@@ -126,9 +127,7 @@ export default function Layout({ user, onLogout, page: Page }: Props) {
             ))}
           </Tabs>
           <div className={classes.spacer} />
-          <Typography className={classes.username}>
-            {user.firstName} {user.lastName}
-          </Typography>
+          <Typography className={classes.username}>{userToText(user)}</Typography>
           <IconButton color="inherit">
             <Badge
               badgeContent={10}

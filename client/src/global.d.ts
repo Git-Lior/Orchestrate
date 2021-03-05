@@ -61,20 +61,14 @@ declare namespace orch {
   }
 
   interface Composition extends CompositionData {
-    sheetMusics: SheetMusic[];
-  }
-
-  interface SheetMusic {
-    role: group.Role;
-    fileUrl: string;
+    roles: Role[];
   }
 
   interface SheetMusicComment {
-    commentId: number;
-    user: {
-      name: string;
-      director: boolean;
-    };
+    id: number;
+    user: UserData;
+    createdAt: Date;
+    updatedAt: Date;
     content: string;
   }
 

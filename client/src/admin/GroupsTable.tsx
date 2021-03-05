@@ -1,12 +1,7 @@
 import React, { useCallback } from "react";
 
-import {
-  AutocompleteDialogRow,
-  ColDef,
-  EditableTable,
-  getUserName,
-  TextDialogRow,
-} from "utils/components";
+import { userToText } from "utils/general";
+import { AutocompleteDialogRow, ColDef, EditableTable, TextDialogRow } from "utils/components";
 
 const DATA_COLUMNS: ColDef[] = [
   { field: "id", headerName: "ID", width: 75 },
@@ -15,7 +10,7 @@ const DATA_COLUMNS: ColDef[] = [
     field: "manager",
     headerName: "Manager",
     flex: 1,
-    valueGetter: _ => getUserName(_.row.manager),
+    valueGetter: _ => userToText(_.row.manager),
   },
 ];
 
@@ -57,7 +52,7 @@ export default function GroupsTable({ groups, users, onGroupChange, onGroupDelet
             fieldKey="manager"
             label="Manager"
             options={users}
-            getOptionLabel={getUserName}
+            getOptionLabel={userToText}
             {...rowProps}
           />
         </>

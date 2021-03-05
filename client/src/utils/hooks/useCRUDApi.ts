@@ -53,7 +53,7 @@ export function useCRUDApi<TData extends CRUDItem, TPayload = TData>(
       refresh();
       return result;
     },
-    [items, apiFetch, refresh]
+    [apiFetch, refresh]
   );
 
   const update = useCallback(
@@ -69,7 +69,7 @@ export function useCRUDApi<TData extends CRUDItem, TPayload = TData>(
       refresh();
       return result;
     },
-    [items, apiFetch, refresh]
+    [apiFetch, refresh]
   );
 
   const change = useCallback(
@@ -83,7 +83,7 @@ export function useCRUDApi<TData extends CRUDItem, TPayload = TData>(
       await apiFetch(id.toString(), { method: "DELETE" }, "none");
       await refresh();
     },
-    [items, apiFetch, refresh]
+    [apiFetch, refresh]
   );
 
   return [items, refresh, change, remove, setQuery];

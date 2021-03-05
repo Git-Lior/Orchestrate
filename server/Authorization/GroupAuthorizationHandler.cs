@@ -34,10 +34,13 @@ namespace Orchestrate.API.Authorization
 
             var group = await _context.Groups
                 .AsNoTracking()
+                .Include(_ => _.Roles.Where(_ => _.Id == roleId))
                 .Include(_ => _.Directors.Where(_ => _.Id == user.Id))
                 .Include(_ => _.Members.Where(_ => _.UserId == user.Id)).ThenInclude(_ => _.Role)
                 .FirstOrDefaultAsync(_ => _.Id == groupId);
             if (group == null) throw new ArgumentException("Group does not exist");
+
+            if (roleId > 0 && !group.Roles.Any()) throw new ArgumentException("Role does not exist in group");
 
             var isUserManager = group.ManagerId == user.Id;
             var isUserDirector = group.Directors.Any();

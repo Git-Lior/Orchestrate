@@ -15,12 +15,12 @@ namespace Orchestrate.API.Controllers
     [Authorize(Policy = GroupRolesPolicy.DirectorOrMember)]
     public class SheetMusicController : OrchestrateController
     {
-        [BindProperty]
-        private int GroupId { get; set; }
-        [BindProperty]
-        private int CompositionId { get; set; }
-        [BindProperty]
-        private int RoleId { get; set; }
+        [FromRoute]
+        public int GroupId { get; set; }
+        [FromRoute]
+        public int CompositionId { get; set; }
+        [FromRoute]
+        public int RoleId { get; set; }
 
         private IQueryable<SheetMusic> SheetMusicQuery =>
             DbContext.SheetMusics.Where(_ => _.GroupId == GroupId
@@ -29,7 +29,7 @@ namespace Orchestrate.API.Controllers
 
         public SheetMusicController(IServiceProvider provider) : base(provider) { }
 
-        [HttpGet("/file")]
+        [HttpGet("file")]
         public async Task<IActionResult> GetSheetMusicFile()
         {
             var sheetMusicFile = await SheetMusicQuery.Select(_ => _.File).SingleOrDefaultAsync();
@@ -39,7 +39,7 @@ namespace Orchestrate.API.Controllers
             return File(sheetMusicFile, "application/pdf");
         }
 
-        [HttpGet("/comments")]
+        [HttpGet("comments")]
         public async Task<IActionResult> GetComments()
         {
             var sheetMusic = await SheetMusicQuery.Include(_ => _.Comments).ThenInclude(_ => _.User)
@@ -50,7 +50,7 @@ namespace Orchestrate.API.Controllers
             return Ok(ModelMapper.Map<IEnumerable<SheetMusicCommentData>>(sheetMusic.Comments));
         }
 
-        [HttpPost("/comments")]
+        [HttpPost("comments")]
         public async Task<IActionResult> AddComment([FromBody] string content)
         {
             var sheetMusic = await SheetMusicQuery.SingleOrDefaultAsync();
@@ -70,7 +70,7 @@ namespace Orchestrate.API.Controllers
             return Ok();
         }
 
-        [HttpPut("/comments/{commentId}")]
+        [HttpPut("comments/{commentId}")]
         public async Task<IActionResult> UpdateComment([FromRoute] int commentId, [FromBody] string content)
         {
             var comment = await SheetMusicQuery
@@ -88,7 +88,7 @@ namespace Orchestrate.API.Controllers
             return Ok();
         }
 
-        [HttpDelete("/comment/{commentId}")]
+        [HttpDelete("comment/{commentId}")]
         public async Task<IActionResult> DeleteComment([FromRoute] int commentId)
         {
             var comment = await SheetMusicQuery
