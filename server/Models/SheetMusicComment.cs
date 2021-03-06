@@ -12,13 +12,12 @@ namespace Orchestrate.API.Models
         public int UserId { get; set; }
         public User User { get; set; }
 
-        [Required, StringLength(300, MinimumLength = 1)]
+        [StringLength(300, MinimumLength = 1)]
         public string Content { get; set; }
 
         [Required]
         public DateTime CreatedAt { get; set; }
         
-        [Required]
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }

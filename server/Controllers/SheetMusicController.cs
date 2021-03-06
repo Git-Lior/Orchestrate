@@ -6,6 +6,7 @@ using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -51,7 +52,7 @@ namespace Orchestrate.API.Controllers
         }
 
         [HttpPost("comments")]
-        public async Task<IActionResult> AddComment([FromBody] string content)
+        public async Task<IActionResult> AddComment([FromBody, StringLength(300, MinimumLength = 1)] string content)
         {
             var sheetMusic = await SheetMusicQuery.SingleOrDefaultAsync();
 
@@ -61,8 +62,7 @@ namespace Orchestrate.API.Controllers
             {
                 UserId = RequestingUserId,
                 Content = content,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
+                CreatedAt = DateTime.Now
             });
 
             await DbContext.SaveChangesAsync();
@@ -73,10 +73,11 @@ namespace Orchestrate.API.Controllers
         [HttpPut("comments/{commentId}")]
         public async Task<IActionResult> UpdateComment([FromRoute] int commentId, [FromBody] string content)
         {
-            var comment = await SheetMusicQuery
-                .SelectMany(_ => _.Comments.Where(_ => _.UserId == RequestingUserId))
-                .Where(_ => _.Id == commentId)
+            var sheetMusic = await SheetMusicQuery
+                .Include(_ => _.Comments.Where(_ => _.Id == commentId && _.UserId == RequestingUserId))
                 .SingleOrDefaultAsync();
+
+            var comment = sheetMusic?.Comments.SingleOrDefault();
 
             if (comment == null) throw new ArgumentNullException("Comment does not exist");
 
@@ -88,17 +89,18 @@ namespace Orchestrate.API.Controllers
             return Ok();
         }
 
-        [HttpDelete("comment/{commentId}")]
+        [HttpDelete("comments/{commentId}")]
         public async Task<IActionResult> DeleteComment([FromRoute] int commentId)
         {
-            var comment = await SheetMusicQuery
-                .SelectMany(_ => _.Comments.Where(_ => _.UserId == RequestingUserId))
-                .Where(_ => _.Id == commentId)
+            var sheetMusic = await SheetMusicQuery
+                .Include(_ => _.Comments.Where(_ => _.Id == commentId && _.UserId == RequestingUserId))
                 .SingleOrDefaultAsync();
+
+            var comment = sheetMusic?.Comments.SingleOrDefault();
 
             if (comment == null) throw new ArgumentNullException("Comment does not exist");
 
-            DbContext.Remove(comment);
+            comment.Content = null;
             await DbContext.SaveChangesAsync();
 
             return Ok();

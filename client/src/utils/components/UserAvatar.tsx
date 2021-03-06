@@ -2,7 +2,10 @@ import React from "react";
 
 import Avatar from "@material-ui/core/Avatar";
 import makeStyles from "@material-ui/core/styles/makeStyles";
+import Tooltip from "@material-ui/core/Tooltip";
+
 import { AppTheme } from "AppTheme";
+import { userToText } from "utils/general";
 
 const useStyles = makeStyles<AppTheme, Props>(({ palette }) => {
   const bgColor = palette.background.default;
@@ -32,9 +35,11 @@ export function UserAvatar(props: Props) {
   const { firstName, lastName } = props.user;
 
   return (
-    <Avatar className={classes.avatar}>
-      {firstName[0].toUpperCase()}
-      {lastName[0].toUpperCase()}
-    </Avatar>
+    <Tooltip title={userToText(props.user)} placement="top" arrow>
+      <Avatar className={classes.avatar}>
+        {firstName[0].toUpperCase()}
+        {lastName[0].toUpperCase()}
+      </Avatar>
+    </Tooltip>
   );
 }

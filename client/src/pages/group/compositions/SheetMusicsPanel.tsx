@@ -19,7 +19,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 
 const useStyles = makeStyles({
   container: { display: "flex", height: "100%" },
-  roles: { padding: "1em", marginRight: "2em", minWidth: "25rem" },
+  roles: { padding: "2rem", marginRight: "4rem", minWidth: "25rem" },
 });
 
 interface Props {

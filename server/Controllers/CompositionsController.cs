@@ -33,8 +33,7 @@ namespace Orchestrate.API.Controllers
             var compositions = DbContext.Compositions
                 .Where(c => c.GroupId == groupId
                             && (title == null || c.Title.Contains(title))
-                            && (genre == null || c.Genre == genre)
-                            && (IsUserDirector || IsCompositionRelevantToMember(c)));
+                            && (genre == null || c.Genre == genre));
 
             if (onlyInUpcomingConcert)
             {
@@ -45,7 +44,19 @@ namespace Orchestrate.API.Controllers
                 );
             }
 
-            return Ok(await compositions.ProjectTo<CompositionData>(MapperConfig).ToListAsync());
+            if (IsUserDirector)
+                return Ok(await compositions.ProjectTo<CompositionData>(MapperConfig).ToListAsync());
+
+            IEnumerable<Composition> result = await compositions
+                .Include(_ => _.Uploader)
+                .Include(_ => _.SheetMusics)
+                .AsNoTracking().ToListAsync();
+
+            var rolesSet = new HashSet<int>(MemberRoles.Select(_ => _.Id));
+
+            result = result.Where(c => c.SheetMusics.Any(s => rolesSet.Contains(s.RoleId)));
+
+            return Ok(ModelMapper.Map<IEnumerable<CompositionData>>(result));
         }
 
         [HttpGet("{compositionId}")]
@@ -61,7 +72,5 @@ namespace Orchestrate.API.Controllers
 
             return Ok(composition);
         }
-
-        private bool IsCompositionRelevantToMember(Composition c) => c.SheetMusics.Any(s => MemberRoles.Any(r => r.Id == s.RoleId));
     }
 }
