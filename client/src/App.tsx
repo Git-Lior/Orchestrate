@@ -7,11 +7,14 @@ import HomePage from "pages/home";
 import Layout from "pages/Layout";
 import PageNotFound from "pages/PageNotFound";
 
+import { useApiFetch } from "utils/hooks";
+
 const TOKEN_STORAGE_KEY = "user_token";
 
 function App() {
   const { pathname } = useLocation();
   const [user, setUser] = useState<orch.User>();
+  const apiFetch = useApiFetch(user, "/auth");
 
   useEffect(() => {
     const token = localStorage.getItem(TOKEN_STORAGE_KEY);
@@ -29,6 +32,19 @@ function App() {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
   }, [setUser]);
 
+  const changePassword = useCallback(
+    async (oldPassword: string, newPassword: string) =>
+      apiFetch(
+        "changePassword",
+        {
+          method: "POST",
+          body: JSON.stringify({ oldPassword, newPassword }),
+        },
+        "none"
+      ).then(() => setUser(u => ({ ...u!, isPasswordTemporary: false }))),
+    [apiFetch]
+  );
+
   const onUserLogin = useCallback(
     (result: orch.User, remember: boolean) => {
       setUser(result);
@@ -45,13 +61,36 @@ function App() {
       <Route
         exact
         path="/"
-        children={<Layout user={user} onLogout={logoutUser} page={HomePage} />}
+        children={
+          <Layout
+            user={user}
+            onLogout={logoutUser}
+            onPasswordChange={changePassword}
+            page={HomePage}
+          />
+        }
       />
       <Route
         path="/group/:groupId/:groupPage"
-        children={<Layout user={user} onLogout={logoutUser} page={GroupPage} />}
+        children={
+          <Layout
+            user={user}
+            onLogout={logoutUser}
+            onPasswordChange={changePassword}
+            page={GroupPage}
+          />
+        }
       />
-      <Route children={<Layout user={user} onLogout={logoutUser} page={PageNotFound} />} />
+      <Route
+        children={
+          <Layout
+            user={user}
+            onLogout={logoutUser}
+            onPasswordChange={changePassword}
+            page={PageNotFound}
+          />
+        }
+      />
     </Switch>
   );
 }

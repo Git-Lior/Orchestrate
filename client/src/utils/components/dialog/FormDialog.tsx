@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Dialog from "@material-ui/core/Dialog";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
-import Typography from "@material-ui/core/Typography";
+import Typography, { TypographyProps } from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
@@ -32,6 +32,8 @@ interface Props {
   open: boolean;
   title: string;
   children: React.ReactNode;
+  titleVariant?: TypographyProps["variant"];
+  fullWidth?: boolean;
   loading?: boolean;
   error?: orch.Error;
   dialogButtons?: React.ReactNode;
@@ -42,6 +44,8 @@ interface Props {
 export function FormDialog({
   open,
   title,
+  titleVariant,
+  fullWidth,
   loading,
   error,
   children,
@@ -52,7 +56,12 @@ export function FormDialog({
   const classes = useStyles();
 
   return (
-    <Dialog open={open} onEscapeKeyDown={onClose}>
+    <Dialog
+      open={open}
+      onEscapeKeyDown={onClose}
+      fullWidth={fullWidth}
+      maxWidth={fullWidth ? false : "sm"}
+    >
       {!open ? (
         <div />
       ) : (
@@ -65,7 +74,7 @@ export function FormDialog({
           >
             <CloseIcon />
           </IconButton>
-          <Typography variant="h4" className={classes.dialogTitle}>
+          <Typography variant={titleVariant ?? "h4"} className={classes.dialogTitle}>
             {title}
           </Typography>
           {children}

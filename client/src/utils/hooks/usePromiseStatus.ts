@@ -16,7 +16,7 @@ export function usePromiseStatus(): PromiseStatus {
     return () => {
       isMounted.current = false;
     };
-  }, [isMounted]);
+  }, []);
 
   const clearError = useCallback(() => setError(undefined), [setError]);
 

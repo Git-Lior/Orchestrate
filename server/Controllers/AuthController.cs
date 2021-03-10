@@ -74,6 +74,7 @@ namespace Orchestrate.API.Controllers
             if (!success) return BadRequest(new { Error = "Incorrect Password" });
 
             user.PasswordHash = _passwordProvider.HashPassword(payload.NewPassword);
+            user.IsPasswordTemporary = false;
             await DbContext.SaveChangesAsync();
 
             return Ok();

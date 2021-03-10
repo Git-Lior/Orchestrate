@@ -1,17 +1,16 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import Container from "@material-ui/core/Container";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
-import Button from "@material-ui/core/Button";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 
-import styles from "./styles";
-import { useApiFetch, useInputState, usePromiseStatus } from "utils/hooks";
+import { useApiFetch, usePromiseStatus } from "utils/hooks";
 import logo from "assets/logo.png";
+import styles from "./styles";
+
+import LoginForm from "./LoginForm";
+import ChangePasswordForm from "./ChangePasswordForm";
 
 const useStyles = makeStyles(styles);
 
@@ -21,82 +20,56 @@ interface LoginProps {
 
 function LoginPage({ onLogin }: LoginProps) {
   const classes = useStyles();
-  const apiFetch = useApiFetch(undefined, "/auth");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [email, setEmail] = useInputState();
-  const [password, setPassword] = useInputState();
-  const [loading, error, setLoginPromise] = usePromiseStatus();
+  const [loading, error, setPromise] = usePromiseStatus();
+  const [user, setUser] = useState<orch.User>();
+  const apiFetch = useApiFetch(user, "/auth");
+  const loginOptions = useRef<{ password: string; rememberMe: boolean }>();
 
-  const _onFormSubmit = useCallback(
-    (e: React.FormEvent<any>) => {
-      e.preventDefault();
+  useEffect(() => {
+    if (user && !user.isPasswordTemporary) onLogin(user, !!loginOptions.current?.rememberMe);
+  }, [onLogin, user]);
 
-      return setLoginPromise(
+  const handleLogin = useCallback(
+    (email: string, password: string, rememberMe: boolean) => {
+      loginOptions.current = { password, rememberMe };
+      return setPromise(
         apiFetch("login", {
           method: "POST",
           body: JSON.stringify({ email, password }),
-        }).then(result => onLogin(result, rememberMe))
+        }).then(setUser)
       );
     },
-    [rememberMe, email, password, setLoginPromise, onLogin, apiFetch]
+    [setPromise, apiFetch]
   );
 
-  const changeRememberMe = useCallback((_, checked: boolean) => setRememberMe(checked), [
-    setRememberMe,
-  ]);
+  const handleChangePassword = useCallback(
+    (newPassword: string) =>
+      setPromise(
+        apiFetch(
+          "changePassword",
+          {
+            method: "POST",
+            body: JSON.stringify({ oldPassword: loginOptions.current?.password, newPassword }),
+          },
+          "none"
+        ).then(() => setUser(u => ({ ...u!, isPasswordTemporary: false })))
+      ),
+    [apiFetch, setPromise]
+  );
 
   return (
     <div className={classes.container}>
       <img src={logo} className={classes.appLogo} alt="Orchestrate" />
       <Container maxWidth="sm">
         <Paper className={classes.loginArea} elevation={5}>
-          <Typography variant="h4" className={classes.loginTitle}>
-            Log in
-          </Typography>
-          <form onSubmit={_onFormSubmit}>
-            <TextField
-              value={email}
-              onChange={setEmail}
-              required
-              fullWidth
-              autoFocus
-              variant="outlined"
-              margin="normal"
-              id="email"
-              name="email"
-              autoComplete="email"
-              label="Email address"
-            />
-            <TextField
-              value={password}
-              onChange={setPassword}
-              type="password"
-              required
-              fullWidth
-              variant="outlined"
-              margin="normal"
-              id="password"
-              name="password"
-              label="Password"
-              autoComplete="current-password"
-            />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" onChange={changeRememberMe} />}
-              label="Remember me"
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.submitButton}
-            >
-              Log in
-            </Button>
-          </form>
+          {user?.isPasswordTemporary ? (
+            <ChangePasswordForm user={user} onChangePassword={handleChangePassword} />
+          ) : (
+            <LoginForm onLogin={handleLogin} />
+          )}
           {loading && (
             <Typography variant="body1" className={classes.loginMessage}>
-              Logging in...
+              {!user ? "Logging in..." : "Changing Password..."}
             </Typography>
           )}
           {error && (
