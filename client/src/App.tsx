@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Redirect, Route, Switch, useLocation } from "react-router-dom";
+import { Redirect, Route, Switch, useHistory, useLocation } from "react-router-dom";
 
 import LoginPage from "pages/login";
 import GroupPage from "pages/group";
@@ -12,6 +12,7 @@ import { useApiFetch } from "utils/hooks";
 const TOKEN_STORAGE_KEY = "user_token";
 
 function App() {
+  const history = useHistory();
   const { pathname } = useLocation();
   const [user, setUser] = useState<orch.User>();
   const apiFetch = useApiFetch(user, "/auth");
@@ -30,7 +31,8 @@ function App() {
   const logoutUser = useCallback(() => {
     setUser(undefined);
     localStorage.removeItem(TOKEN_STORAGE_KEY);
-  }, [setUser]);
+    history.push("/");
+  }, [setUser, history]);
 
   const changePassword = useCallback(
     async (oldPassword: string, newPassword: string) =>

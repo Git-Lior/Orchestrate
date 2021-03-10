@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
@@ -6,7 +7,6 @@ using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
 using Orchestrate.API.Services.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -26,21 +26,16 @@ namespace Orchestrate.API.Controllers.Admin
         [HttpGet]
         public async Task<IActionResult> Users([FromQuery] int groupId)
         {
-            if (groupId <= 0)
-                return Ok(ModelMapper.Map<IEnumerable<FullUserData>>(await DbContext.Users.AsNoTracking().ToListAsync()));
+            var usersQuery = DbContext.Users.AsNoTracking();
 
-            var group = await DbContext.Groups.AsNoTracking()
-                .Include(_ => _.Manager)
-                .Include(_ => _.Directors)
-                .Include(_ => _.Members).ThenInclude(_ => _.User)
-                .FirstOrDefaultAsync(_ => _.Id == groupId);
+            if (groupId > 0)
+                usersQuery = usersQuery.Where(u =>
+                       u.ManagingGroups.Any(g => g.Id == groupId)
+                    || u.DirectorOfGroups.Any(g => g.Id == groupId)
+                    || u.MemberOfGroups.Any(g => g.GroupId == groupId));
 
-            var users = new List<User> { group.Manager }
-                .Concat(group.Directors)
-                .Concat(group.Members.Select(_ => _.User))
-                .Distinct();
 
-            return Ok(ModelMapper.Map<IEnumerable<FullUserData>>(users));
+            return Ok(await usersQuery.ProjectTo<FullUserData>(MapperConfig).ToListAsync());
         }
 
         [HttpPost]

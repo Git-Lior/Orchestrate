@@ -1,9 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Collections.Generic;
 
 namespace Orchestrate.API.Models
 {
-    [Table("group_member")]
-    public class GroupMember
+    public class GroupRole
     {
         public int GroupId { get; set; }
         public Group Group { get; set; }
@@ -11,7 +10,6 @@ namespace Orchestrate.API.Models
         public int RoleId { get; set; }
         public Role Role { get; set; }
 
-        public int UserId { get; set; }
-        public User User { get; set; }
+        public ICollection<User> Members { get; set; }
     }
 }

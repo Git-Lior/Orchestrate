@@ -34,17 +34,19 @@ namespace Orchestrate.API.Authorization
 
             var group = await _context.Groups
                 .AsNoTracking()
-                .Include(_ => _.Roles.Where(_ => _.Id == roleId))
+                .Include(_ => _.Roles)
                 .Include(_ => _.Directors.Where(_ => _.Id == user.Id))
-                .Include(_ => _.Members.Where(_ => _.UserId == user.Id)).ThenInclude(_ => _.Role)
+                .Include(_ => _.Roles).ThenInclude(_ => _.Role)
+                .Include(_ => _.Roles).ThenInclude(_ => _.Members)
                 .FirstOrDefaultAsync(_ => _.Id == groupId);
             if (group == null) throw new ArgumentException("Group does not exist");
 
-            if (roleId > 0 && !group.Roles.Any()) throw new ArgumentException("Role does not exist in group");
+            if (roleId > 0 && !group.Roles.Any(_ => _.RoleId == roleId))
+                throw new ArgumentException("Role does not exist in group");
 
             var isUserManager = group.ManagerId == user.Id;
             var isUserDirector = group.Directors.Any();
-            var memberRoles = group.Members.Select(_ => _.Role);
+            var memberRoles = group.Roles.Where(_ => _.Members.Any(_ => _.Id == user.Id)).Select(_ => _.Role);
 
             _httpContextAccessor.HttpContext.Items["IsUserManager"] = isUserManager;
             _httpContextAccessor.HttpContext.Items["IsUserDirector"] = isUserDirector;

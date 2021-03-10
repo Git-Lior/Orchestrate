@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -17,7 +16,6 @@ namespace Orchestrate.API.Models
         public string Email { get; set; }
     }
 
-    [Table("user")]
     public class User : UserPayload
     {
         public int Id { get; set; }
@@ -29,9 +27,9 @@ namespace Orchestrate.API.Models
 
         [InverseProperty("Manager")]
         public ICollection<Group> ManagingGroups { get; set; }
-
-        [InverseProperty("Directors")]
         public ICollection<Group> DirectorOfGroups { get; set; }
-        public ICollection<GroupMember> MemberOfGroups { get; set; }
+        public ICollection<GroupRole> MemberOfGroups { get; set; }
+
+        public ICollection<ConcertAttendance> Attendances { get; set; }
     }
 }

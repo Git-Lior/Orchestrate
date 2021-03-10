@@ -60,50 +60,35 @@ namespace Orchestrate.API.Controllers.Manager
 
             var dbRole = await DbContext.Roles.FirstOrDefaultAsync(_ => _.Section == role.Section && _.Num == role.Num);
 
-            if (group.Roles.Contains(dbRole))
-                throw new ArgumentException("Role already exists in group");
-
             if (dbRole == null)
             {
                 dbRole = ModelMapper.Map<Role>(role);
                 DbContext.Roles.Add(dbRole);
                 await DbContext.SaveChangesAsync();
             }
+            else if (group.Roles.Any(_ => _.RoleId == dbRole.Id))
+                throw new ArgumentException("Role already exists in group");
 
-            group.Roles.Add(dbRole);
+            var groupRole = new GroupRole { Role = dbRole };
+            group.Roles.Add(groupRole);
             await DbContext.SaveChangesAsync();
 
-            return Ok(new GroupRoleData
-            {
-                Id = dbRole.Id,
-                Section = dbRole.Section,
-                Num = dbRole.Num,
-                Members = new List<UserData>()
-            });
+            return Ok(ModelMapper.Map<GroupRoleData>(groupRole));
         }
 
-        // TODO
         [HttpDelete("roles/{roleId}")]
         public async Task<IActionResult> RemoveRole([FromRoute] int groupId, [FromRoute] int roleId)
         {
-            var group = await DbContext.Groups
-                .Include(_ => _.Roles.Where(r => r.Id == roleId)).ThenInclude(_ => _.InGroups)
-                .Include(_ => _.Members.Where(m => m.RoleId == roleId))
-                .FirstAsync(_ => _.Id == groupId);
+            var groupRole = await DbContext.GroupRoles
+                .Include(_ => _.Role)
+                .SingleAsync(_ => _.GroupId == groupId && _.RoleId == roleId);
 
-            var dbRole = group.Roles.FirstOrDefault();
+            var groupCount = await DbContext.Groups.Where(_ => _.Roles.Any(_ => _.RoleId == roleId)).CountAsync();
 
-            if (dbRole == null) throw new ArgumentException("Role doesn't exist");
-
-            if (dbRole.InGroups.Count == 1)
-            {
-                DbContext.Remove(dbRole);
-            }
+            if (groupCount <= 1)
+                DbContext.Remove(groupRole.Role);
             else
-            {
-                group.Roles.Remove(dbRole);
-                DbContext.RemoveRange(group.Members);
-            }
+                DbContext.Remove(groupRole);
 
             await DbContext.SaveChangesAsync();
 
@@ -116,15 +101,11 @@ namespace Orchestrate.API.Controllers.Manager
             var dbUser = await DbContext.Users.FindAsync(memberId);
             if (dbUser == null) throw new ArgumentException("User doesn't exist");
 
-            var group = await DbContext.Groups
-                .Include(_ => _.Roles)
+            var groupRole = await DbContext.GroupRoles
                 .Include(_ => _.Members)
-                .FirstAsync(_ => _.Id == groupId);
+                .SingleAsync(_ => _.GroupId == groupId && _.RoleId == roleId);
 
-            var role = group.Roles.FirstOrDefault(_ => _.Id == roleId);
-            if (role == null) throw new ArgumentException("Role doesn't exist");
-
-            group.Members.Add(new GroupMember { Group = group, Role = role, User = dbUser });
+            groupRole.Members.Add(dbUser);
             await DbContext.SaveChangesAsync();
 
             return Ok();
@@ -133,12 +114,13 @@ namespace Orchestrate.API.Controllers.Manager
         [HttpDelete("roles/{roleId}/members/{memberId}")]
         public async Task<IActionResult> RemoveMember([FromRoute] int groupId, [FromRoute] int roleId, [FromRoute] int memberId)
         {
-            var group = await DbContext.Groups.Include(_ => _.Members).FirstAsync(_ => _.Id == groupId);
+            var groupRole = await DbContext.GroupRoles
+                .Include(_ => _.Members.Where(_ => _.Id == memberId))
+                .SingleAsync(_ => _.GroupId == groupId && _.RoleId == roleId);
 
-            var member = group.Members.FirstOrDefault(_ => _.UserId == memberId && _.RoleId == roleId);
-            if (member == null) throw new ArgumentException("Member doesn't exist in this role");
+            if (!groupRole.Members.Any()) throw new ArgumentException("Member doesn't exist in this role");
 
-            group.Members.Remove(member);
+            groupRole.Members.Clear();
             await DbContext.SaveChangesAsync();
 
             return Ok();

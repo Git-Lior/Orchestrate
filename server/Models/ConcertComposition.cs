@@ -2,7 +2,6 @@
 
 namespace Orchestrate.API.Models
 {
-    [Table("concert_composition")]
     public class ConcertComposition
     {
         public int GroupId { get; set; }

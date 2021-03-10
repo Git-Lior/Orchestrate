@@ -20,40 +20,19 @@ namespace Orchestrate.API.Controllers
         {
             if (await DbContext.Users.AllAsync(_ => _.Id != RequestingUserId)) throw new UserNotExistException();
 
-            return Ok(await DbContext.Groups.Where(_ => _.ManagerId == RequestingUserId)
-                .Union(DbContext.Groups.Where(_ => _.Directors.Any(_ => _.Id == RequestingUserId)))
-                .Union(DbContext.Groups.Where(_ => _.Members.Any(_ => _.UserId == RequestingUserId)))
-                .OrderBy(_ => _.Name)
-                .ProjectTo<GroupData>(MapperConfig)
-                .ToListAsync());
+            return Ok(await DbContext.Groups
+                        .Where(_ => _.ManagerId == RequestingUserId
+                                    || _.Directors.Any(_ => _.Id == RequestingUserId)
+                                    || _.Roles.Any(_ => _.Members.Any(_ => _.Id == RequestingUserId)))
+                        .OrderBy(_ => _.Name)
+                        .ProjectTo<GroupData>(MapperConfig)
+                        .ToListAsync());
         }
 
         [HttpGet("{groupId}")]
         public async Task<IActionResult> GetGroupInfo(int groupId)
         {
-            var group = await DbContext.Groups.AsNoTracking()
-                .Include(_ => _.Manager)
-                .Include(_ => _.Directors)
-                .Include(_ => _.Roles)
-                .Include(_ => _.Members).ThenInclude(_ => _.Role)
-                .Include(_ => _.Members).ThenInclude(_ => _.User)
-                .FirstAsync(_ => _.Id == groupId);
-
-            return Ok(new FullGroupData()
-            {
-                Id = group.Id,
-                Name = group.Name,
-                Manager = ModelMapper.Map<UserData>(group.Manager),
-                Directors = ModelMapper.Map<IEnumerable<UserData>>(group.Directors),
-                Roles = group.Roles.GroupJoin(group.Members, _ => _.Id, _ => _.RoleId,
-                    (role, groupMember) => new GroupRoleData
-                    {
-                        Id = role.Id,
-                        Section = role.Section,
-                        Num = role.Num,
-                        Members = ModelMapper.Map<IEnumerable<UserData>>(groupMember.Select(_ => _.User))
-                    })
-            });
+            return Ok(await DbContext.Groups.ProjectTo<FullGroupData>(MapperConfig).SingleAsync(_ => _.Id == groupId));
         }
     }
 }

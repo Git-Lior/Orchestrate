@@ -19,7 +19,13 @@ namespace Orchestrate.API
             CreateMap<User, LoggedInUserData>();
             CreateMap<User, CreatedUserData>();
 
+            CreateMap<GroupRole, GroupRoleData>()
+                .ForMember(_ => _.Id, o => o.MapFrom(_ => _.Role.Id))
+                .ForMember(_ => _.Section, o => o.MapFrom(_ => _.Role.Section))
+                .ForMember(_ => _.Num, o => o.MapFrom(_ => _.Role.Num));
+
             CreateMap<Group, GroupData>();
+            CreateMap<Group, FullGroupData>();
 
             CreateMap<Composition, CompositionData>();
             CreateMap<Composition, FullCompositionData>()

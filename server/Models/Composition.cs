@@ -16,7 +16,6 @@ namespace Orchestrate.API.Models
         public string Genre { get; set; }
     }
 
-    [Table("composition")]
     public class Composition : CompositionPayload
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -29,6 +28,8 @@ namespace Orchestrate.API.Models
         public User Uploader { get; set; }
 
         public ICollection<SheetMusic> SheetMusics { get; set; }
-        public ICollection<ConcertComposition> ConcertCompositions { get; set; }
+
+        public ICollection<Concert> Concerts { get; set; }
+        public List<ConcertComposition> ConcertCompositions { get; set; }
     }
 }

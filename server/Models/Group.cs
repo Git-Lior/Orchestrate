@@ -13,7 +13,6 @@ namespace Orchestrate.API.Models
         public int ManagerId { get; set; }
     }
 
-    [Table("group")]
     public class Group : GroupPayload
     {
         public int Id { get; set; }
@@ -21,8 +20,7 @@ namespace Orchestrate.API.Models
         public User Manager { get; set; }
 
         public ICollection<User> Directors { get; set; }
-        public ICollection<Role> Roles { get; set; }
-        public ICollection<GroupMember> Members { get; set; }
+        public ICollection<GroupRole> Roles { get; set; }
 
         public ICollection<Composition> Compositions { get; set; }
         public ICollection<Concert> Concerts { get; set; }

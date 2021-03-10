@@ -14,11 +14,8 @@ namespace Orchestrate.API.Models
         public int? Num { get; set; }
     }
 
-    [Table("role")]
     public class Role : RolePayload
     {
         public int Id { get; set; }
-
-        public ICollection<Group> InGroups { get; set; }
     }
 }

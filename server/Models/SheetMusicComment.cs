@@ -7,6 +7,7 @@ namespace Orchestrate.API.Models
     [Table("sheet_music_comment")]
     public class SheetMusicComment
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         public int UserId { get; set; }
@@ -17,7 +18,7 @@ namespace Orchestrate.API.Models
 
         [Required]
         public DateTime CreatedAt { get; set; }
-        
+
         public DateTime? UpdatedAt { get; set; }
     }
 }
