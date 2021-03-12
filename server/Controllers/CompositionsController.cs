@@ -38,9 +38,9 @@ namespace Orchestrate.API.Controllers
             if (onlyInUpcomingConcert)
             {
                 compositions = compositions.Intersect(
-                    DbContext.Concerts.Where(_ => _.GroupId == groupId && _.Date > DateTime.Now)
-                        .SelectMany(_ => _.ConcertCompositions)
-                        .Select(_ => _.Composition)
+                    DbContext.Concerts
+                        .Where(_ => _.GroupId == groupId && _.Date > DateTime.Now)
+                        .SelectMany(_ => _.Compositions)
                 );
             }
 

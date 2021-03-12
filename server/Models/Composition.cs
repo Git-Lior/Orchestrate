@@ -30,6 +30,5 @@ namespace Orchestrate.API.Models
         public ICollection<SheetMusic> SheetMusics { get; set; }
 
         public ICollection<Concert> Concerts { get; set; }
-        public List<ConcertComposition> ConcertCompositions { get; set; }
     }
 }

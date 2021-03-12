@@ -22,7 +22,6 @@ namespace Orchestrate.API.Data
             modelBuilder.Entity<Composition>().HasKey(c => new { c.GroupId, c.Id });
             modelBuilder.Entity<SheetMusic>().HasKey(sm => new { sm.GroupId, sm.CompositionId, sm.RoleId });
             modelBuilder.Entity<Concert>().HasKey(c => new { c.GroupId, c.Id });
-            modelBuilder.Entity<ConcertComposition>().HasKey(c => new { c.GroupId, c.CompositionId, c.ConcertId });
             modelBuilder.Entity<ConcertAttendance>().HasKey(c => new { c.GroupId, c.ConcertId, c.UserId });
 
             modelBuilder.Entity<User>().HasAlternateKey(u => u.Email);
@@ -53,18 +52,8 @@ namespace Orchestrate.API.Data
 
             modelBuilder.Entity<Concert>()
                 .HasMany(c => c.Compositions)
-                .WithMany(cc => cc.Concerts)
-                .UsingEntity<ConcertComposition>(
-                    j => j
-                        .HasOne(cc => cc.Composition)
-                        .WithMany(c => c.ConcertCompositions)
-                        .HasForeignKey(cc => new { cc.GroupId, cc.CompositionId }),
-                    j => j
-                        .HasOne(cc => cc.Concert)
-                        .WithMany(c => c.ConcertCompositions)
-                        .HasForeignKey(cc => new { cc.GroupId, cc.ConcertId }),
-                    j => j.HasKey(cc => new { cc.GroupId, cc.ConcertId, cc.CompositionId })
-                );
+                .WithMany(c => c.Concerts)
+                .UsingEntity(j => j.ToTable("concert_composition"));
         }
     }
 }

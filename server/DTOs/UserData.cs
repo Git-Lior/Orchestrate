@@ -22,4 +22,9 @@
     {
         public string TemporaryPassword { get; set; }
     }
+
+    public class UserDataWithAttendance : UserData
+    {
+        public bool? Attending { get; set; }
+    }
 }

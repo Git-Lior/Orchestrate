@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
 using Orchestrate.API.Models;
 using System;
@@ -13,15 +12,23 @@ namespace Orchestrate.API.Controllers.Director
 {
     [Route("api/groups/{groupId}/compositions")]
     [Authorize(Policy = GroupRolesPolicy.DirectorOnly)]
-    public class CompositionDirectorController : OrchestrateController
+    public class CompositionDirectorController : OrchestrateController<Composition>
     {
+        [FromRoute]
+        public int GroupId { get; set; }
+        [FromRoute]
+        public int CompositionId { get; set; }
+
+        protected override IQueryable<Composition> MatchingEntityQuery(IQueryable<Composition> query)
+            => query.Where(_ => _.GroupId == GroupId && _.Id == CompositionId);
+
         public CompositionDirectorController(IServiceProvider provider) : base(provider) { }
 
         [HttpPost]
-        public async Task<IActionResult> AddComposition([FromRoute] int groupId, [FromBody] CompositionPayload payload)
+        public async Task<IActionResult> AddComposition([FromBody] CompositionPayload payload)
         {
             var composition = ModelMapper.Map<Composition>(payload);
-            composition.GroupId = groupId;
+            composition.GroupId = GroupId;
             composition.UploaderId = RequestingUserId;
 
             DbContext.Compositions.Add(composition);
@@ -31,22 +38,21 @@ namespace Orchestrate.API.Controllers.Director
         }
 
         [HttpPut("{compositionId}")]
-        public async Task<IActionResult> UpdateComposition([FromRoute] int groupId, [FromRoute] int compositionId, [FromBody] CompositionPayload payload)
+        public async Task<IActionResult> UpdateComposition([FromBody] CompositionPayload payload)
         {
-            var composition = await DbContext.Compositions.FindAsync(groupId, compositionId);
+            var composition = await GetMatchingEntity(DbContext.Compositions);
             if (composition == null) throw new ArgumentException("Composition doesn't exist");
 
             ModelMapper.Map(payload, composition);
-
             await DbContext.SaveChangesAsync();
 
             return Ok();
         }
 
         [HttpDelete("{compositionId}")]
-        public async Task<IActionResult> RemoveComposition([FromRoute] int groupId, [FromRoute] int compositionId)
+        public async Task<IActionResult> RemoveComposition()
         {
-            var composition = await DbContext.Compositions.FindAsync(groupId, compositionId);
+            var composition = await GetMatchingEntity(DbContext.Compositions);
 
             if (composition == null) throw new ArgumentException("Composition does not exist");
 
@@ -57,19 +63,19 @@ namespace Orchestrate.API.Controllers.Director
         }
 
         [HttpPost("{compositionId}/{roleId}")]
-        public async Task<IActionResult> UploadSheetMusicFile([FromRoute] int groupId, [FromRoute] int compositionId, [FromRoute] int roleId, IFormFile file)
+        public async Task<IActionResult> UploadSheetMusicFile([FromRoute] int roleId, IFormFile file)
         {
             using var stream = new MemoryStream((int)file.Length);
             await file.CopyToAsync(stream);
 
-            var sheetMusic = await DbContext.SheetMusics.FindAsync(groupId, compositionId, roleId);
+            var sheetMusic = await DbContext.SheetMusics.FindAsync(GroupId, CompositionId, roleId);
 
             if (sheetMusic == null)
             {
                 sheetMusic = new SheetMusic
                 {
-                    GroupId = groupId,
-                    CompositionId = compositionId,
+                    GroupId = GroupId,
+                    CompositionId = CompositionId,
                     RoleId = roleId
                 };
                 DbContext.SheetMusics.Add(sheetMusic);

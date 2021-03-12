@@ -62,6 +62,7 @@ namespace Orchestrate.API
                 options.AddPolicy(GroupRolesPolicy.DirectorOnly, policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Director)));
                 options.AddPolicy(GroupRolesPolicy.DirectorOrMember, policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Director | GroupRoles.Member)));
                 options.AddPolicy(GroupRolesPolicy.ManagerOnly, policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Manager)));
+                options.AddPolicy(GroupRolesPolicy.ManagerOrMember, policy => policy.AddRequirements(new GroupRolesRequirement(GroupRoles.Manager | GroupRoles.Member)));
             });
 
             services.AddHttpContextAccessor();

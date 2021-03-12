@@ -14,9 +14,15 @@ namespace Orchestrate.API.Controllers.Admin
 {
     [Route("api/admin/users")]
     [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
-    public class UsersAdminController : OrchestrateController
+    public class UsersAdminController : OrchestrateController<User>
     {
         private readonly IPasswordProvider _passwordProvider;
+
+        [FromRoute]
+        public int UserId { get; set; }
+
+        protected override IQueryable<User> MatchingEntityQuery(IQueryable<User> query)
+            => query.Where(_ => _.Id == UserId);
 
         public UsersAdminController(IPasswordProvider passwordProvider, IServiceProvider provider) : base(provider)
         {
@@ -56,10 +62,10 @@ namespace Orchestrate.API.Controllers.Admin
             return Ok(userData);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser([FromRoute] int id, [FromBody] UserPayload payload)
+        [HttpPut("{userId}")]
+        public async Task<IActionResult> UpdateUser([FromBody] UserPayload payload)
         {
-            var dbUser = await DbContext.Users.FindAsync(id);
+            var dbUser = await GetMatchingEntity(DbContext.Users);
             if (dbUser == null) return NotFound(new { Error = "User not found" });
 
             ModelMapper.Map(payload, dbUser);
@@ -68,13 +74,13 @@ namespace Orchestrate.API.Controllers.Admin
             return Ok(ModelMapper.Map<UserData>(dbUser));
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser([FromRoute] int id)
+        [HttpDelete("{userId}")]
+        public async Task<IActionResult> DeleteUser()
         {
-            if (await DbContext.Groups.AsNoTracking().AnyAsync(_ => _.ManagerId == id))
+            if (await DbContext.Groups.AsNoTracking().AnyAsync(_ => _.ManagerId == UserId))
                 return BadRequest(new { Error = "Cannot delete a user that manages a group, change the group's manager first" });
 
-            var user = await DbContext.Users.FindAsync(id);
+            var user = await GetMatchingEntity(DbContext.Users);
             if (user == null) return NotFound(new { Error = "User not found" });
 
             DbContext.Users.Remove(user);

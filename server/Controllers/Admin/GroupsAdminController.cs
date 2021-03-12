@@ -6,14 +6,21 @@ using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Orchestrate.API.Controllers.Admin
 {
     [Route("api/admin/groups")]
     [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
-    public class GroupsAdminController : OrchestrateController
+    public class GroupsAdminController : OrchestrateController<Group>
     {
+        [FromRoute]
+        public int GroupId { get; set; }
+
+        protected override IQueryable<Group> MatchingEntityQuery(IQueryable<Group> query)
+            => query.Where(_ => _.Id == GroupId);
+
         public GroupsAdminController(IServiceProvider provider) : base(provider) { }
 
         [HttpGet]
@@ -33,9 +40,9 @@ namespace Orchestrate.API.Controllers.Admin
         }
 
         [HttpPut("{groupId}")]
-        public async Task<IActionResult> UpdateGroup([FromRoute] int groupId, [FromBody] GroupPayload payload)
+        public async Task<IActionResult> UpdateGroup([FromBody] GroupPayload payload)
         {
-            var group = await DbContext.Groups.FindAsync(groupId);
+            var group = await GetMatchingEntity(DbContext.Groups);
 
             if (group == null) return NotFound(new { Error = "Group not found" });
 
@@ -46,9 +53,9 @@ namespace Orchestrate.API.Controllers.Admin
         }
 
         [HttpDelete("{groupId}")]
-        public async Task<IActionResult> DeleteGroup([FromRoute] int groupId)
+        public async Task<IActionResult> DeleteGroup()
         {
-            var group = await DbContext.Groups.FindAsync(groupId);
+            var group = await GetMatchingEntity(DbContext.Groups);
             if (group == null) return NotFound(new { Error = "Group not found" });
 
             DbContext.Groups.Remove(group);

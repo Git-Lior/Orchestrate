@@ -1,12 +1,15 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Orchestrate.API.Data;
 using Orchestrate.API.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Orchestrate.API.Controllers
 {
@@ -33,5 +36,14 @@ namespace Orchestrate.API.Controllers
             DbContext = provider.GetRequiredService<OrchestrateContext>();
             _adminRoleName = provider.GetRequiredService<IOptions<JwtOptions>>().Value.AdminRoleName;
         }
+    }
+
+    public class OrchestrateController<T> : OrchestrateController
+    {
+        public OrchestrateController(IServiceProvider provider) : base(provider) { }
+
+        protected virtual IQueryable<T> MatchingEntityQuery(IQueryable<T> query) => query;
+
+        protected Task<T> GetMatchingEntity(IQueryable<T> source) => MatchingEntityQuery(source).SingleOrDefaultAsync();
     }
 }
