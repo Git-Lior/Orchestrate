@@ -2,6 +2,7 @@ import "./index.css";
 
 import React from "react";
 import ReactDOM from "react-dom";
+import moment from "moment";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 
 import reportWebVitals from "./reportWebVitals";
@@ -9,6 +10,8 @@ import AppTheme from "./AppTheme";
 
 import App from "./App";
 import AdminApp from "./admin";
+
+moment.locale("he");
 
 ReactDOM.render(
   <React.StrictMode>

@@ -6,20 +6,24 @@ using System.Linq;
 namespace Orchestrate.API
 {
     public class DataMapping : Profile
-    {
+    {   
+
         public DataMapping()
         {
+            int RequestingUserId = 0; // this will be passd at runtime
+
             CreateMap<UserPayload, User>();
             CreateMap<RolePayload, Role>();
             CreateMap<GroupPayload, Group>();
             CreateMap<CompositionPayload, Composition>();
+            CreateMap<ConcertPayload, Concert>();
 
             CreateMap<User, UserData>();
             CreateMap<User, FullUserData>();
             CreateMap<User, LoggedInUserData>();
             CreateMap<User, CreatedUserData>();
             CreateMap<User, UserDataWithAttendance>()
-                .ForMember(_ => _.Attending, o => o.MapFrom((s, d) => s.Attendances.FirstOrDefault()?.Attending));
+                .ForMember(_ => _.Attending, o => o.MapFrom(s => s.Attendances.FirstOrDefault().Attending));
 
             CreateMap<GroupRole, BasicGroupRoleData>()
                 .ForMember(_ => _.Id, o => o.MapFrom(_ => _.Role.Id))
@@ -43,10 +47,13 @@ namespace Orchestrate.API
 
             CreateMap<SheetMusicComment, SheetMusicCommentData>();
 
-            CreateMap<Concert, ConcertData>();
-            CreateMap<Concert, ConcertDataWithAttendance>()
-                .ForMember(_ => _.Attending, o => o.MapFrom(_ => _.Attendances.Where(_ => _.Attending).Select(_ => _.User)))
-                .ForMember(_ => _.NotAttending, o => o.MapFrom(_ => _.Attendances.Where(_ => !_.Attending).Select(_ => _.User)));
+            CreateMap<Concert, ConcertData>()
+                .ForMember(_ => _.Attending, o => o.MapFrom(_ => _.Attendances.FirstOrDefault(a => a.UserId == RequestingUserId).Attending));
+
+            CreateMap<Concert, ConcertDataWithUserAttendance>()
+                .IncludeBase<Concert, ConcertData>()
+                .ForMember(_ => _.AttendingUsers, o => o.MapFrom(_ => _.Attendances.Where(_ => _.Attending).Select(_ => _.User)))
+                .ForMember(_ => _.NotAttendingUsers, o => o.MapFrom(_ => _.Attendances.Where(_ => !_.Attending).Select(_ => _.User)));
         }
     }
 }

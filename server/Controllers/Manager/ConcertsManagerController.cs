@@ -30,6 +30,7 @@ namespace Orchestrate.API.Controllers.Manager
         public async Task<IActionResult> CreateConcert([FromBody] ConcertPayload payload)
         {
             var concert = ModelMapper.Map<Concert>(payload);
+            concert.GroupId = GroupId;
 
             DbContext.Concerts.Add(concert);
             await DbContext.SaveChangesAsync();

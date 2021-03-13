@@ -27,27 +27,22 @@ namespace Orchestrate.API.Controllers
 
         [HttpGet]
         [Authorize(Policy = GroupRolesPolicy.ManagerOrMember)]
-        public async Task<IActionResult> GetConcerts([FromQuery] DateTime? until, [FromQuery] int limit, [FromQuery] bool onlyAttending)
+        public async Task<IActionResult> GetFutureConcerts([FromQuery] bool hideNotAttending)
         {
             IQueryable<Concert> concerts = DbContext.Concerts.AsNoTracking()
                 .Where(_ => _.GroupId == GroupId)
-                .OrderByDescending(_ => _.Date);
-
-            if (until != null) concerts = concerts.Where(_ => _.Date < until);
-            if (limit > 0) concerts = concerts.Take(limit);
+                .Include(_ => _.Attendances)
+                .OrderBy(_ => _.Date);
 
             if (IsUserManager)
-            {
-                var result = await concerts.Include(_ => _.Attendances).ToListAsync();
-                return Ok(ModelMapper.Map<IEnumerable<ConcertDataWithAttendance>>(result));
-            }
+                return Ok(await concerts.ProjectTo<ConcertDataWithUserAttendance>(MapperConfig, new { RequestingUserId }).ToListAsync());
 
-            if (onlyAttending) concerts = concerts.Where(_ => _.Attendances.Any(_ => _.UserId == RequestingUserId && _.Attending));
+            if (hideNotAttending) concerts = concerts.Where(_ => _.Attendances.All(_ => _.UserId != RequestingUserId || _.Attending));
 
-            return Ok(await concerts.ProjectTo<ConcertData>(MapperConfig).ToListAsync());
+            return Ok(await concerts.ProjectTo<ConcertData>(MapperConfig, new { RequestingUserId }).ToListAsync());
         }
 
-        [HttpPost("attendance")]
+        [HttpPost("{concertId}/attendance")]
         [Authorize(Policy = GroupRolesPolicy.MemberOnly)]
         public async Task<IActionResult> SetAttendance([FromBody] bool attending)
         {
