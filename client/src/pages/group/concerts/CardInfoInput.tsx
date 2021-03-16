@@ -13,19 +13,25 @@ import { useInputState } from "utils/hooks/useInputState";
 
 interface Props {
   concert: orch.Concert | undefined;
-  onDataUpdated: (data?: orch.OptionalId<orch.ConcertData>) => void;
+  onDataUpdated: React.Dispatch<React.SetStateAction<orch.OptionalId<orch.ConcertData>>>;
 }
 
 export default function CardInfoInput({ concert, onDataUpdated }: Props) {
   const [date, setDate] = useState<Moment | null>(concert?.date ? moment(concert.date) : null);
   const [location, setLocation] = useInputState(concert?.location);
 
-  const newUpdatedData: orch.OptionalId<orch.ConcertData> | undefined = useMemo(
-    () => (date?.isValid() && location ? { date: date.toISOString(), location } : undefined),
+  const newUpdatedData: orch.OptionalId<orch.ConcertData> = useMemo(
+    () => ({
+      date: date?.isValid() ? date.toISOString() : "",
+      location,
+    }),
     [date, location]
   );
 
-  useEffect(() => onDataUpdated(newUpdatedData), [newUpdatedData, onDataUpdated]);
+  useEffect(() => onDataUpdated(u => ({ ...u, ...newUpdatedData })), [
+    newUpdatedData,
+    onDataUpdated,
+  ]);
 
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>

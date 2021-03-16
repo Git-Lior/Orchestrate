@@ -13,6 +13,7 @@ namespace Orchestrate.API.Models
         [Required]
         public DateTime Date { get; set; }
 
+        [StringLength(100)]
         public string Description { get; set; }
     }
 

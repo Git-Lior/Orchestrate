@@ -40,7 +40,6 @@ namespace Orchestrate.API
             CreateMap<Group, GroupData>();
             CreateMap<Group, FullGroupData>();
 
-            CreateMap<Composition, BasicCompositionData>();
             CreateMap<Composition, CompositionData>();
             CreateMap<Composition, FullCompositionData>()
                 .ForMember(f => f.Roles, o => o.MapFrom(c => c.SheetMusics.Select(s => s.Role)));

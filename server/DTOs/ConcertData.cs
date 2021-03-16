@@ -10,7 +10,7 @@ namespace Orchestrate.API.DTOs
         public DateTime Date { get; set; }
         public string Description { get; set; }
         public bool? Attending { get; set; }
-        public IEnumerable<BasicCompositionData> Compositions { get; set; }
+        public IEnumerable<CompositionData> Compositions { get; set; }
     }
 
     public class ConcertDataWithUserAttendance : ConcertData

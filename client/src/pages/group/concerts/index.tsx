@@ -68,6 +68,28 @@ export default function GroupConcertsPage({ user, userInfo, group }: Props) {
     [apiFetch, refreshConcerts]
   );
 
+  const getCompositions = useCallback(
+    (title: string) => apiFetch(`/groups/${group.id}/compositions?title=${title}`),
+    [apiFetch, group.id]
+  );
+
+  const addComposition = useCallback(
+    (concert: orch.Concert, composition: orch.CompositionData) =>
+      apiFetch(
+        `${concert.id}/compositions`,
+        { method: "POST", body: JSON.stringify(composition.id) },
+        "none"
+      ).then(refreshConcerts),
+    [apiFetch, refreshConcerts]
+  );
+  const removeComposition = useCallback(
+    (concert: orch.Concert, composition: orch.CompositionData) =>
+      apiFetch(`${concert.id}/compositions/${composition.id}`, { method: "DELETE" }, "none").then(
+        refreshConcerts
+      ),
+    [apiFetch, refreshConcerts]
+  );
+
   return (
     <Container maxWidth="md">
       <div className={classes.header}>
@@ -103,11 +125,14 @@ export default function GroupConcertsPage({ user, userInfo, group }: Props) {
               editMode={concert.id === editedConcert?.id}
               concert={concert}
               userInfo={userInfo}
+              compositionProvider={getCompositions}
               onEditRequested={setEditedConcert}
               onEditCancel={clearEditedConcert}
               onEditDone={changeEditedConcert}
               onDelete={removeConcert}
               onAttendanceChange={changeAttendance}
+              onCompositionAdded={addComposition}
+              onCompositionRemoved={removeComposition}
             />
           ))
         )}

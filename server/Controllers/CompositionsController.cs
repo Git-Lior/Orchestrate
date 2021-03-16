@@ -13,12 +13,12 @@ using System.Threading.Tasks;
 namespace Orchestrate.API.Controllers
 {
     [Route("api/groups/{groupId}/compositions")]
-    [Authorize(Policy = GroupRolesPolicy.DirectorOrMember)]
     public class CompositionsController : OrchestrateController
     {
         public CompositionsController(IServiceProvider provider) : base(provider) { }
 
         [HttpGet("genres")]
+        [Authorize(Policy = GroupRolesPolicy.DirectorOrMember)]
         public async Task<IActionResult> GetGenres([FromRoute] int groupId)
         {
             return Ok(await DbContext.Compositions
@@ -44,7 +44,7 @@ namespace Orchestrate.API.Controllers
                 );
             }
 
-            if (IsUserDirector)
+            if (IsUserDirector || IsUserManager)
                 return Ok(await compositions.ProjectTo<CompositionData>(MapperConfig).ToListAsync());
 
             IEnumerable<Composition> result = await compositions
@@ -60,6 +60,7 @@ namespace Orchestrate.API.Controllers
         }
 
         [HttpGet("{compositionId}")]
+        [Authorize(Policy = GroupRolesPolicy.DirectorOrMember)]
         public async Task<IActionResult> GetFullComposition([FromRoute] int groupId, [FromRoute] int compositionId)
         {
             var composition = await DbContext.Compositions

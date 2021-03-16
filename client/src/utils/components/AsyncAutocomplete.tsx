@@ -6,7 +6,7 @@ import Autocomplete, { AutocompleteProps } from "@material-ui/lab/Autocomplete";
 import { useInputState } from "utils/hooks";
 import { textAutocompleteOptions } from "./textAutocompleteOptions";
 
-interface Props<
+export interface AsyncAutocompleteProps<
   T,
   Multiple extends boolean | undefined = undefined,
   DisableClearable extends boolean | undefined = undefined,
@@ -25,7 +25,7 @@ export function AsyncAutocomplete<
   inputValue,
   onInputChange,
   ...otherProps
-}: Props<T, Multiple, DisableClearable, FreeSolo>) {
+}: AsyncAutocompleteProps<T, Multiple, DisableClearable, FreeSolo>) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<T[]>();
   const [innerInputValue, setInnerInputValue] = useInputState();

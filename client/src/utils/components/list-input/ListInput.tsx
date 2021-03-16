@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import { classnames } from "@material-ui/data-grid";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
@@ -8,7 +9,8 @@ import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 
-import { usePromiseStatus } from "utils/hooks";
+import { useInputState, usePromiseStatus } from "utils/hooks";
+import { AsyncAutocomplete, AsyncAutocompleteProps } from "../AsyncAutocomplete";
 
 const useStyles = makeStyles({
   container: {
@@ -23,43 +25,49 @@ const useStyles = makeStyles({
   },
 });
 
-interface Props<TItem, TNewItem> {
-  items: TItem[] | undefined;
+interface Props<T> extends AsyncAutocompleteProps<T> {
+  items: T[] | undefined;
   disabled?: boolean;
-  getListItem: (item: TItem) => React.ReactNode;
-  onClick?: (item: TItem) => React.ReactNode;
-  onAdded: (item: TNewItem) => Promise<any>;
-  onRemoved: (item: TItem) => Promise<any>;
-  children: (props: { onAdded: (item: TNewItem) => Promise<any> }) => React.ReactNode;
+  children: (item: T) => React.ReactNode;
+  onAdded: (item: T) => Promise<any>;
+  onRemoved: (item: T) => Promise<any>;
 }
 
-export function ListInput<TItem extends { id: number }, TNewItem = orch.OptionalId<TItem>>({
+export function ListInput<T extends { id: number }>({
   items,
   disabled,
-  getListItem,
+  className,
+  children,
   onAdded,
   onRemoved,
-  children,
-}: Props<TItem, TNewItem>) {
+  optionsProvider,
+  ...autocompleteProps
+}: Props<T>) {
   const classes = useStyles();
+  const [inputValue, setInputValue] = useInputState();
   const [loading, error, setPromise] = usePromiseStatus();
 
-  const onItemAdded = useCallback((item: TNewItem) => setPromise(onAdded(item)), [
-    setPromise,
-    onAdded,
-  ]);
+  const filteredOptionsProvider = useCallback(
+    async text => {
+      const options = await optionsProvider(text);
+      return !items || !options ? options : options.filter(u => !items.some(_ => _.id === u.id));
+    },
+    [optionsProvider, items]
+  );
 
-  const onItemRemoved = useCallback((item: TItem) => setPromise(onRemoved(item)), [
+  const onItemAdded = useCallback((item: T) => setPromise(onAdded(item)), [setPromise, onAdded]);
+
+  const onItemRemoved = useCallback((item: T) => setPromise(onRemoved(item)), [
     setPromise,
     onRemoved,
   ]);
 
   return (
-    <Paper className={classes.container}>
+    <Paper className={classnames(classes.container, className)}>
       <List className={classes.list}>
         {items?.map(item => (
           <ListItem key={item.id}>
-            {getListItem(item)}
+            {children(item)}
             {!disabled && (
               <ListItemSecondaryAction>
                 <IconButton edge="end" aria-label="remove" onClick={() => onItemRemoved(item)}>
@@ -70,7 +78,21 @@ export function ListInput<TItem extends { id: number }, TNewItem = orch.Optional
           </ListItem>
         ))}
       </List>
-      {!disabled && children({ onAdded: onItemAdded })}
+      {!disabled && (
+        <AsyncAutocomplete
+          {...autocompleteProps}
+          optionsProvider={filteredOptionsProvider}
+          value={null}
+          inputValue={inputValue}
+          onInputChange={setInputValue as any}
+          onChange={(_, item) => {
+            if (item) {
+              setInputValue();
+              onItemAdded(item);
+            }
+          }}
+        />
+      )}
     </Paper>
   );
 }

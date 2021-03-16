@@ -1,10 +1,9 @@
-import React, { useCallback } from "react";
+import React from "react";
 import moment from "moment";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import PlaceIcon from "@material-ui/icons/Place";
-import Button from "@material-ui/core/Button";
 
 const useStyles = makeStyles({
   root: {
@@ -20,19 +19,10 @@ const useStyles = makeStyles({
 
 interface Props {
   concert: orch.Concert;
-  userInfo: orch.group.UserInfo;
-  onAttendanceChange: (value: boolean) => void;
 }
 
-export default function CardInfo({ userInfo, concert, onAttendanceChange }: Props) {
+export default function CardInfo({ concert }: Props) {
   const classes = useStyles();
-
-  const onAccept = useCallback(() => {
-    if (!concert.attending) onAttendanceChange(true);
-  }, [concert.attending, onAttendanceChange]);
-  const onReject = useCallback(() => {
-    if (concert.attending !== false) onAttendanceChange(false);
-  }, [concert.attending, onAttendanceChange]);
 
   return (
     <div className={classes.root}>
@@ -42,18 +32,8 @@ export default function CardInfo({ userInfo, concert, onAttendanceChange }: Prop
       </div>
       <div className={classes.concertLocation}>
         <PlaceIcon />
-        <Typography variant="body1">{concert.location}</Typography>
+        <Typography variant="h6">{concert.location}</Typography>
       </div>
-      {userInfo.roles.length > 0 && (
-        <div>
-          <Button variant="contained" size="small" onClick={onAccept}>
-            Accept
-          </Button>
-          <Button variant="contained" size="small" onClick={onReject}>
-            Reject
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
