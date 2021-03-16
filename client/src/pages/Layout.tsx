@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { generatePath, useHistory, useParams } from "react-router";
 
@@ -16,7 +16,7 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
+import PersonIcon from "@material-ui/icons/Person";
 import LockIcon from "@material-ui/icons/Lock";
 import TextField from "@material-ui/core/TextField";
 
@@ -25,9 +25,10 @@ import layoutStyles from "./Layout.styles";
 import smallLogo from "assets/logo-small.png";
 
 import { useApiFetch, useInputState, usePromiseStatus } from "utils/hooks";
-import { groupPages, defaultGroupPage } from "./group";
+import { groupPages } from "./group";
 import { userToText } from "utils/general";
 import { FormDialog } from "utils/components";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const useStyles = makeStyles(layoutStyles);
 
@@ -38,17 +39,19 @@ interface Props {
   page: React.ComponentType<orch.PageProps>;
 }
 
-const GROUP_ROUTE_PATH = "/group/:groupId/:groupPage";
+const GROUP_ROUTE_PATH = "/group/:groupId/:groupPage?";
 
 export default function Layout({ user, onLogout, onPasswordChange, page: Page }: Props) {
   const classes = useStyles();
   const apiFetch = useApiFetch(user, "/groups");
   const history = useHistory<orch.group.RouteParams>();
 
+  const appBarRef = useRef<Element>();
+
   const { groupId, groupPage } = useParams<orch.group.RouteParams>();
   const [groups, setGroups] = useState<orch.GroupData[]>();
   const [group, setGroup] = useState<orch.Group>();
-  const [menuAnchor, setMenuAnchor] = useState<Element>();
+  const [isMenuOpen, setMenuOpen] = useState(false);
   const [changePasswordDialogOpen, setChangePasswordDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -56,6 +59,11 @@ export default function Layout({ user, onLogout, onPasswordChange, page: Page }:
       setGroups(await apiFetch(""));
     })();
   }, [apiFetch]);
+
+  useEffect(() => {
+    if (!groupId && groups && groups.length >= 1)
+      history.push(generatePath(GROUP_ROUTE_PATH, { groupId: groups[0].id }));
+  }, [groups, groupId, history]);
 
   useEffect(() => {
     (async function () {
@@ -80,12 +88,7 @@ export default function Layout({ user, onLogout, onPasswordChange, page: Page }:
 
   const setGroupId = useCallback(
     (e: React.ChangeEvent<any>) =>
-      history.push(
-        generatePath(GROUP_ROUTE_PATH, {
-          groupId: e.target.value,
-          groupPage: defaultGroupPage,
-        })
-      ),
+      history.push(generatePath(GROUP_ROUTE_PATH, { groupId: e.target.value })),
     [history]
   );
 
@@ -95,41 +98,45 @@ export default function Layout({ user, onLogout, onPasswordChange, page: Page }:
     [history, groupId]
   );
 
-  const handleMenuClick = useCallback(
-    (e: React.MouseEvent<any>) => setMenuAnchor(e.currentTarget),
-    []
-  );
-  const handleMenuClose = useCallback(() => setMenuAnchor(undefined), []);
+  const handleMenuClick = useCallback((e: React.MouseEvent<any>) => setMenuOpen(true), []);
+  const handleMenuClose = useCallback(() => setMenuOpen(false), []);
 
   const showChangePasswordDialog = useCallback(() => {
     setChangePasswordDialogOpen(true);
-    setMenuAnchor(undefined);
+    setMenuOpen(false);
   }, []);
 
   const hideChangePasswordDialog = useCallback(() => setChangePasswordDialogOpen(false), []);
 
   return (
     <>
-      <AppBar position="static">
+      <AppBar position="static" ref={appBarRef}>
         <Toolbar className={classes.toolbar}>
           <Link to="/" className={classes.noLineHeight}>
             <img src={smallLogo} className={classes.appLogo} alt="Orchestrate" />
           </Link>
-          <Typography>Group:</Typography>
-          <Select
-            className={classes.groupSelect}
-            value={(groups && groupId) || ""}
-            onChange={setGroupId}
-            placeholder="Select group..."
-            disabled={groups?.length === 0}
-          >
-            {!groups && <MenuItem disabled>Loading Groups...</MenuItem>}
-            {groups?.map(({ id, name }) => (
-              <MenuItem key={id} value={id}>
-                {name}
-              </MenuItem>
-            ))}
-          </Select>
+          {!groups && <CircularProgress color="secondary" size="2rem" />}
+          {groups && groups.length > 1 && (
+            <>
+              <Typography>Group:</Typography>
+              {groups.length === 0 && <Typography>{groups[0].name}</Typography>}
+              {groups.length > 1 && (
+                <Select
+                  className={classes.groupSelect}
+                  value={groupId || ""}
+                  onChange={setGroupId}
+                  placeholder="Select group..."
+                >
+                  {!groups && <MenuItem disabled>Loading Groups...</MenuItem>}
+                  {groups?.map(({ id, name }) => (
+                    <MenuItem key={id} value={id}>
+                      {name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+            </>
+          )}
           <div className={classes.spacer} />
           <Tabs
             className={classes.groupTabs}
@@ -149,7 +156,10 @@ export default function Layout({ user, onLogout, onPasswordChange, page: Page }:
             ))}
           </Tabs>
           <div className={classes.spacer} />
-          <Typography className={classes.username}>{userToText(user)}</Typography>
+          <div onClick={handleMenuClick} className={classes.user}>
+            <PersonIcon />
+            <Typography>{userToText(user)}</Typography>
+          </div>
           <IconButton color="inherit">
             <Badge
               badgeContent={10}
@@ -160,10 +170,12 @@ export default function Layout({ user, onLogout, onPasswordChange, page: Page }:
               <NotificationsIcon />
             </Badge>
           </IconButton>
-          <IconButton onClick={handleMenuClick}>
-            <MoreVertIcon color="secondary" />
-          </IconButton>
-          <Menu anchorEl={menuAnchor} open={!!menuAnchor} onClose={handleMenuClose}>
+          <Menu
+            anchorEl={appBarRef.current}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            open={isMenuOpen}
+            onClose={handleMenuClose}
+          >
             <MenuItem onClick={showChangePasswordDialog}>
               <ListItemIcon>
                 <LockIcon fontSize="small" />

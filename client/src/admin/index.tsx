@@ -51,11 +51,11 @@ interface ContentProps {
 function AdminAppContent({ token }: ContentProps) {
   const classes = useStyles();
   const [createdUser, setCreatedUser] = useState<Required<UserDataWithTempPassword>>();
-  const [users, _refreshUsers, changeUser, deleteUser] = useCRUDApi<orch.UserData>(
+  const [users, _refreshUsers, changeUser, deleteUser, setUsersQuery] = useCRUDApi<orch.UserData>(
     token,
     "/admin/users"
   );
-  const [groups, _refreshGroups, changeGroup, deleteGroup, setUsersQuery] = useCRUDApi<
+  const [groups, _refreshGroups, changeGroup, deleteGroup] = useCRUDApi<
     orch.GroupData,
     orch.GroupPayload
   >(token, "/admin/groups");

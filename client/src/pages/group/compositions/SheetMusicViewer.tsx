@@ -21,6 +21,7 @@ import { useApiFetch, useInputState } from "utils/hooks";
 import { UserAvatar } from "utils/components";
 
 const MAX_MESSAGE_LENGTH = 300;
+const MAX_LINE_BREAKS = 3;
 
 const useStyles = makeStyles({
   commentsContainer: {
@@ -37,6 +38,7 @@ const useStyles = makeStyles({
     flexDirection: "column",
     width: "min-content",
   },
+  commentText: { whiteSpace: "pre-wrap" },
   deletedComment: { opacity: 0.7 },
   deletedCommentText: { fontStyle: "italic" },
   newCommentContainer: {
@@ -120,9 +122,18 @@ export default function SheetMusicViewer({
   const onEditDone = useCallback(async () => {
     if (!editedComment) return;
 
+    const commentContent = editedComment.content.trim();
+
+    if (
+      !commentContent ||
+      commentContent.length > MAX_MESSAGE_LENGTH ||
+      hasExceedingLineBreaks(commentContent)
+    )
+      return;
+
     await apiFetch(
       `comments/${editedComment.id}`,
-      { method: "PUT", body: JSON.stringify(editedComment.content) },
+      { method: "PUT", body: JSON.stringify(commentContent) },
       "none"
     );
     setComments(await apiFetch("comments"));
@@ -191,7 +202,7 @@ export default function SheetMusicViewer({
                   />
                 ) : (
                   <ListItemText
-                    className={content ? undefined : classes.deletedCommentText}
+                    className={content ? classes.commentText : classes.deletedCommentText}
                     primary={content ?? "[Comment deleted by user]"}
                     secondary={
                       <>
@@ -240,6 +251,7 @@ interface CommentBoxProps {
 }
 
 function CommentBox({ value, onChange, label, rows }: CommentBoxProps) {
+  const exceedingLineBreaks = hasExceedingLineBreaks(value);
   return (
     <TextField
       label={label}
@@ -247,11 +259,19 @@ function CommentBox({ value, onChange, label, rows }: CommentBoxProps) {
       multiline
       rows={rows}
       rowsMax={5}
-      error={value.length > MAX_MESSAGE_LENGTH}
-      helperText={`${value.length}/${MAX_MESSAGE_LENGTH}`}
+      error={exceedingLineBreaks || value.length > MAX_MESSAGE_LENGTH}
+      helperText={
+        exceedingLineBreaks
+          ? `you can use at most ${MAX_LINE_BREAKS} line breaks`
+          : `${value.length}/${MAX_MESSAGE_LENGTH}`
+      }
       variant="outlined"
       value={value}
       onChange={onChange}
     />
   );
+}
+
+function hasExceedingLineBreaks(text: string) {
+  return text.split("").filter(_ => _ === "\n").length > MAX_LINE_BREAKS;
 }

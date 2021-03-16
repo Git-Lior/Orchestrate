@@ -73,7 +73,7 @@ function App() {
         }
       />
       <Route
-        path="/group/:groupId/:groupPage"
+        path="/group/:groupId/:groupPage?"
         children={
           <Layout
             user={user}

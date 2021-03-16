@@ -22,8 +22,10 @@ const layoutStyles: Styles<AppTheme, {}> = theme => ({
     "&:before, &:after": { borderBottomColor: `${theme.palette.secondary.main} !important` },
   },
   spacer: { flexGrow: 1 },
-  username: {
-    marginRight: 10,
+  user: {
+    padding: "1rem",
+    display: "flex",
+    cursor: "pointer",
   },
   groupTabs: {
     "&[disabled]": { pointerEvents: "none" },
@@ -33,6 +35,7 @@ const layoutStyles: Styles<AppTheme, {}> = theme => ({
     flexDirection: "column",
     padding: "2em",
     height: `calc(100% - ${toolbarHeight}px)`,
+    position: "relative",
   },
 });
 

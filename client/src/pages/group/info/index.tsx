@@ -10,6 +10,8 @@ import DirectorsPanel from "./DirectorsPanel";
 import AddRoleDialogButton from "./AddRoleDialogButton";
 import RolesPanel from "./RolesPanel";
 
+import changeGroupImage from "assets/change-group.png";
+
 const useStyles = makeStyles({
   title: {
     marginBottom: "3rem",
@@ -17,6 +19,12 @@ const useStyles = makeStyles({
     justifyContent: "center",
     alignItems: "center",
     "& > :not(:first-child)": { marginLeft: "1rem" },
+  },
+  changeGroupImage: {
+    position: "absolute",
+    top: "5px",
+    left: "130px",
+    opacity: 0.8,
   },
   container: {
     display: "flex",
@@ -41,7 +49,7 @@ const useStyles = makeStyles({
 type Props = Required<orch.PageProps>;
 
 export default function GroupInfoPage(props: Props) {
-  const { user, userInfo, group } = props;
+  const { user, userInfo, group, groups } = props;
 
   const classes = useStyles();
   const apiFetch = useApiFetch(user);
@@ -56,6 +64,7 @@ export default function GroupInfoPage(props: Props) {
       <Typography variant="h4" color="primary" className={classes.title}>
         Group Info - {group.name}
       </Typography>
+      {groups.length > 1 && <img className={classes.changeGroupImage} src={changeGroupImage} />}
       <div className={classes.container}>
         <div className={classes.sidePanel}>
           <Typography variant="h5" className={classes.title}>

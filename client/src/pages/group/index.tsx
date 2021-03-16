@@ -1,8 +1,7 @@
 import React from "react";
 import { Redirect, useParams } from "react-router-dom";
 
-import { groupPages } from "./pages";
-export { groupPages, defaultGroupPage } from "./pages";
+import { groupPages, defaultGroupPage } from "./pages";
 
 export default function GroupPage({ user, group, userInfo, groups, setGroup }: orch.PageProps) {
   const { groupPage } = useParams<orch.group.RouteParams>();
@@ -11,9 +10,8 @@ export default function GroupPage({ user, group, userInfo, groups, setGroup }: o
 
   if (!group) return <div>loading group info...</div>;
 
-  if (!page) return null;
-
-  if (!page.isEnabled(userInfo!)) return <Redirect to="" />;
+  if (!page || !page.isEnabled(userInfo!))
+    return <Redirect to={`/group/${group.id}/${defaultGroupPage}`} />;
 
   return (
     <page.Component
@@ -25,3 +23,5 @@ export default function GroupPage({ user, group, userInfo, groups, setGroup }: o
     />
   );
 }
+
+export { groupPages, defaultGroupPage } from "./pages";
