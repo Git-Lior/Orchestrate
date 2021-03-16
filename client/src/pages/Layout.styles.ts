@@ -1,3 +1,4 @@
+import { fade } from "@material-ui/core/styles";
 import { Styles } from "@material-ui/core/styles/withStyles";
 
 import { AppTheme } from "AppTheme";
@@ -12,10 +13,10 @@ const layoutStyles: Styles<AppTheme, {}> = theme => ({
     backgroundColor: theme.palette.secondary.main,
     marginRight: 30,
   },
-  noLineHeight: { lineHeight: 0 },
   groupSelect: {
     marginLeft: 20,
-    background: "none",
+    backgroundColor: fade(theme.palette.secondary.main, 0.8),
+    height: 40,
     width: 200,
     padding: "2px 10px",
     cursor: "default",

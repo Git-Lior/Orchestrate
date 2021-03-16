@@ -23,7 +23,7 @@ const useStyles = makeStyles({
   changeGroupImage: {
     position: "absolute",
     top: "5px",
-    left: "130px",
+    left: "100px",
     opacity: 0.8,
   },
   container: {

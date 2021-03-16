@@ -112,13 +112,10 @@ export default function Layout({ user, onLogout, onPasswordChange, page: Page }:
     <>
       <AppBar position="static" ref={appBarRef}>
         <Toolbar className={classes.toolbar}>
-          <Link to="/" className={classes.noLineHeight}>
-            <img src={smallLogo} className={classes.appLogo} alt="Orchestrate" />
-          </Link>
+          <img src={smallLogo} className={classes.appLogo} alt="Orchestrate" />
           {!groups && <CircularProgress color="secondary" size="2rem" />}
           {groups && groups.length > 1 && (
             <>
-              <Typography>Group:</Typography>
               {groups.length === 0 && <Typography>{groups[0].name}</Typography>}
               {groups.length > 1 && (
                 <Select
@@ -126,6 +123,7 @@ export default function Layout({ user, onLogout, onPasswordChange, page: Page }:
                   value={groupId || ""}
                   onChange={setGroupId}
                   placeholder="Select group..."
+                  variant="outlined"
                 >
                   {!groups && <MenuItem disabled>Loading Groups...</MenuItem>}
                   {groups?.map(({ id, name }) => (

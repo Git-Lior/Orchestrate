@@ -21,6 +21,13 @@ const theme = createMuiTheme({
   props: {
     // change default props of components
   },
+  overrides: {
+    MuiSelect: {
+      select: {
+        "&:focus": { background: "none !important" },
+      },
+    },
+  },
 });
 
 export type AppTheme = typeof theme;
