@@ -53,9 +53,12 @@ namespace Orchestrate.API.Controllers
             var attendance = concert.Attendances.FirstOrDefault();
 
             if (attendance == null)
-                concert.Attendances.Add(new ConcertAttendance { UserId = RequestingUserId, Attending = attending });
+                concert.Attendances.Add(new ConcertAttendance { UserId = RequestingUserId, UpdatedAt = DateTime.Now, Attending = attending });
             else
+            {
+                attendance.UpdatedAt = DateTime.Now;
                 attendance.Attending = attending;
+            }
 
             await DbContext.SaveChangesAsync();
 

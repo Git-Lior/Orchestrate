@@ -24,6 +24,32 @@ namespace Orchestrate.API.Controllers.Manager
             return Ok(await DbContext.Users.AsNoTracking().ProjectTo<UserData>(MapperConfig).ToListAsync());
         }
 
+        [HttpGet("updates")]
+        public async Task<IActionResult> GetUpdates([FromRoute] int groupId)
+        {
+            var timeBound = DateTime.Today.AddDays(-7);
+
+            var compositions = await DbContext.Compositions.AsNoTracking()
+                .Where(c => c.GroupId == groupId && c.CreatedAt > timeBound)
+                .ProjectTo<CompositionUpdateData>(MapperConfig)
+                .ToListAsync();
+
+            var concerts = await DbContext.Concerts.AsNoTracking()
+                .Include(c => c.Attendances.Where(_ => _.UpdatedAt > timeBound))
+                .Where(c => c.Attendances.Count > 0)
+                .ToListAsync();
+
+            IEnumerable<dynamic> concertDatas = concerts
+                .Select(c => new ConcertUpdateData
+                {
+                    Date = c.Attendances.Max(_ => _.UpdatedAt),
+                    Concert = ModelMapper.Map<BasicConcertData>(c),
+                    Attendance = c.Attendances.Count
+                });
+
+            return Ok(concertDatas.Concat(compositions).OrderByDescending(_ => _.Date));
+        }
+
         [HttpPost("directors")]
         public async Task<IActionResult> AddDirector([FromRoute] int groupId, [FromBody] int directorId)
         {

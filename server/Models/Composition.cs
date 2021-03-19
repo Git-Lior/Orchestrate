@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -26,6 +27,9 @@ namespace Orchestrate.API.Models
 
         public int? UploaderId { get; set; }
         public User Uploader { get; set; }
+
+        [Required]
+        public DateTime CreatedAt { get; set; }
 
         public ICollection<SheetMusic> SheetMusics { get; set; }
 

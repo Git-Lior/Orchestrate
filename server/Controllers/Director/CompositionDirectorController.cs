@@ -30,6 +30,7 @@ namespace Orchestrate.API.Controllers.Director
             var composition = ModelMapper.Map<Composition>(payload);
             composition.GroupId = GroupId;
             composition.UploaderId = RequestingUserId;
+            composition.CreatedAt = DateTime.Now;
 
             DbContext.Compositions.Add(composition);
             await DbContext.SaveChangesAsync();

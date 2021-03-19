@@ -31,6 +31,7 @@ namespace Orchestrate.API.Controllers.Manager
         {
             var concert = ModelMapper.Map<Concert>(payload);
             concert.GroupId = GroupId;
+            concert.CreatedAt = DateTime.Now;
 
             DbContext.Concerts.Add(concert);
             await DbContext.SaveChangesAsync();

@@ -6,7 +6,7 @@ using System.Linq;
 namespace Orchestrate.API
 {
     public class DataMapping : Profile
-    {   
+    {
 
         public DataMapping()
         {
@@ -43,9 +43,12 @@ namespace Orchestrate.API
             CreateMap<Composition, CompositionData>();
             CreateMap<Composition, FullCompositionData>()
                 .ForMember(f => f.Roles, o => o.MapFrom(c => c.SheetMusics.Select(s => s.Role)));
+            CreateMap<Composition, CompositionUpdateData>()
+                .ForMember(_ => _.Date, o => o.MapFrom(_ => _.CreatedAt));
 
             CreateMap<SheetMusicComment, SheetMusicCommentData>();
 
+            CreateMap<Concert, BasicConcertData>();
             CreateMap<Concert, ConcertData>()
                 .ForMember(_ => _.Attending, o => o.MapFrom(_ => _.Attendances.FirstOrDefault(a => a.UserId == RequestingUserId).Attending));
 

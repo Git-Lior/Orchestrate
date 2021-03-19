@@ -25,6 +25,9 @@ namespace Orchestrate.API.Models
         public int GroupId { get; set; }
         public Group Group { get; set; }
 
+        [Required]
+        public DateTime CreatedAt { get; set; }
+
         public ICollection<ConcertAttendance> Attendances { get; set; }
 
         public ICollection<Composition> Compositions { get; set; }

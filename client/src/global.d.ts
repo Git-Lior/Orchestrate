@@ -88,6 +88,21 @@ declare namespace orch {
     notAttendingUsers: UserData[];
   }
 
+  type UpdateData = orch.CompositionUpdateData | orch.ConcertUpdateData;
+
+  interface CompositionUpdateData {
+    date: string;
+    id: number;
+    title: string;
+    uploader: orch.UserData;
+  }
+
+  interface ConcertUpdateData {
+    date: string;
+    attendance: number;
+    concert: orch.ConcertData;
+  }
+
   namespace group {
     interface RouteParams {
       groupId?: string;

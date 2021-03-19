@@ -9,6 +9,7 @@ import { useApiFetch } from "utils/hooks";
 import DirectorsPanel from "./DirectorsPanel";
 import AddRoleDialogButton from "./AddRoleDialogButton";
 import RolesPanel from "./RolesPanel";
+import UpdatesPanel from "./UpdatesPanel";
 
 import changeGroupImage from "assets/change-group.png";
 
@@ -31,7 +32,7 @@ const useStyles = makeStyles({
     height: "100%",
     "& > *": { padding: "0 2rem" },
   },
-  sidePanel: { flex: "0 0 300px" },
+  sidePanel: { flex: "0 0 300px", display: "flex", flexDirection: "column" },
   directorsPanel: {
     height: "50%",
     minHeight: "20rem",
@@ -42,6 +43,9 @@ const useStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
+  },
+  updatesPanel: {
+    flex: 1,
   },
   rolesPanelContent: { flex: 1 },
 });
@@ -83,12 +87,16 @@ export default function GroupInfoPage(props: Props) {
             <RolesPanel {...props} getAllUsers={getAllUsers} />
           </Paper>
         </div>
-        <div className={classes.sidePanel}>
-          <Typography variant="h5" className={classes.title}>
-            Updates
-          </Typography>
-          <Paper></Paper>
-        </div>
+        {userInfo.manager && (
+          <div className={classes.sidePanel}>
+            <Typography variant="h5" className={classes.title}>
+              Updates
+            </Typography>
+            <Paper className={classes.updatesPanel}>
+              <UpdatesPanel user={user} group={group} />
+            </Paper>
+          </div>
+        )}
       </div>
     </>
   );

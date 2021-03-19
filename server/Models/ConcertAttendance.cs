@@ -1,4 +1,7 @@
-﻿namespace Orchestrate.API.Models
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace Orchestrate.API.Models
 {
     public class ConcertAttendance
     {
@@ -10,6 +13,9 @@
 
         public int UserId { get; set; }
         public User User { get; set; }
+
+        [Required]
+        public DateTime UpdatedAt { get; set; }
 
         public bool Attending { get; set; }
     }
