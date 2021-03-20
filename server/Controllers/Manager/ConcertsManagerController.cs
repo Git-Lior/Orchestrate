@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
+using Orchestrate.API.Controllers.Helpers;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,6 +21,7 @@ namespace Orchestrate.API.Controllers.Manager
         [FromRoute]
         public int ConcertId { get; set; }
 
+        protected override string EntityName => "Concert";
         protected override IQueryable<Concert> MatchingEntityQuery(IQueryable<Concert> query) =>
             query.Where(_ => _.GroupId == GroupId && _.Id == ConcertId);
 
@@ -44,8 +45,6 @@ namespace Orchestrate.API.Controllers.Manager
         {
             var dbConcert = await GetMatchingEntity(DbContext.Concerts);
 
-            if (dbConcert == null) throw new ArgumentException("Concert does not exist");
-
             ModelMapper.Map(payload, dbConcert);
             await DbContext.SaveChangesAsync();
 
@@ -57,8 +56,6 @@ namespace Orchestrate.API.Controllers.Manager
         {
             var dbConcert = await GetMatchingEntity(DbContext.Concerts);
 
-            if (dbConcert == null) throw new ArgumentException("Concert does not exist");
-
             DbContext.Remove(dbConcert);
             await DbContext.SaveChangesAsync();
 
@@ -68,20 +65,18 @@ namespace Orchestrate.API.Controllers.Manager
         [HttpGet("{concertId}/attendance")]
         public async Task<IActionResult> GetConcertAttendance()
         {
-            var groupRoles = await DbContext.Groups.Where(_ => _.Id == GroupId)
-                .SelectMany(_ => _.Roles)
+            return Ok(await DbContext.Groups.AsNoTracking()
+                    .Where(_ => _.Id == GroupId)
+                    .SelectMany(_ => _.Roles)
                     .Include(_ => _.Members)
                         .ThenInclude(_ => _.Attendances.Where(_ => _.GroupId == GroupId && _.ConcertId == ConcertId))
-                .ToListAsync();
-
-            return Ok(ModelMapper.Map<IEnumerable<GroupRoleAttendanceData>>(groupRoles));
+                    .ProjectTo<GroupRoleAttendanceData>(MapperConfig)
+                    .ToListAsync());
         }
 
         [HttpGet("{concertId}/compositions")]
         public async Task<IActionResult> GetRelevantCompositions()
         {
-            var dbConcert = await GetMatchingEntity(DbContext.Concerts);
-
             return Ok(await DbContext.Compositions.AsNoTracking()
                 .Where(_ => _.GroupId == GroupId && _.Concerts.All(c => c.Id != ConcertId))
                 .ProjectTo<CompositionData>(MapperConfig)
@@ -94,12 +89,12 @@ namespace Orchestrate.API.Controllers.Manager
         {
             var dbComposition = await GetGroupComposition(compositionId);
 
-            var dbConcerts = await GetMatchingEntity(DbContext.Concerts
+            var dbConcert = await GetMatchingEntity(DbContext.Concerts
                 .Include(_ => _.Compositions.Where(_ => _.GroupId == GroupId && _.Id == compositionId)));
 
-            if (dbConcerts.Compositions.Any()) throw new ArgumentException("Composition already in concert");
+            if (dbConcert.Compositions.Any()) throw new ArgumentException("Composition already in concert");
 
-            dbConcerts.Compositions.Add(dbComposition);
+            dbConcert.Compositions.Add(dbComposition);
 
             await DbContext.SaveChangesAsync();
 

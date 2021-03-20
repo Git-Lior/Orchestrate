@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
+using Orchestrate.API.Controllers.Helpers;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
 using Orchestrate.API.Services.Interfaces;
@@ -21,6 +22,7 @@ namespace Orchestrate.API.Controllers.Admin
         [FromRoute]
         public int UserId { get; set; }
 
+        protected override string EntityName => "User";
         protected override IQueryable<User> MatchingEntityQuery(IQueryable<User> query)
             => query.Where(_ => _.Id == UserId);
 
@@ -66,7 +68,6 @@ namespace Orchestrate.API.Controllers.Admin
         public async Task<IActionResult> UpdateUser([FromBody] UserPayload payload)
         {
             var dbUser = await GetMatchingEntity(DbContext.Users);
-            if (dbUser == null) return NotFound(new { Error = "User not found" });
 
             ModelMapper.Map(payload, dbUser);
             await DbContext.SaveChangesAsync();
@@ -77,11 +78,10 @@ namespace Orchestrate.API.Controllers.Admin
         [HttpDelete("{userId}")]
         public async Task<IActionResult> DeleteUser()
         {
-            if (await DbContext.Groups.AsNoTracking().AnyAsync(_ => _.ManagerId == UserId))
-                return BadRequest(new { Error = "Cannot delete a user that manages a group, change the group's manager first" });
+            if (await DbContext.Groups.AnyAsync(_ => _.ManagerId == UserId))
+                throw new ArgumentException("Cannot delete a user that manages a group, change the group's manager first");
 
             var user = await GetMatchingEntity(DbContext.Users);
-            if (user == null) return NotFound(new { Error = "User not found" });
 
             DbContext.Users.Remove(user);
             await DbContext.SaveChangesAsync();

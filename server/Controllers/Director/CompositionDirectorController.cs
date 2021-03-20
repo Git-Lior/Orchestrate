@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Orchestrate.API.Authorization;
+using Orchestrate.API.Controllers.Helpers;
 using Orchestrate.API.Models;
 using System;
 using System.IO;
@@ -19,6 +20,7 @@ namespace Orchestrate.API.Controllers.Director
         [FromRoute]
         public int CompositionId { get; set; }
 
+        protected override string EntityName => "Composition";
         protected override IQueryable<Composition> MatchingEntityQuery(IQueryable<Composition> query)
             => query.Where(_ => _.GroupId == GroupId && _.Id == CompositionId);
 
@@ -42,7 +44,6 @@ namespace Orchestrate.API.Controllers.Director
         public async Task<IActionResult> UpdateComposition([FromBody] CompositionPayload payload)
         {
             var composition = await GetMatchingEntity(DbContext.Compositions);
-            if (composition == null) throw new ArgumentException("Composition doesn't exist");
 
             ModelMapper.Map(payload, composition);
             await DbContext.SaveChangesAsync();
@@ -54,8 +55,6 @@ namespace Orchestrate.API.Controllers.Director
         public async Task<IActionResult> RemoveComposition()
         {
             var composition = await GetMatchingEntity(DbContext.Compositions);
-
-            if (composition == null) throw new ArgumentException("Composition does not exist");
 
             DbContext.Compositions.Remove(composition);
             await DbContext.SaveChangesAsync();
@@ -73,17 +72,11 @@ namespace Orchestrate.API.Controllers.Director
 
             if (sheetMusic == null)
             {
-                sheetMusic = new SheetMusic
-                {
-                    GroupId = GroupId,
-                    CompositionId = CompositionId,
-                    RoleId = roleId
-                };
+                sheetMusic = new SheetMusic { GroupId = GroupId, CompositionId = CompositionId, RoleId = roleId };
                 DbContext.SheetMusics.Add(sheetMusic);
             }
 
             sheetMusic.File = stream.ToArray();
-
             await DbContext.SaveChangesAsync();
 
             return Ok();

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
+using Orchestrate.API.Controllers.Helpers;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
 using System;
@@ -23,6 +24,7 @@ namespace Orchestrate.API.Controllers
         [FromRoute]
         public int RoleId { get; set; }
 
+        protected override string EntityName => "Sheet music";
         protected override IQueryable<SheetMusic> MatchingEntityQuery(IQueryable<SheetMusic> query)
             => query.Where(_ => _.GroupId == GroupId
                              && _.CompositionId == CompositionId
@@ -33,9 +35,7 @@ namespace Orchestrate.API.Controllers
         [HttpGet("file")]
         public async Task<IActionResult> GetSheetMusicFile()
         {
-            var sheetMusicFile = await MatchingEntityQuery(DbContext.SheetMusics).Select(_ => _.File).SingleOrDefaultAsync();
-
-            if (sheetMusicFile == null) throw new ArgumentNullException("Sheet music does not exist");
+            var sheetMusicFile = await GetMatchingEntity(DbContext.SheetMusics, q => q.Select(_ => _.File));
 
             return File(sheetMusicFile, "application/pdf");
         }
@@ -43,11 +43,7 @@ namespace Orchestrate.API.Controllers
         [HttpGet("comments")]
         public async Task<IActionResult> GetComments()
         {
-            var sheetMusic = await MatchingEntityQuery(DbContext.SheetMusics)
-                    .Include(_ => _.Comments).ThenInclude(_ => _.User)
-                    .SingleOrDefaultAsync();
-
-            if (sheetMusic == null) throw new ArgumentNullException("Sheet music does not exist");
+            var sheetMusic = await GetMatchingEntity(DbContext.SheetMusics.Include(_ => _.Comments).ThenInclude(_ => _.User));
 
             return Ok(ModelMapper.Map<IEnumerable<SheetMusicCommentData>>(sheetMusic.Comments));
         }
@@ -56,8 +52,6 @@ namespace Orchestrate.API.Controllers
         public async Task<IActionResult> AddComment([FromBody, StringLength(300, MinimumLength = 1)] string content)
         {
             var sheetMusic = await GetMatchingEntity(DbContext.SheetMusics);
-
-            if (sheetMusic == null) throw new ArgumentNullException("Sheet music does not exist");
 
             sheetMusic.Comments.Add(new SheetMusicComment
             {
@@ -74,13 +68,12 @@ namespace Orchestrate.API.Controllers
         [HttpPut("comments/{commentId}")]
         public async Task<IActionResult> UpdateComment([FromRoute] int commentId, [FromBody] string content)
         {
-            var sheetMusic = await MatchingEntityQuery(DbContext.SheetMusics)
-                .Include(_ => _.Comments.Where(_ => _.Id == commentId && _.UserId == RequestingUserId))
-                .SingleOrDefaultAsync();
+            var sheetMusic = await GetMatchingEntity(DbContext.SheetMusics
+                .Include(_ => _.Comments.Where(_ => _.Id == commentId && _.UserId == RequestingUserId)));
 
-            var comment = sheetMusic?.Comments.SingleOrDefault();
+            var comment = sheetMusic.Comments.SingleOrDefault();
 
-            if (comment == null) throw new ArgumentNullException("Comment does not exist");
+            if (comment?.Content == null) throw new ArgumentException("Comment does not exist");
 
             comment.Content = content;
             comment.UpdatedAt = DateTime.UtcNow;
@@ -93,13 +86,12 @@ namespace Orchestrate.API.Controllers
         [HttpDelete("comments/{commentId}")]
         public async Task<IActionResult> DeleteComment([FromRoute] int commentId)
         {
-            var sheetMusic = await MatchingEntityQuery(DbContext.SheetMusics)
-                .Include(_ => _.Comments.Where(_ => _.Id == commentId && _.UserId == RequestingUserId))
-                .SingleOrDefaultAsync();
+            var sheetMusic = await GetMatchingEntity(DbContext.SheetMusics
+                .Include(_ => _.Comments.Where(_ => _.Id == commentId && _.UserId == RequestingUserId)));
 
-            var comment = sheetMusic?.Comments.SingleOrDefault();
+            var comment = sheetMusic.Comments.SingleOrDefault();
 
-            if (comment == null) throw new ArgumentNullException("Comment does not exist");
+            if (comment?.Content == null) throw new ArgumentException("Comment does not exist");
 
             comment.Content = null;
             await DbContext.SaveChangesAsync();

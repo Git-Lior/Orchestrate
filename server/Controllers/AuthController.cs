@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Orchestrate.API.Authorization;
+using Orchestrate.API.Controllers.Helpers;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
 using Orchestrate.API.Services.Interfaces;
@@ -31,7 +32,7 @@ namespace Orchestrate.API.Controllers
         public IActionResult Admin([FromBody] string password)
         {
             if (password != _adminOptions.AdminPassword)
-                return BadRequest(new { Error = "Incorrect admin credentials" });
+                throw new ArgumentException("Incorrect admin credentials");
 
             return Ok(_tokenGenerator.GenerateAdminToken());
         }
@@ -41,11 +42,11 @@ namespace Orchestrate.API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginPayload info)
         {
             var user = await DbContext.Users.FirstOrDefaultAsync(_ => _.Email == info.Email);
-            if (user == null) return NotFound(new { Error = "User not found" });
+            if (user == null) throw new ArgumentException("User not found");
 
             var (success, needsUpgrade) = _passwordProvider.CheckHash(user.PasswordHash, info.Password);
 
-            if (!success) return BadRequest(new { Error = "Incorrect password" });
+            if (!success) throw new ArgumentException("Incorrect password");
 
             if (needsUpgrade)
             {
@@ -71,7 +72,7 @@ namespace Orchestrate.API.Controllers
             var user = await GetRequestingUser();
 
             var (success, _) = _passwordProvider.CheckHash(user.PasswordHash, payload.OldPassword);
-            if (!success) return BadRequest(new { Error = "Incorrect Password" });
+            if (!success) throw new ArgumentException("Incorrect Password");
 
             user.PasswordHash = _passwordProvider.HashPassword(payload.NewPassword);
             user.IsPasswordTemporary = false;

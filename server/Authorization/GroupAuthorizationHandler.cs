@@ -26,11 +26,11 @@ namespace Orchestrate.API.Authorization
             string userIdStr = context.User.Identity.Name;
             if (userIdStr == null) return;
 
-            if (!TryGetHttpRouteParam("groupId", out int groupId)) return;
-            TryGetHttpRouteParam("roleId", out int roleId);
-
             var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(_ => _.Id == int.Parse(userIdStr));
             if (user == null) throw new UserNotExistException();
+
+            if (!TryGetHttpRouteParam("groupId", out int groupId)) return;
+            TryGetHttpRouteParam("roleId", out int roleId);
 
             var group = await _context.Groups
                 .AsNoTracking()

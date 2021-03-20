@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
+using Orchestrate.API.Controllers.Helpers;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
 using System;
@@ -67,7 +68,7 @@ namespace Orchestrate.API.Controllers
                 .Where(c => c.GroupId == groupId && c.Id == compositionId)
                 .Include(c => c.SheetMusics.Where(s => MemberRoles.Any(r => r.Id == s.RoleId)))
                 .ProjectTo<FullCompositionData>(MapperConfig)
-                .FirstOrDefaultAsync();
+                .SingleOrDefaultAsync();
 
             if (composition == null) throw new ArgumentException("Composition does not exist");
 

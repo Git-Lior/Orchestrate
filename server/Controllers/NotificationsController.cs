@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Orchestrate.API.Controllers.Helpers;
 using Orchestrate.API.DTOs;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Orchestrate.API.Controllers
 {
-    [Route("/api/notifications")]
+    [Route("api/[controller]")]
     public class NotificationsController : OrchestrateController
     {
         public NotificationsController(IServiceProvider provider) : base(provider) { }

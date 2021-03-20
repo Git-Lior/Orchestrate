@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
+using Orchestrate.API.Controllers.Helpers;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,6 +20,7 @@ namespace Orchestrate.API.Controllers
         [FromRoute]
         public int ConcertId { get; set; }
 
+        protected override string EntityName => "Concert";
         protected override IQueryable<Concert> MatchingEntityQuery(IQueryable<Concert> query) =>
             query.Where(_ => _.GroupId == GroupId && _.Id == ConcertId);
 
@@ -47,8 +48,6 @@ namespace Orchestrate.API.Controllers
         public async Task<IActionResult> SetAttendance([FromBody] bool attending)
         {
             var concert = await GetMatchingEntity(DbContext.Concerts.Include(_ => _.Attendances.Where(a => a.UserId == RequestingUserId)));
-
-            if (concert == null) throw new ArgumentException("Concert does not exist");
 
             var attendance = concert.Attendances.FirstOrDefault();
 

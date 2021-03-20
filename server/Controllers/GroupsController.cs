@@ -1,10 +1,9 @@
 ﻿using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Orchestrate.API.Authorization;
+using Orchestrate.API.Controllers.Helpers;
 using Orchestrate.API.DTOs;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,9 +17,7 @@ namespace Orchestrate.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetGroups()
         {
-            if (await DbContext.Users.AllAsync(_ => _.Id != RequestingUserId)) throw new UserNotExistException();
-
-            return Ok(await DbContext.Groups
+            return Ok(await DbContext.Groups.AsNoTracking()
                         .Where(_ => _.ManagerId == RequestingUserId
                                     || _.Directors.Any(_ => _.Id == RequestingUserId)
                                     || _.Roles.Any(_ => _.Members.Any(_ => _.Id == RequestingUserId)))

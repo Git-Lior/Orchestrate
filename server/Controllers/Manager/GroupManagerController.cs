@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
+using Orchestrate.API.Controllers.Helpers;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
 using System;
@@ -56,7 +57,10 @@ namespace Orchestrate.API.Controllers.Manager
             var director = await DbContext.Users.FindAsync(directorId);
             if (director == null) throw new ArgumentException("User not found");
 
-            var group = await DbContext.Groups.Include(_ => _.Directors).FirstAsync(_ => _.Id == groupId);
+            var group = await DbContext.Groups
+                .Include(_ => _.Directors.Where(_ => _.Id == directorId))
+                .SingleAsync(_ => _.Id == groupId);
+            if (group.Directors.Any()) throw new ArgumentException("Director already in group");
 
             group.Directors.Add(director);
             await DbContext.SaveChangesAsync();
@@ -68,10 +72,12 @@ namespace Orchestrate.API.Controllers.Manager
         public async Task<IActionResult> RemoveDirector([FromRoute] int groupId, [FromRoute] int directorId)
         {
             var director = await DbContext.Users.FindAsync(directorId);
-
             if (director == null) throw new ArgumentException("User not found");
 
-            var group = await DbContext.Groups.Include(_ => _.Directors).FirstAsync(_ => _.Id == groupId);
+            var group = await DbContext.Groups
+                .Include(_ => _.Directors.Where(_ => _.Id == directorId))
+                .SingleAsync(_ => _.Id == groupId);
+            if (!group.Directors.Any()) throw new ArgumentException("Director does not exist in group");
 
             group.Directors.Remove(director);
             await DbContext.SaveChangesAsync();
@@ -82,9 +88,8 @@ namespace Orchestrate.API.Controllers.Manager
         [HttpPost("roles")]
         public async Task<IActionResult> AddRole([FromRoute] int groupId, [FromBody] RolePayload role)
         {
-            var group = await DbContext.Groups.Include(_ => _.Roles).FirstAsync(_ => _.Id == groupId);
-
-            var dbRole = await DbContext.Roles.FirstOrDefaultAsync(_ => _.Section == role.Section && _.Num == role.Num);
+            var group = await DbContext.Groups.Include(_ => _.Roles).SingleAsync(_ => _.Id == groupId);
+            var dbRole = await DbContext.Roles.SingleOrDefaultAsync(_ => _.Section == role.Section && _.Num == role.Num);
 
             if (dbRole == null)
             {
@@ -111,10 +116,8 @@ namespace Orchestrate.API.Controllers.Manager
 
             var groupCount = await DbContext.Groups.Where(_ => _.Roles.Any(_ => _.RoleId == roleId)).CountAsync();
 
-            if (groupCount <= 1)
-                DbContext.Remove(groupRole.Role);
-            else
-                DbContext.Remove(groupRole);
+            if (groupCount <= 1) DbContext.Remove(groupRole.Role);
+            else DbContext.Remove(groupRole);
 
             await DbContext.SaveChangesAsync();
 

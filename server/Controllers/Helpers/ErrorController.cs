@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
 using System;
 
-namespace Orchestrate.API.Controllers
+namespace Orchestrate.API.Controllers.Helpers
 {
     [ApiController]
     [Route("api/[controller]")]
