@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
+using System;
 using System.Linq;
 
 namespace Orchestrate.API
@@ -11,6 +12,8 @@ namespace Orchestrate.API
         public DataMapping()
         {
             int RequestingUserId = 0; // this will be passd at runtime
+
+            CreateMap<DateTimeOffset, long>().ConvertUsing(d => d.ToUnixTimeSeconds());
 
             CreateMap<UserPayload, User>();
             CreateMap<RolePayload, Role>();
@@ -24,6 +27,8 @@ namespace Orchestrate.API
             CreateMap<User, CreatedUserData>();
             CreateMap<User, UserDataWithAttendance>()
                 .ForMember(_ => _.Attending, o => o.MapFrom(s => s.Attendances.FirstOrDefault().Attending));
+
+            CreateMap<Role, BasicGroupRoleData>();
 
             CreateMap<GroupRole, BasicGroupRoleData>()
                 .ForMember(_ => _.Id, o => o.MapFrom(_ => _.Role.Id))
@@ -40,6 +45,7 @@ namespace Orchestrate.API
             CreateMap<Group, GroupData>();
             CreateMap<Group, FullGroupData>();
 
+            CreateMap<Composition, BasicCompositionData>();
             CreateMap<Composition, CompositionData>();
             CreateMap<Composition, FullCompositionData>()
                 .ForMember(f => f.Roles, o => o.MapFrom(c => c.SheetMusics.Select(s => s.Role)));

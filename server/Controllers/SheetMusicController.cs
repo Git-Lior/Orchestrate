@@ -63,7 +63,7 @@ namespace Orchestrate.API.Controllers
             {
                 UserId = RequestingUserId,
                 Content = content,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.UtcNow
             });
 
             await DbContext.SaveChangesAsync();
@@ -83,7 +83,7 @@ namespace Orchestrate.API.Controllers
             if (comment == null) throw new ArgumentNullException("Comment does not exist");
 
             comment.Content = content;
-            comment.UpdatedAt = DateTime.Now;
+            comment.UpdatedAt = DateTime.UtcNow;
 
             await DbContext.SaveChangesAsync();
 

@@ -4,7 +4,7 @@ namespace Orchestrate.API.DTOs
 {
     public class UpdateData
     {
-        public DateTime Date { get; set; }
+        public long Date { get; set; }
     }
 
     public class CompositionUpdateData : UpdateData

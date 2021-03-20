@@ -9,7 +9,8 @@ import {
 } from "@material-ui/pickers";
 
 import TextField from "@material-ui/core/TextField";
-import { useInputState } from "utils/hooks/useInputState";
+
+import { useInputState } from "utils/hooks";
 
 interface Props {
   concert: orch.Concert | undefined;
@@ -17,12 +18,12 @@ interface Props {
 }
 
 export default function CardInfoInput({ concert, onDataUpdated }: Props) {
-  const [date, setDate] = useState<Moment | null>(concert?.date ? moment(concert.date) : null);
+  const [date, setDate] = useState<Moment | null>(concert?.date ? moment.unix(concert.date) : null);
   const [location, setLocation] = useInputState(concert?.location);
 
   const newUpdatedData: orch.OptionalId<orch.ConcertData> = useMemo(
     () => ({
-      date: date?.isValid() ? date.toISOString() : "",
+      date: date?.isValid() ? date.toISOString() : ("" as any),
       location,
     }),
     [date, location]

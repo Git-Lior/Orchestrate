@@ -42,7 +42,7 @@ namespace Orchestrate.API.Controllers.Manager
             IEnumerable<dynamic> concertDatas = concerts
                 .Select(c => new ConcertUpdateData
                 {
-                    Date = c.Attendances.Max(_ => _.UpdatedAt),
+                    Date = ModelMapper.Map<long>(c.Attendances.Max(_ => _.UpdatedAt)),
                     Concert = ModelMapper.Map<BasicConcertData>(c),
                     Attendance = c.Attendances.Count
                 });

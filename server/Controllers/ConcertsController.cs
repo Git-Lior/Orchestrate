@@ -53,10 +53,10 @@ namespace Orchestrate.API.Controllers
             var attendance = concert.Attendances.FirstOrDefault();
 
             if (attendance == null)
-                concert.Attendances.Add(new ConcertAttendance { UserId = RequestingUserId, UpdatedAt = DateTime.Now, Attending = attending });
+                concert.Attendances.Add(new ConcertAttendance { UserId = RequestingUserId, UpdatedAt = DateTime.UtcNow, Attending = attending });
             else
             {
-                attendance.UpdatedAt = DateTime.Now;
+                attendance.UpdatedAt = DateTime.UtcNow;
                 attendance.Attending = attending;
             }
 

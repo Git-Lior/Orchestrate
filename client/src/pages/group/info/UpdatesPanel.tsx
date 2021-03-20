@@ -47,8 +47,8 @@ export default function UpdatesPanel({ user, group }: Props) {
   );
 }
 
-function _fullDateString(date: string) {
-  return moment(date).format("DD/MM/yyyy HH:mm:ss");
+function _fullDateString(date: number) {
+  return moment.unix(date).format("DD/MM/yyyy HH:mm:ss");
 }
 
 function _isConcertUpdate(u: orch.UpdateData): u is orch.ConcertUpdateData {

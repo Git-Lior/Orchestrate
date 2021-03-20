@@ -7,7 +7,7 @@ namespace Orchestrate.API.DTOs
     {
         public int Id { get; set; }
         public string Location { get; set; }
-        public DateTime Date { get; set; }
+        public long Date { get; set; }
     }
 
     public class ConcertData : BasicConcertData

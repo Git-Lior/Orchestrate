@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import moment from "moment";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
@@ -206,7 +207,7 @@ export default function SheetMusicViewer({
                     primary={content ?? "[Comment deleted by user]"}
                     secondary={
                       <>
-                        {new Date(updatedAt ?? createdAt).toLocaleString("he-IL")}
+                        {moment.unix(updatedAt ?? createdAt).format("DD/MM/yyyy HH:mm:ss")}
                         {updatedAt && " (edited)"}
                       </>
                     }

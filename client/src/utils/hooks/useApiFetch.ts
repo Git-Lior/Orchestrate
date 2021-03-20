@@ -8,7 +8,7 @@ type ApiFetchFunc = <T extends ResultTypes | "none" = "json">(
   type?: T
 ) => T extends "none" ? Promise<Response> : T extends ResultTypes ? ReturnType<Response[T]> : never;
 
-export function useApiFetch(user?: { token: string }, baseUrl: string = "") {
+export function useApiFetch(user?: { token?: string }, baseUrl: string = "") {
   const apiFetch: ApiFetchFunc = useCallback(
     (url, init = {}, type = "json" as any) => {
       const resolvedUrl = url.startsWith("/") ? url : `${baseUrl}/${url}`;

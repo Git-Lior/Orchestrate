@@ -36,6 +36,12 @@ namespace Orchestrate.API.Data
                 .WithMany(_ => _.MemberOfGroups)
                 .UsingEntity(j => j.ToTable("group_role_member"));
 
+            modelBuilder.Entity<GroupRole>()
+                .HasMany(_ => _.SheetMusics)
+                .WithOne(_ => _.GroupRole)
+                .HasForeignKey(r => new { r.GroupId, r.RoleId })
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<Composition>()
                 .HasMany(c => c.SheetMusics)
                 .WithOne(sm => sm.Composition)

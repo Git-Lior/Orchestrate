@@ -11,7 +11,7 @@ namespace Orchestrate.API.Models
         public string Location { get; set; }
 
         [Required]
-        public DateTime Date { get; set; }
+        public DateTimeOffset Date { get; set; }
 
         [StringLength(100)]
         public string Description { get; set; }
@@ -26,7 +26,7 @@ namespace Orchestrate.API.Models
         public Group Group { get; set; }
 
         [Required]
-        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
 
         public ICollection<ConcertAttendance> Attendances { get; set; }
 

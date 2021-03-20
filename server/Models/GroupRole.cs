@@ -11,5 +11,7 @@ namespace Orchestrate.API.Models
         public Role Role { get; set; }
 
         public ICollection<User> Members { get; set; }
+
+        public ICollection<SheetMusic> SheetMusics { get; set; }
     }
 }

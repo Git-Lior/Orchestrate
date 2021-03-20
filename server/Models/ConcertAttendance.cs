@@ -15,7 +15,7 @@ namespace Orchestrate.API.Models
         public User User { get; set; }
 
         [Required]
-        public DateTime UpdatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
 
         public bool Attending { get; set; }
     }

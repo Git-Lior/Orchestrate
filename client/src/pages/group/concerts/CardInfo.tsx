@@ -27,8 +27,8 @@ export default function CardInfo({ concert }: Props) {
   return (
     <div className={classes.root}>
       <div className={classes.concertTime}>
-        <Typography variant="body1">{moment(concert.date).format("DD/MM/yyyy")}</Typography>
-        <Typography variant="body1">{moment(concert.date).format("HH:mm")}</Typography>
+        <Typography variant="body1">{moment.unix(concert.date).format("DD/MM/yyyy")}</Typography>
+        <Typography variant="body1">{moment.unix(concert.date).format("HH:mm")}</Typography>
       </div>
       <div className={classes.concertLocation}>
         <PlaceIcon />

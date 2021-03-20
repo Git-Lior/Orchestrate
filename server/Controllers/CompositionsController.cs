@@ -39,7 +39,7 @@ namespace Orchestrate.API.Controllers
             {
                 compositions = compositions.Intersect(
                     DbContext.Concerts
-                        .Where(_ => _.GroupId == groupId && _.Date > DateTime.Now)
+                        .Where(_ => _.GroupId == groupId && _.Date > DateTime.UtcNow)
                         .SelectMany(_ => _.Compositions)
                 );
             }

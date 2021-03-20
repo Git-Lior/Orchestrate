@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { generatePath, useHistory, useParams } from "react-router";
 
+import makeStyles from "@material-ui/core/styles/makeStyles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Select from "@material-ui/core/Select";
@@ -9,26 +9,23 @@ import MenuItem from "@material-ui/core/MenuItem";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
-import Badge from "@material-ui/core/Badge";
 import Menu from "@material-ui/core/Menu";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import NotificationsIcon from "@material-ui/icons/Notifications";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import PersonIcon from "@material-ui/icons/Person";
 import LockIcon from "@material-ui/icons/Lock";
 import TextField from "@material-ui/core/TextField";
-
-import makeStyles from "@material-ui/core/styles/makeStyles";
-import layoutStyles from "./Layout.styles";
-import smallLogo from "assets/logo-small.png";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 import { useApiFetch, useInputState, usePromiseStatus } from "utils/hooks";
-import { groupPages } from "./group";
 import { userToText } from "utils/general";
 import { FormDialog } from "utils/components";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import smallLogo from "assets/logo-small.png";
+
+import layoutStyles from "./Layout.styles";
+import { groupPages } from "./group";
+import Notifications from "./Notifications";
 
 const useStyles = makeStyles(layoutStyles);
 
@@ -158,19 +155,12 @@ export default function Layout({ user, onLogout, onPasswordChange, page: Page }:
             <PersonIcon />
             <Typography>{userToText(user)}</Typography>
           </div>
-          <IconButton color="inherit">
-            <Badge
-              badgeContent={10}
-              overlap="circle"
-              color="secondary"
-              anchorOrigin={{ vertical: "top", horizontal: "right" }}
-            >
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
+          <Notifications user={user} />
           <Menu
             anchorEl={appBarRef.current}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "center" }}
+            getContentAnchorEl={null}
             open={isMenuOpen}
             onClose={handleMenuClose}
           >

@@ -52,9 +52,12 @@ declare namespace orch {
     members: UserData[];
   }
 
-  interface CompositionData {
+  interface BasicCompositionData {
     id: number;
     title: string;
+  }
+
+  interface CompositionData extends BasicCompositionData {
     composer: string;
     genre: string;
     uploader: orch.UserData;
@@ -67,15 +70,15 @@ declare namespace orch {
   interface SheetMusicComment {
     id: number;
     user: UserData; // TODO: can be null
-    createdAt: string;
-    updatedAt?: string;
+    createdAt: number;
+    updatedAt?: number;
     content: string;
   }
 
   interface ConcertData {
     id: number;
     location: string;
-    date: string;
+    date: number;
     description?: string;
   }
 
@@ -91,16 +94,32 @@ declare namespace orch {
   type UpdateData = orch.CompositionUpdateData | orch.ConcertUpdateData;
 
   interface CompositionUpdateData {
-    date: string;
+    date: number;
     id: number;
     title: string;
     uploader: orch.UserData;
   }
 
   interface ConcertUpdateData {
-    date: string;
+    date: number;
     attendance: number;
     concert: orch.ConcertData;
+  }
+
+  type NotificationData = orch.SheetMusicNotificationData | orch.ConcertNotificationData;
+
+  interface SheetMusicNotificationData {
+    date: number;
+    groupId: number;
+    composition: BasicCompositionData;
+    role: Role;
+    comments: number;
+  }
+
+  interface ConcertNotificationData {
+    date: number;
+    groupId: number;
+    concert: ConcertData;
   }
 
   namespace group {

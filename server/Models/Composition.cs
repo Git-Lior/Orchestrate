@@ -29,7 +29,7 @@ namespace Orchestrate.API.Models
         public User Uploader { get; set; }
 
         [Required]
-        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
 
         public ICollection<SheetMusic> SheetMusics { get; set; }
 

@@ -7,7 +7,7 @@ import HomePage from "pages/home";
 import Layout from "pages/Layout";
 import PageNotFound from "pages/PageNotFound";
 
-import { useApiFetch } from "utils/hooks";
+import { useApiFetch, useLocalStorage } from "utils/hooks";
 
 const TOKEN_STORAGE_KEY = "user_token";
 
@@ -15,24 +15,18 @@ function App() {
   const history = useHistory();
   const { pathname } = useLocation();
   const [user, setUser] = useState<orch.User>();
-  const apiFetch = useApiFetch(user, "/auth");
+  const [storedToken, setStoredToken] = useLocalStorage(TOKEN_STORAGE_KEY);
+  const apiFetch = useApiFetch(user ?? { token: storedToken }, "/auth");
 
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
-    if (token) {
-      fetch("/api/auth/info", {
-        headers: { authorization: "Bearer " + token },
-      })
-        .then(_ => _.json())
-        .then(u => setUser({ ...u, token }));
-    }
+    if (storedToken) apiFetch("info").then(u => setUser({ ...u, token: storedToken }));
   }, []);
 
   const logoutUser = useCallback(() => {
     setUser(undefined);
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    setStoredToken(undefined);
     history.push("/");
-  }, [setUser, history]);
+  }, [setUser, setStoredToken, history]);
 
   const changePassword = useCallback(
     async (oldPassword: string, newPassword: string) =>
@@ -50,9 +44,9 @@ function App() {
   const onUserLogin = useCallback(
     (result: orch.User, remember: boolean) => {
       setUser(result);
-      if (remember) localStorage.setItem(TOKEN_STORAGE_KEY, result.token);
+      if (remember) setStoredToken(result.token);
     },
-    [setUser]
+    [setUser, setStoredToken]
   );
 
   if (!user) return <LoginPage onLogin={onUserLogin} />;
