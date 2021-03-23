@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
@@ -6,7 +7,6 @@ using Orchestrate.API.Controllers.Helpers;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,11 +14,12 @@ namespace Orchestrate.API.Controllers.Admin
 {
     [Route("api/admin/groups")]
     [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
-    public class GroupsAdminController : OrchestrateController<Group>
+    public class GroupsAdminController : EntityApiControllerBase<Group>
     {
         [FromRoute]
         public int GroupId { get; set; }
 
+        protected override string EntityName => "Group";
         protected override IQueryable<Group> MatchingEntityQuery(IQueryable<Group> query)
             => query.Where(_ => _.Id == GroupId);
 
@@ -27,8 +28,7 @@ namespace Orchestrate.API.Controllers.Admin
         [HttpGet]
         public async Task<IActionResult> GetGroups()
         {
-            var allGroups = await DbContext.Groups.AsNoTracking().Include(_ => _.Manager).ToListAsync();
-            return Ok(ModelMapper.Map<IEnumerable<GroupData>>(allGroups));
+            return Ok(await DbContext.Groups.AsNoTracking().ProjectTo<GroupData>(MapperConfig).ToListAsync());
         }
 
         [HttpPost]
@@ -45,8 +45,6 @@ namespace Orchestrate.API.Controllers.Admin
         {
             var group = await GetMatchingEntity(DbContext.Groups);
 
-            if (group == null) return NotFound(new { Error = "Group not found" });
-
             ModelMapper.Map(payload, group);
             await DbContext.SaveChangesAsync();
 
@@ -57,7 +55,6 @@ namespace Orchestrate.API.Controllers.Admin
         public async Task<IActionResult> DeleteGroup()
         {
             var group = await GetMatchingEntity(DbContext.Groups);
-            if (group == null) return NotFound(new { Error = "Group not found" });
 
             DbContext.Groups.Remove(group);
             await DbContext.SaveChangesAsync();

@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace Orchestrate.API.Controllers
 {
     [Route("api/groups/{groupId}/concerts")]
-    public class ConcertsController : OrchestrateController<Concert>
+    public class ConcertsController : EntityApiControllerBase<Concert>
     {
         [FromRoute]
         public int GroupId { get; set; }
@@ -35,7 +35,7 @@ namespace Orchestrate.API.Controllers
                 .Include(_ => _.Attendances)
                 .OrderBy(_ => _.Date);
 
-            if (IsUserManager)
+            if (UserGroupPosition.Manager)
                 return Ok(await concerts.ProjectTo<ConcertDataWithUserAttendance>(MapperConfig, new { RequestingUserId }).ToListAsync());
 
             if (hideNotAttending) concerts = concerts.Where(_ => _.Attendances.All(_ => _.UserId != RequestingUserId || _.Attending));

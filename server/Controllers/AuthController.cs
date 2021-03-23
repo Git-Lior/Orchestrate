@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace Orchestrate.API.Controllers
 {
     [Route("api/[controller]")]
-    public class AuthController : OrchestrateController
+    public class AuthController : ApiControllerBase
     {
         private readonly IPasswordProvider _passwordProvider;
         private readonly ITokenGenerator _tokenGenerator;

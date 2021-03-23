@@ -13,7 +13,7 @@ namespace Orchestrate.API.Controllers.Director
 {
     [Route("api/groups/{groupId}/compositions")]
     [Authorize(Policy = GroupRolesPolicy.DirectorOnly)]
-    public class CompositionDirectorController : OrchestrateController<Composition>
+    public class CompositionDirectorController : EntityApiControllerBase<Composition>
     {
         [FromRoute]
         public int GroupId { get; set; }

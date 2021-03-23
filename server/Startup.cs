@@ -76,6 +76,7 @@ namespace Orchestrate.API
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Orchestrate.API", Version = "v1" });
             });
 
+            services.AddScoped<IUserGroupPositionProvider, UserGroupPositionProvider>();
             services.AddScoped<ITokenGenerator, TokenGenerator>();
             services.AddScoped<IPasswordProvider, PasswordProvider>();
         }

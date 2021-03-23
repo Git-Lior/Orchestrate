@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Orchestrate.API.Controllers
 {
     [Route("api/[controller]")]
-    public class GroupsController : OrchestrateController
+    public class GroupsController : ApiControllerBase
     {
         public GroupsController(IServiceProvider provider) : base(provider) { }
 

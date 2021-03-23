@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace Orchestrate.API.Controllers
 {
     [Route("api/groups/{groupId}/compositions")]
-    public class CompositionsController : OrchestrateController
+    public class CompositionsController : ApiControllerBase
     {
         public CompositionsController(IServiceProvider provider) : base(provider) { }
 
@@ -45,15 +45,15 @@ namespace Orchestrate.API.Controllers
                 );
             }
 
-            if (IsUserDirector || IsUserManager)
+            if (UserGroupPosition.Director || UserGroupPosition.Manager)
                 return Ok(await compositions.ProjectTo<CompositionData>(MapperConfig).ToListAsync());
 
-            IEnumerable<Composition> result = await compositions
+            IEnumerable<Composition> result = await compositions.AsNoTracking()
                 .Include(_ => _.Uploader)
                 .Include(_ => _.SheetMusics)
-                .AsNoTracking().ToListAsync();
+                .ToListAsync();
 
-            var rolesSet = new HashSet<int>(MemberRoles.Select(_ => _.Id));
+            var rolesSet = new HashSet<int>(UserGroupPosition.Roles.Select(_ => _.Id));
 
             result = result.Where(c => c.SheetMusics.Any(s => rolesSet.Contains(s.RoleId)));
 
@@ -66,13 +66,15 @@ namespace Orchestrate.API.Controllers
         {
             var composition = await DbContext.Compositions
                 .Where(c => c.GroupId == groupId && c.Id == compositionId)
-                .Include(c => c.SheetMusics.Where(s => MemberRoles.Any(r => r.Id == s.RoleId)))
-                .ProjectTo<FullCompositionData>(MapperConfig)
+                .Include(c => c.Uploader)
+                .Include(c => c.SheetMusics
+                    .Where(s => UserGroupPosition.Director
+                             || UserGroupPosition.Roles.Any(r => r.Id == s.RoleId)))
                 .SingleOrDefaultAsync();
 
             if (composition == null) throw new ArgumentException("Composition does not exist");
 
-            return Ok(composition);
+            return Ok(ModelMapper.Map<FullCompositionData>(composition));
         }
     }
 }

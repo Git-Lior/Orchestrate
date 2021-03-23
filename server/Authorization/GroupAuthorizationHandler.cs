@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Data;
+using Orchestrate.API.Services.Interfaces;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,10 +15,12 @@ namespace Orchestrate.API.Authorization
 
         private readonly OrchestrateContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IUserGroupPositionProvider _positionProvider;
 
-        public GroupAuthorizationHandler(OrchestrateContext context, IHttpContextAccessor httpContextAccessor)
+        public GroupAuthorizationHandler(OrchestrateContext context, IHttpContextAccessor httpContextAccessor, IUserGroupPositionProvider userGroupPositionProvider)
         {
             _context = context;
+            _positionProvider = userGroupPositionProvider;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -26,31 +29,14 @@ namespace Orchestrate.API.Authorization
             string userIdStr = context.User.Identity.Name;
             if (userIdStr == null) return;
 
-            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(_ => _.Id == int.Parse(userIdStr));
-            if (user == null) throw new UserNotExistException();
+            var userId = int.Parse(userIdStr);
+
+            if (await _context.Users.AllAsync(_ => _.Id != userId)) throw new UserNotExistException();
 
             if (!TryGetHttpRouteParam("groupId", out int groupId)) return;
             TryGetHttpRouteParam("roleId", out int roleId);
 
-            var group = await _context.Groups
-                .AsNoTracking()
-                .Include(_ => _.Roles)
-                .Include(_ => _.Directors.Where(_ => _.Id == user.Id))
-                .Include(_ => _.Roles).ThenInclude(_ => _.Role)
-                .Include(_ => _.Roles).ThenInclude(_ => _.Members)
-                .FirstOrDefaultAsync(_ => _.Id == groupId);
-            if (group == null) throw new ArgumentException("Group does not exist");
-
-            if (roleId > 0 && !group.Roles.Any(_ => _.RoleId == roleId))
-                throw new ArgumentException("Role does not exist in group");
-
-            var isUserManager = group.ManagerId == user.Id;
-            var isUserDirector = group.Directors.Any();
-            var memberRoles = group.Roles.Where(_ => _.Members.Any(_ => _.Id == user.Id)).Select(_ => _.Role);
-
-            _httpContextAccessor.HttpContext.Items["IsUserManager"] = isUserManager;
-            _httpContextAccessor.HttpContext.Items["IsUserDirector"] = isUserDirector;
-            _httpContextAccessor.HttpContext.Items["MemberRoles"] = memberRoles;
+            await _positionProvider.Initialize(userId, groupId);
 
             var pendingRequirements = context.PendingRequirements.OfType<GroupRolesRequirement>().ToList();
 
@@ -61,9 +47,9 @@ namespace Orchestrate.API.Authorization
             // if route has groupId and no requirements specified, check all roles
             var roles = noRequirements ? _allRoles : pendingRequirements[0].Roles;
 
-            if (HasRole(roles, GroupRoles.Manager) && isUserManager
-                || HasRole(roles, GroupRoles.Director) && isUserDirector
-                || HasRole(roles, GroupRoles.Member) && memberRoles.Any(r => roleId == 0 || r.Id == roleId))
+            if (HasRole(roles, GroupRoles.Manager) && _positionProvider.Manager
+                || HasRole(roles, GroupRoles.Director) && _positionProvider.Director
+                || HasRole(roles, GroupRoles.Member) && _positionProvider.Roles.Any(r => roleId == 0 || r.Id == roleId))
             {
                 if (!noRequirements) context.Succeed(pendingRequirements[0]);
             }

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Orchestrate.API.Controllers
 {
     [Route("api/[controller]")]
-    public class NotificationsController : OrchestrateController
+    public class NotificationsController : ApiControllerBase
     {
         public NotificationsController(IServiceProvider provider) : base(provider) { }
 

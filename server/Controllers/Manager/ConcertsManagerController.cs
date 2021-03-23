@@ -14,7 +14,7 @@ namespace Orchestrate.API.Controllers.Manager
 {
     [Route("api/groups/{groupId}/concerts")]
     [Authorize(Policy = GroupRolesPolicy.ManagerOnly)]
-    public class ConcertsManagerController : OrchestrateController<Concert>
+    public class ConcertsManagerController : EntityApiControllerBase<Concert>
     {
         [FromRoute]
         public int GroupId { get; set; }
@@ -60,18 +60,6 @@ namespace Orchestrate.API.Controllers.Manager
             await DbContext.SaveChangesAsync();
 
             return Ok();
-        }
-
-        [HttpGet("{concertId}/attendance")]
-        public async Task<IActionResult> GetConcertAttendance()
-        {
-            return Ok(await DbContext.Groups.AsNoTracking()
-                    .Where(_ => _.Id == GroupId)
-                    .SelectMany(_ => _.Roles)
-                    .Include(_ => _.Members)
-                        .ThenInclude(_ => _.Attendances.Where(_ => _.GroupId == GroupId && _.ConcertId == ConcertId))
-                    .ProjectTo<GroupRoleAttendanceData>(MapperConfig)
-                    .ToListAsync());
         }
 
         [HttpGet("{concertId}/compositions")]

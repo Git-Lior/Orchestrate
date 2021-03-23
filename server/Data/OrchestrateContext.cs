@@ -25,7 +25,7 @@ namespace Orchestrate.API.Data
             modelBuilder.Entity<ConcertAttendance>().HasKey(c => new { c.GroupId, c.ConcertId, c.UserId });
 
             modelBuilder.Entity<User>().HasAlternateKey(u => u.Email);
-            modelBuilder.Entity<Role>().HasAlternateKey(r => new { r.Section, r.Num });
+            modelBuilder.Entity<Role>().HasIndex(r => new { r.Section, r.Num }).IsUnique();
 
             modelBuilder.Entity<Group>()
                 .HasMany(g => g.Directors)

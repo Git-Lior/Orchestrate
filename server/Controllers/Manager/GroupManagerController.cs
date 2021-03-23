@@ -15,7 +15,7 @@ namespace Orchestrate.API.Controllers.Manager
 {
     [Route("api/groups/{groupId}")]
     [Authorize(Policy = GroupRolesPolicy.ManagerOnly)]
-    public class GroupManagerController : OrchestrateController
+    public class GroupManagerController : ApiControllerBase
     {
         public GroupManagerController(IServiceProvider provider) : base(provider) { }
 

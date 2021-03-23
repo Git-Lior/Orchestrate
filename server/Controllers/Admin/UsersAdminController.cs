@@ -15,7 +15,7 @@ namespace Orchestrate.API.Controllers.Admin
 {
     [Route("api/admin/users")]
     [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
-    public class UsersAdminController : OrchestrateController<User>
+    public class UsersAdminController : EntityApiControllerBase<User>
     {
         private readonly IPasswordProvider _passwordProvider;
 

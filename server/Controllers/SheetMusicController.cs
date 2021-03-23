@@ -15,7 +15,7 @@ namespace Orchestrate.API.Controllers
 {
     [Route("api/groups/{groupId}/compositions/{compositionId}/roles/{roleId}")]
     [Authorize(Policy = GroupRolesPolicy.DirectorOrMember)]
-    public class SheetMusicController : OrchestrateController<SheetMusic>
+    public class SheetMusicController : EntityApiControllerBase<SheetMusic>
     {
         [FromRoute]
         public int GroupId { get; set; }
