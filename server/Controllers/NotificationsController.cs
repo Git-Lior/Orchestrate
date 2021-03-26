@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Controllers.Helpers;
 using Orchestrate.API.DTOs;
+using Orchestrate.API.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,8 @@ namespace Orchestrate.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetNotifications([FromQuery] DateTime? lastUpdate)
         {
+            var userRoles = Repository.Get<User>().Entities.Where(_ => _.Id == RequestingUserId).SelectMany(_ => _.MemberOfGroups);
+
             var relevanceDate = new DateTime(
                 Math.Min(
                     Math.Max(
@@ -27,40 +30,40 @@ namespace Orchestrate.API.Controllers
                 )
             );
 
-            var sheetMusics = await DbContext.SheetMusics
+            var sheetMusics = await Repository.Get<SheetMusic>().Entities
                 .Where(_ => _.Group.Directors.Any(_ => _.Id == RequestingUserId))
-                .Union(DbContext.Users
-                        .Where(_ => _.Id == RequestingUserId)
-                        .SelectMany(_ => _.MemberOfGroups)
-                        .SelectMany(_ => _.SheetMusics))
+                .Union(userRoles.SelectMany(_ => _.SheetMusics))
                 .Include(_ => _.Comments.Where(_ => _.CreatedAt > relevanceDate && _.UserId != RequestingUserId && _.Content != null))
                 .Include(_ => _.Composition)
                 .Include(_ => _.Role)
                 .ToListAsync();
 
-            var concerts = await DbContext.Concerts
-                .Where(c => c.Group.ManagerId == RequestingUserId)
-                .Union(DbContext.Concerts
-                    .Where(_ => _.Attendances.Any(_ => _.UserId == RequestingUserId && _.Attending)))
+            var upcomingConcerts = await Repository.Get<Concert>().Entities
+                .Where(c => c.Group.ManagerId == RequestingUserId || c.Attendances.Any(_ => _.UserId == RequestingUserId && _.Attending))
                 .Where(c => c.Date > DateTime.UtcNow && c.Date < DateTime.Today.AddDays(1))
+                .ToListAsync();
+
+            var newConcerts = await userRoles.SelectMany(_ => _.Group.Concerts)
+                .Where(_ => _.CreatedAt > relevanceDate)
                 .ToListAsync();
 
             IEnumerable<dynamic> sheetMusicNotifications = sheetMusics.Where(_ => _.Comments.Count > 0)
                 .Select(s => new SheetMusicNotificationData
                 {
-                    Date = ModelMapper.Map<long>(s.Comments.Max(_ => _.CreatedAt)),
+                    Date = Mapper.Map<long>(s.Comments.Max(_ => _.CreatedAt)),
                     GroupId = s.GroupId,
-                    Composition = ModelMapper.Map<BasicCompositionData>(s.Composition),
-                    Role = ModelMapper.Map<BasicGroupRoleData>(s.Role),
+                    Composition = Mapper.Map<BasicCompositionData>(s.Composition),
+                    Role = Mapper.Map<BasicGroupRoleData>(s.Role),
                     Comments = s.Comments.Count
                 });
 
-            var concertNotifications = concerts.Select(c => new ConcertNotificationData
-            {
-                Date = ModelMapper.Map<long>((DateTimeOffset)DateTime.Today.ToUniversalTime()),
-                GroupId = c.GroupId,
-                Concert = ModelMapper.Map<BasicConcertData>(c)
-            });
+            var concertNotifications = upcomingConcerts.Concat(newConcerts)
+                .Select(c => new ConcertNotificationData
+                {
+                    Date = Mapper.Map<long>((DateTimeOffset)c.Date.Date),
+                    GroupId = c.GroupId,
+                    Concert = Mapper.Map<BasicConcertData>(c)
+                });
 
             return Ok(concertNotifications.Concat(sheetMusicNotifications).OrderByDescending(_ => _.Date));
         }

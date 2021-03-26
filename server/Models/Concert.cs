@@ -17,16 +17,20 @@ namespace Orchestrate.API.Models
         public string Description { get; set; }
     }
 
-    public class Concert : ConcertPayload
+    public class CompleteConcertPayload : ConcertPayload
+    {
+        public int GroupId { get; set; }
+
+        [Required]
+        public DateTimeOffset CreatedAt { get; set; }
+    }
+
+    public class Concert : CompleteConcertPayload
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        public int GroupId { get; set; }
         public Group Group { get; set; }
-
-        [Required]
-        public DateTimeOffset CreatedAt { get; set; }
 
         public ICollection<ConcertAttendance> Attendances { get; set; }
 

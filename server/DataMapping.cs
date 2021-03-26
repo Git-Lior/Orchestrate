@@ -8,18 +8,22 @@ namespace Orchestrate.API
 {
     public class DataMapping : Profile
     {
-
         public DataMapping()
         {
             int RequestingUserId = 0; // this will be passd at runtime
 
             CreateMap<DateTimeOffset, long>().ConvertUsing(d => d.ToUnixTimeSeconds());
 
+            CreateMap<UserPayload, CompleteUserPayload>();
+
             CreateMap<UserPayload, User>();
+            CreateMap<CompleteUserPayload, User>();
             CreateMap<RolePayload, Role>();
             CreateMap<GroupPayload, Group>();
             CreateMap<CompositionPayload, Composition>();
+            CreateMap<CompleteCompositionPayload, Composition>();
             CreateMap<ConcertPayload, Concert>();
+            CreateMap<CompleteConcertPayload, Concert>();
 
             CreateMap<User, UserData>();
             CreateMap<User, FullUserData>();

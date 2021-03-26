@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
 using Orchestrate.API.Controllers.Helpers;
+using Orchestrate.API.Data.Repositories;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
 using System;
@@ -16,31 +17,39 @@ namespace Orchestrate.API.Controllers
     [Route("api/groups/{groupId}/compositions")]
     public class CompositionsController : ApiControllerBase
     {
-        public CompositionsController(IServiceProvider provider) : base(provider) { }
+        private readonly CompositionsRepository _compositionsRepo;
+
+        [FromRoute]
+        public int GroupId { get; set; }
+
+        public CompositionsController(IServiceProvider provider, CompositionsRepository repository) : base(provider)
+        {
+            _compositionsRepo = repository;
+        }
 
         [HttpGet("genres")]
         [Authorize(Policy = GroupRolesPolicy.DirectorOrMember)]
-        public async Task<IActionResult> GetGenres([FromRoute] int groupId)
+        public async Task<IActionResult> GetGenres()
         {
-            return Ok(await DbContext.Compositions
-                .Where(_ => _.GroupId == groupId)
+            return Ok(await _compositionsRepo.NoTrackedEntities
+                .Where(_ => _.GroupId == GroupId)
                 .Select(_ => _.Genre).Distinct()
                 .ToListAsync());
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetCompositions([FromRoute] int groupId, [FromQuery] string title, [FromQuery] string genre, [FromQuery] bool onlyInUpcomingConcert)
+        public async Task<IActionResult> GetCompositions([FromQuery] string title, [FromQuery] string genre, [FromQuery] bool onlyInUpcomingConcert)
         {
-            var compositions = DbContext.Compositions
-                .Where(c => c.GroupId == groupId
+            var compositions = _compositionsRepo.Entities
+                .Where(c => c.GroupId == GroupId
                             && (title == null || c.Title.Contains(title))
                             && (genre == null || c.Genre == genre));
 
             if (onlyInUpcomingConcert)
             {
                 compositions = compositions.Intersect(
-                    DbContext.Concerts
-                        .Where(_ => _.GroupId == groupId && _.Date > DateTime.UtcNow)
+                    Repository.Get<Concert>().Entities
+                        .Where(_ => _.GroupId == GroupId && _.Date > DateTime.UtcNow)
                         .SelectMany(_ => _.Compositions)
                 );
             }
@@ -57,24 +66,23 @@ namespace Orchestrate.API.Controllers
 
             result = result.Where(c => c.SheetMusics.Any(s => rolesSet.Contains(s.RoleId)));
 
-            return Ok(ModelMapper.Map<IEnumerable<CompositionData>>(result));
+            return Ok(Mapper.Map<IEnumerable<CompositionData>>(result));
         }
 
         [HttpGet("{compositionId}")]
         [Authorize(Policy = GroupRolesPolicy.DirectorOrMember)]
-        public async Task<IActionResult> GetFullComposition([FromRoute] int groupId, [FromRoute] int compositionId)
+        public async Task<IActionResult> GetFullComposition([FromRoute] int compositionId)
         {
-            var composition = await DbContext.Compositions
-                .Where(c => c.GroupId == groupId && c.Id == compositionId)
-                .Include(c => c.Uploader)
-                .Include(c => c.SheetMusics
-                    .Where(s => UserGroupPosition.Director
-                             || UserGroupPosition.Roles.Any(r => r.Id == s.RoleId)))
-                .SingleOrDefaultAsync();
+            var composition = await SingleOrError(
+                _compositionsRepo.FindOne(new CompositionIdentifier(GroupId, compositionId))
+                    .Include(c => c.Uploader)
+                    .Include(c => c.SheetMusics
+                        .Where(s => UserGroupPosition.Director
+                                 || UserGroupPosition.Roles.Any(r => r.Id == s.RoleId)))
+                    .ThenInclude(_ => _.Role)
+                );
 
-            if (composition == null) throw new ArgumentException("Composition does not exist");
-
-            return Ok(ModelMapper.Map<FullCompositionData>(composition));
+            return Ok(Mapper.Map<FullCompositionData>(composition));
         }
     }
 }

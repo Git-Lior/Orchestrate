@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Orchestrate.API.Data;
+using Orchestrate.API.Data.Repositories.Interfaces;
 using Orchestrate.API.Services.Interfaces;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Orchestrate.API.Controllers.Helpers
 {
@@ -13,18 +15,26 @@ namespace Orchestrate.API.Controllers.Helpers
     [ApiController]
     public abstract class ApiControllerBase : ControllerBase
     {
-        protected IMapper ModelMapper { get; }
-        protected OrchestrateContext DbContext { get; }
-        protected IUserGroupPositionProvider UserGroupPosition { get; }
+        protected IMapper Mapper { get; }
+        protected IConfigurationProvider MapperConfig => Mapper.ConfigurationProvider;
+        protected IEntityRepositoryCreator Repository { get; }
 
         protected int RequestingUserId => int.Parse(User.Identity.Name);
-        protected IConfigurationProvider MapperConfig => ModelMapper.ConfigurationProvider;
+        protected IUserGroupPositionProvider UserGroupPosition { get; }
 
         public ApiControllerBase(IServiceProvider provider)
         {
-            ModelMapper = provider.GetRequiredService<IMapper>();
-            DbContext = provider.GetRequiredService<OrchestrateContext>();
+            Mapper = provider.GetRequiredService<IMapper>();
             UserGroupPosition = provider.GetRequiredService<IUserGroupPositionProvider>();
+            Repository = provider.GetRequiredService<IEntityRepositoryCreator>();
+        }
+
+        protected async Task<T> SingleOrError<T>(IQueryable<T> query, string typeName = null)
+        {
+            var entity = await query.SingleOrDefaultAsync();
+            if (entity == null) throw new ArgumentException($"{typeName ?? typeof(T).Name} does not exist");
+
+            return entity;
         }
     }
 }

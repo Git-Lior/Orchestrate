@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Orchestrate.API.Authorization;
 using Orchestrate.API.Controllers.Helpers;
+using Orchestrate.API.Data.Repositories;
 using Orchestrate.API.DTOs;
-using Orchestrate.API.Models;
 using Orchestrate.API.Services.Interfaces;
 using System;
 using System.Threading.Tasks;
@@ -15,16 +15,18 @@ namespace Orchestrate.API.Controllers
     [Route("api/[controller]")]
     public class AuthController : ApiControllerBase
     {
-        private readonly IPasswordProvider _passwordProvider;
         private readonly ITokenGenerator _tokenGenerator;
         private readonly AdminOptions _adminOptions;
+        private readonly UsersRepository _usersRepo;
 
-        public AuthController(IPasswordProvider passwordProvider, IOptions<AdminOptions> adminOptions, ITokenGenerator tokenGenerator, IServiceProvider provider)
-            : base(provider)
+        public AuthController(IServiceProvider provider,
+                              IOptions<AdminOptions> adminOptions,
+                              ITokenGenerator tokenGenerator,
+                              UsersRepository repository) : base(provider)
         {
-            _passwordProvider = passwordProvider;
             _adminOptions = adminOptions.Value;
             _tokenGenerator = tokenGenerator;
+            _usersRepo = repository;
         }
 
         [AllowAnonymous]
@@ -41,21 +43,8 @@ namespace Orchestrate.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginPayload info)
         {
-            var user = await DbContext.Users.FirstOrDefaultAsync(_ => _.Email == info.Email);
-            if (user == null) throw new ArgumentException("User not found");
-
-            var (success, needsUpgrade) = _passwordProvider.CheckHash(user.PasswordHash, info.Password);
-
-            if (!success) throw new ArgumentException("Incorrect password");
-
-            if (needsUpgrade)
-            {
-                user.PasswordHash = _passwordProvider.HashPassword(info.Password);
-                await DbContext.SaveChangesAsync();
-            }
-
-            var userData = ModelMapper.Map<LoggedInUserData>(user);
-            userData.Token = _tokenGenerator.GenerateUserToken(user.Id);
+            var userData = await _usersRepo.AuthenticateUser(info.Email, info.Password);
+            userData.Token = _tokenGenerator.GenerateUserToken(userData.Id);
 
             return Ok(userData);
         }
@@ -63,30 +52,25 @@ namespace Orchestrate.API.Controllers
         [HttpGet("info")]
         public async Task<IActionResult> Info()
         {
-            return Ok(ModelMapper.Map<LoggedInUserData>(await GetRequestingUser()));
+            try
+            {
+                var user = await SingleOrError(_usersRepo.FindOne(new UserIdentifier(RequestingUserId)).ProjectTo<UserData>(MapperConfig));
+
+                return Ok(user);
+            }
+            catch
+            {
+                throw new UserNotExistException();
+            }
         }
 
         [HttpPost("changePassword")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordPayload payload)
         {
-            var user = await GetRequestingUser();
-
-            var (success, _) = _passwordProvider.CheckHash(user.PasswordHash, payload.OldPassword);
-            if (!success) throw new ArgumentException("Incorrect Password");
-
-            user.PasswordHash = _passwordProvider.HashPassword(payload.NewPassword);
-            user.IsPasswordTemporary = false;
-            await DbContext.SaveChangesAsync();
+            var user = await SingleOrError(_usersRepo.FindOne(new UserIdentifier(RequestingUserId)));
+            await _usersRepo.ChangePassword(user, payload.OldPassword, payload.NewPassword);
 
             return Ok();
-        }
-
-        private async Task<User> GetRequestingUser()
-        {
-            var user = await DbContext.Users.FindAsync(RequestingUserId);
-            if (user == null) throw new UserNotExistException();
-
-            return user;
         }
     }
 

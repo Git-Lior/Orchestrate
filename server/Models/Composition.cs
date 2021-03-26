@@ -17,19 +17,21 @@ namespace Orchestrate.API.Models
         public string Genre { get; set; }
     }
 
-    public class Composition : CompositionPayload
+    public class CompleteCompositionPayload : CompositionPayload
+    {
+        public int? UploaderId { get; set; }
+        public int GroupId { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
+    }
+
+    public class Composition : CompleteCompositionPayload
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        public int GroupId { get; set; }
         public Group Group { get; set; }
 
-        public int? UploaderId { get; set; }
         public User Uploader { get; set; }
-
-        [Required]
-        public DateTimeOffset CreatedAt { get; set; }
 
         public ICollection<SheetMusic> SheetMusics { get; set; }
 

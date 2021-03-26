@@ -3,20 +3,21 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
 using Orchestrate.API.Controllers.Helpers;
+using Orchestrate.API.Data.Repositories;
 using Orchestrate.API.DTOs;
-using Orchestrate.API.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Orchestrate.API.Controllers
 {
     [Route("api/groups/{groupId}/compositions/{compositionId}/roles/{roleId}")]
     [Authorize(Policy = GroupRolesPolicy.DirectorOrMember)]
-    public class SheetMusicController : EntityApiControllerBase<SheetMusic>
+    public class SheetMusicController : ApiControllerBase
     {
+        private readonly SheetMusicRepository _sheetMusicRepo;
+
         [FromRoute]
         public int GroupId { get; set; }
         [FromRoute]
@@ -24,43 +25,38 @@ namespace Orchestrate.API.Controllers
         [FromRoute]
         public int RoleId { get; set; }
 
-        protected override string EntityName => "Sheet music";
-        protected override IQueryable<SheetMusic> MatchingEntityQuery(IQueryable<SheetMusic> query)
-            => query.Where(_ => _.GroupId == GroupId
-                             && _.CompositionId == CompositionId
-                             && _.RoleId == RoleId);
+        private SheetMusicIdentifier EntityId => new SheetMusicIdentifier(GroupId, CompositionId, RoleId);
 
-        public SheetMusicController(IServiceProvider provider) : base(provider) { }
+        public SheetMusicController(IServiceProvider provider, SheetMusicRepository sheetMusicRepo) : base(provider)
+        {
+            _sheetMusicRepo = sheetMusicRepo;
+        }
 
         [HttpGet("file")]
         public async Task<IActionResult> GetSheetMusicFile()
         {
-            var sheetMusicFile = await GetMatchingEntity(DbContext.SheetMusics, q => q.Select(_ => _.File));
+            var sheetMusic = await SingleOrError(_sheetMusicRepo.FindOne(EntityId), "Sheet Music");
 
-            return File(sheetMusicFile, "application/pdf");
+            return File(sheetMusic.File, "application/pdf");
         }
 
         [HttpGet("comments")]
         public async Task<IActionResult> GetComments()
         {
-            var sheetMusic = await GetMatchingEntity(DbContext.SheetMusics.Include(_ => _.Comments).ThenInclude(_ => _.User));
+            var sheetMusic = await SingleOrError(_sheetMusicRepo
+                .FindOne(EntityId)
+                .Include(_ => _.Comments)
+                    .ThenInclude(_ => _.User), "Sheet Music");
 
-            return Ok(ModelMapper.Map<IEnumerable<SheetMusicCommentData>>(sheetMusic.Comments));
+            return Ok(Mapper.Map<IEnumerable<SheetMusicCommentData>>(sheetMusic.Comments));
         }
 
         [HttpPost("comments")]
         public async Task<IActionResult> AddComment([FromBody, StringLength(300, MinimumLength = 1)] string content)
         {
-            var sheetMusic = await GetMatchingEntity(DbContext.SheetMusics);
+            var sheetMusic = await SingleOrError(_sheetMusicRepo.FindOne(EntityId), "Sheet Music");
 
-            sheetMusic.Comments.Add(new SheetMusicComment
-            {
-                UserId = RequestingUserId,
-                Content = content,
-                CreatedAt = DateTime.UtcNow
-            });
-
-            await DbContext.SaveChangesAsync();
+            await _sheetMusicRepo.AddComment(sheetMusic, RequestingUserId, content);
 
             return Ok();
         }
@@ -68,17 +64,9 @@ namespace Orchestrate.API.Controllers
         [HttpPut("comments/{commentId}")]
         public async Task<IActionResult> UpdateComment([FromRoute] int commentId, [FromBody] string content)
         {
-            var sheetMusic = await GetMatchingEntity(DbContext.SheetMusics
-                .Include(_ => _.Comments.Where(_ => _.Id == commentId && _.UserId == RequestingUserId)));
+            var sheetMusic = await SingleOrError(_sheetMusicRepo.FindOne(EntityId), "Sheet Music");
 
-            var comment = sheetMusic.Comments.SingleOrDefault();
-
-            if (comment?.Content == null) throw new ArgumentException("Comment does not exist");
-
-            comment.Content = content;
-            comment.UpdatedAt = DateTime.UtcNow;
-
-            await DbContext.SaveChangesAsync();
+            await _sheetMusicRepo.UpdateComment(sheetMusic, RequestingUserId, commentId, content);
 
             return Ok();
         }
@@ -86,15 +74,9 @@ namespace Orchestrate.API.Controllers
         [HttpDelete("comments/{commentId}")]
         public async Task<IActionResult> DeleteComment([FromRoute] int commentId)
         {
-            var sheetMusic = await GetMatchingEntity(DbContext.SheetMusics
-                .Include(_ => _.Comments.Where(_ => _.Id == commentId && _.UserId == RequestingUserId)));
+            var sheetMusic = await SingleOrError(_sheetMusicRepo.FindOne(EntityId), "Sheet Music");
 
-            var comment = sheetMusic.Comments.SingleOrDefault();
-
-            if (comment?.Content == null) throw new ArgumentException("Comment does not exist");
-
-            comment.Content = null;
-            await DbContext.SaveChangesAsync();
+            await _sheetMusicRepo.DeleteComment(sheetMusic, RequestingUserId, commentId);
 
             return Ok();
         }

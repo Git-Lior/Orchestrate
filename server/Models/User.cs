@@ -16,14 +16,17 @@ namespace Orchestrate.API.Models
         public string Email { get; set; }
     }
 
-    public class User : UserPayload
+    public class CompleteUserPayload : UserPayload
     {
-        public int Id { get; set; }
-
         [Required]
         public string PasswordHash { get; set; }
 
         public bool IsPasswordTemporary { get; set; }
+    }
+
+    public class User : CompleteUserPayload
+    {
+        public int Id { get; set; }
 
         [InverseProperty("Manager")]
         public ICollection<Group> ManagingGroups { get; set; }

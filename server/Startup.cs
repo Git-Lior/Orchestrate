@@ -10,6 +10,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Orchestrate.API.Authorization;
 using Orchestrate.API.Data;
+using Orchestrate.API.Data.Repositories;
+using Orchestrate.API.Data.Repositories.Interfaces;
+using Orchestrate.API.Models;
 using Orchestrate.API.Services;
 using Orchestrate.API.Services.Interfaces;
 using System.Text;
@@ -79,6 +82,14 @@ namespace Orchestrate.API
             services.AddScoped<IUserGroupPositionProvider, UserGroupPositionProvider>();
             services.AddScoped<ITokenGenerator, TokenGenerator>();
             services.AddScoped<IPasswordProvider, PasswordProvider>();
+
+            BindRepository<User, UsersRepository>(services);
+            BindRepository<Role, RolesRepository>(services);
+            BindRepository<Group, GroupsRepository>(services);
+            BindRepository<Concert, ConcertsRepository>(services);
+            BindRepository<Composition, CompositionsRepository>(services);
+            BindRepository<SheetMusic, SheetMusicRepository>(services);
+            services.AddScoped<IEntityRepositoryCreator, EntityRepositoryCreator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -100,6 +111,14 @@ namespace Orchestrate.API
             app.UseAuthorization();
 
             app.UseMvc();
+        }
+
+        private void BindRepository<T, TRepository>(IServiceCollection services)
+           where T : class
+           where TRepository : EntityRepositoryBase<T>
+        {
+            services.AddScoped<TRepository>();
+            services.AddScoped<IEntityRepository<T>, TRepository>();
         }
     }
 }

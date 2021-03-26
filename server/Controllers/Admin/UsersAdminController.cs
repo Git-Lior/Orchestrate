@@ -4,61 +4,42 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
 using Orchestrate.API.Controllers.Helpers;
+using Orchestrate.API.Data.Repositories;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
-using Orchestrate.API.Services.Interfaces;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Orchestrate.API.Controllers.Admin
 {
     [Route("api/admin/users")]
     [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
-    public class UsersAdminController : EntityApiControllerBase<User>
+    public class UsersAdminController : ApiControllerBase
     {
-        private readonly IPasswordProvider _passwordProvider;
+        protected UsersRepository _usersRepo { get; }
 
         [FromRoute]
         public int UserId { get; set; }
 
-        protected override string EntityName => "User";
-        protected override IQueryable<User> MatchingEntityQuery(IQueryable<User> query)
-            => query.Where(_ => _.Id == UserId);
+        public UserIdentifier EntityId => new UserIdentifier(UserId);
 
-        public UsersAdminController(IPasswordProvider passwordProvider, IServiceProvider provider) : base(provider)
+        public UsersAdminController(IServiceProvider provider, UsersRepository repository) : base(provider)
         {
-            _passwordProvider = passwordProvider;
+            _usersRepo = repository;
         }
 
         [HttpGet]
         public async Task<IActionResult> Users([FromQuery] int groupId)
         {
-            var usersQuery = DbContext.Users.AsNoTracking();
-
-            if (groupId > 0)
-                usersQuery = usersQuery.Where(u =>
-                       u.ManagingGroups.Any(g => g.Id == groupId)
-                    || u.DirectorOfGroups.Any(g => g.Id == groupId)
-                    || u.MemberOfGroups.Any(g => g.GroupId == groupId));
-
-
-            return Ok(await usersQuery.ProjectTo<FullUserData>(MapperConfig).ToListAsync());
+            return Ok(await _usersRepo.GetUsersInGroup(groupId).ProjectTo<FullUserData>(MapperConfig).ToListAsync());
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] UserPayload payload)
         {
-            var user = ModelMapper.Map<User>(payload);
+            (var password, var completePayload) = _usersRepo.GenerateNewUserPayload(payload);
 
-            string password = _passwordProvider.GenerateTemporaryPassword(16);
-            user.PasswordHash = _passwordProvider.HashPassword(password);
-            user.IsPasswordTemporary = true;
-
-            DbContext.Users.Add(user);
-            await DbContext.SaveChangesAsync();
-
-            var userData = ModelMapper.Map<CreatedUserData>(user);
+            var userData = await _usersRepo.Create<CreatedUserData>(completePayload);
             userData.TemporaryPassword = password;
 
             return Ok(userData);
@@ -67,25 +48,15 @@ namespace Orchestrate.API.Controllers.Admin
         [HttpPut("{userId}")]
         public async Task<IActionResult> UpdateUser([FromBody] UserPayload payload)
         {
-            var dbUser = await GetMatchingEntity(DbContext.Users);
-
-            ModelMapper.Map(payload, dbUser);
-            await DbContext.SaveChangesAsync();
-
-            return Ok(ModelMapper.Map<UserData>(dbUser));
+            var user = await SingleOrError(_usersRepo.FindOne(EntityId));
+            return Ok(await _usersRepo.Update<UserData>(user, payload));
         }
 
         [HttpDelete("{userId}")]
         public async Task<IActionResult> DeleteUser()
         {
-            if (await DbContext.Groups.AnyAsync(_ => _.ManagerId == UserId))
-                throw new ArgumentException("Cannot delete a user that manages a group, change the group's manager first");
-
-            var user = await GetMatchingEntity(DbContext.Users);
-
-            DbContext.Users.Remove(user);
-            await DbContext.SaveChangesAsync();
-
+            var user = await SingleOrError(_usersRepo.FindOne(EntityId));
+            await _usersRepo.Delete(user);
             return Ok();
         }
     }

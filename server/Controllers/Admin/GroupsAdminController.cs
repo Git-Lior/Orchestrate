@@ -4,61 +4,57 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
 using Orchestrate.API.Controllers.Helpers;
+using Orchestrate.API.Data.Repositories;
+using Orchestrate.API.Data.Repositories.Interfaces;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Models;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Orchestrate.API.Controllers.Admin
 {
     [Route("api/admin/groups")]
     [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
-    public class GroupsAdminController : EntityApiControllerBase<Group>
+    public class GroupsAdminController : ApiControllerBase
     {
+        private readonly IEntityRepository<Group> _groupsRepo;
+
         [FromRoute]
         public int GroupId { get; set; }
 
-        protected override string EntityName => "Group";
-        protected override IQueryable<Group> MatchingEntityQuery(IQueryable<Group> query)
-            => query.Where(_ => _.Id == GroupId);
+        public GroupIdentifier EntityId => new GroupIdentifier(GroupId);
 
-        public GroupsAdminController(IServiceProvider provider) : base(provider) { }
+        public GroupsAdminController(IServiceProvider provider) : base(provider)
+        {
+            _groupsRepo = Repository.Get<Group>();
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetGroups()
         {
-            return Ok(await DbContext.Groups.AsNoTracking().ProjectTo<GroupData>(MapperConfig).ToListAsync());
+            return Ok(await _groupsRepo.NoTrackedEntities.ProjectTo<GroupData>(MapperConfig).ToListAsync());
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateGroup([FromBody] GroupPayload payload)
         {
-            DbContext.Groups.Add(ModelMapper.Map<Group>(payload));
-            await DbContext.SaveChangesAsync();
-
+            await _groupsRepo.Create(payload);
             return Ok();
         }
 
         [HttpPut("{groupId}")]
         public async Task<IActionResult> UpdateGroup([FromBody] GroupPayload payload)
         {
-            var group = await GetMatchingEntity(DbContext.Groups);
-
-            ModelMapper.Map(payload, group);
-            await DbContext.SaveChangesAsync();
-
+            var group = await SingleOrError(_groupsRepo.FindOne(EntityId));
+            await _groupsRepo.Update(group, payload);
             return Ok();
         }
 
         [HttpDelete("{groupId}")]
         public async Task<IActionResult> DeleteGroup()
         {
-            var group = await GetMatchingEntity(DbContext.Groups);
-
-            DbContext.Groups.Remove(group);
-            await DbContext.SaveChangesAsync();
-
+            var group = await SingleOrError(_groupsRepo.FindOne(EntityId));
+            await _groupsRepo.Delete(group);
             return Ok();
         }
     }
