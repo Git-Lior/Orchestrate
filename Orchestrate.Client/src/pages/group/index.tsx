@@ -8,6 +8,8 @@ export default function GroupPage({ user, group, userInfo, groups, setGroup }: o
 
   const page = groupPages.find(_ => _.route === groupPage);
 
+  if (!groups) return <div>loading groups...</div>;
+
   if (!group) return <div>loading group info...</div>;
 
   if (!page || !page.isEnabled(userInfo!))
