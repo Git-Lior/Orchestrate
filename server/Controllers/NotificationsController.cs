@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Controllers.Helpers;
 using Orchestrate.API.DTOs;
-using Orchestrate.API.Models;
+using Orchestrate.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,7 +53,7 @@ namespace Orchestrate.API.Controllers
                     Date = Mapper.Map<long>(s.Comments.Max(_ => _.CreatedAt)),
                     GroupId = s.GroupId,
                     Composition = Mapper.Map<BasicCompositionData>(s.Composition),
-                    Role = Mapper.Map<BasicGroupRoleData>(s.Role),
+                    Role = Mapper.Map<RoleData>(s.Role),
                     Comments = s.Comments.Count
                 });
 

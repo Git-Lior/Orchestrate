@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Orchestrate.API.Data;
-using Orchestrate.API.Models;
 using Orchestrate.API.Services.Interfaces;
+using Orchestrate.Data;
+using Orchestrate.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

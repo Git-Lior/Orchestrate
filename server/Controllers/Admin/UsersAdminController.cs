@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
 using Orchestrate.API.Controllers.Helpers;
-using Orchestrate.API.Data.Repositories;
+using Orchestrate.Data.Repositories.Interfaces;
 using Orchestrate.API.DTOs;
-using Orchestrate.API.Models;
+using Orchestrate.Data.Models;
 using System;
 using System.Threading.Tasks;
 
@@ -16,14 +16,14 @@ namespace Orchestrate.API.Controllers.Admin
     [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
     public class UsersAdminController : ApiControllerBase
     {
-        protected UsersRepository _usersRepo { get; }
+        protected IUsersRepository _usersRepo { get; }
 
         [FromRoute]
         public int UserId { get; set; }
 
         public UserIdentifier EntityId => new UserIdentifier(UserId);
 
-        public UsersAdminController(IServiceProvider provider, UsersRepository repository) : base(provider)
+        public UsersAdminController(IServiceProvider provider, IUsersRepository repository) : base(provider)
         {
             _usersRepo = repository;
         }

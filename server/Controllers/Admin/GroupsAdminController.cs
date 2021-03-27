@@ -4,10 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
 using Orchestrate.API.Controllers.Helpers;
-using Orchestrate.API.Data.Repositories;
-using Orchestrate.API.Data.Repositories.Interfaces;
 using Orchestrate.API.DTOs;
-using Orchestrate.API.Models;
+using Orchestrate.Data.Interfaces;
+using Orchestrate.Data.Models;
 using System;
 using System.Threading.Tasks;
 

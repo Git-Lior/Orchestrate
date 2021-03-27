@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
 using Orchestrate.API.Controllers.Helpers;
-using Orchestrate.API.Data.Repositories;
-using Orchestrate.API.Models;
+using Orchestrate.Data.Repositories.Interfaces;
+using Orchestrate.Data.Models;
 using System;
 using System.Threading.Tasks;
 
@@ -14,7 +14,7 @@ namespace Orchestrate.API.Controllers.Manager
     [Authorize(Policy = GroupRolesPolicy.ManagerOnly)]
     public class ConcertsManagerController : ApiControllerBase
     {
-        private ConcertsRepository _concertsRepo;
+        private IConcertsRepository _concertsRepo;
 
         [FromRoute]
         public int GroupId { get; set; }
@@ -23,7 +23,7 @@ namespace Orchestrate.API.Controllers.Manager
 
         public ConcertIdentifier EntityId => new ConcertIdentifier(GroupId, ConcertId);
 
-        public ConcertsManagerController(IServiceProvider provider, ConcertsRepository repository) : base(provider)
+        public ConcertsManagerController(IServiceProvider provider, IConcertsRepository repository) : base(provider)
         {
             _concertsRepo = repository;
         }

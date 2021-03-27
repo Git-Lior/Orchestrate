@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Orchestrate.API.DTOs;
-using Orchestrate.API.Models;
+using Orchestrate.Data.Models;
 using System;
 using System.Linq;
 
@@ -32,18 +32,18 @@ namespace Orchestrate.API
             CreateMap<User, UserDataWithAttendance>()
                 .ForMember(_ => _.Attending, o => o.MapFrom(s => s.Attendances.FirstOrDefault().Attending));
 
-            CreateMap<Role, BasicGroupRoleData>();
+            CreateMap<Role, RoleData>();
 
-            CreateMap<GroupRole, BasicGroupRoleData>()
+            CreateMap<GroupRole, RoleData>()
                 .ForMember(_ => _.Id, o => o.MapFrom(_ => _.Role.Id))
                 .ForMember(_ => _.Section, o => o.MapFrom(_ => _.Role.Section))
                 .ForMember(_ => _.Num, o => o.MapFrom(_ => _.Role.Num));
 
             CreateMap<GroupRole, GroupRoleData>()
-                .IncludeBase<GroupRole, BasicGroupRoleData>();
+                .IncludeBase<GroupRole, RoleData>();
 
             CreateMap<GroupRole, GroupRoleAttendanceData>()
-                .IncludeBase<GroupRole, BasicGroupRoleData>()
+                .IncludeBase<GroupRole, RoleData>()
                 .ForMember(_ => _.Attendances, o => o.MapFrom(_ => _.Members));
 
             CreateMap<Group, GroupData>();

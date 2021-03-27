@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
 using Orchestrate.API.Controllers.Helpers;
-using Orchestrate.API.Data.Repositories;
+using Orchestrate.Data.Repositories.Interfaces;
 using Orchestrate.API.DTOs;
-using Orchestrate.API.Models;
+using Orchestrate.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,15 +18,15 @@ namespace Orchestrate.API.Controllers.Manager
     [Authorize(Policy = GroupRolesPolicy.ManagerOnly)]
     public class GroupManagerController : ApiControllerBase
     {
-        private readonly RolesRepository _rolesRepo;
-        private readonly GroupsRepository _groupsRepo;
+        private readonly IRolesRepository _rolesRepo;
+        private readonly IGroupsRepository _groupsRepo;
 
         [FromRoute]
         public int GroupId { get; set; }
 
         public GroupIdentifier EntityId => new GroupIdentifier(GroupId);
 
-        public GroupManagerController(IServiceProvider provider, GroupsRepository repository, RolesRepository rolesRepo) : base(provider)
+        public GroupManagerController(IServiceProvider provider, IGroupsRepository repository, IRolesRepository rolesRepo) : base(provider)
         {
             _groupsRepo = repository;
             _rolesRepo = rolesRepo;

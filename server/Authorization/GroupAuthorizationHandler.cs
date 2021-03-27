@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Orchestrate.API.Data;
+using Orchestrate.Data;
 using Orchestrate.API.Services.Interfaces;
 using System;
 using System.Linq;

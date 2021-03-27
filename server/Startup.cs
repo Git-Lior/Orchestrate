@@ -6,15 +6,17 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Orchestrate.API.Authorization;
-using Orchestrate.API.Data;
-using Orchestrate.API.Data.Repositories;
-using Orchestrate.API.Data.Repositories.Interfaces;
-using Orchestrate.API.Models;
 using Orchestrate.API.Services;
 using Orchestrate.API.Services.Interfaces;
+using Orchestrate.Data;
+using Orchestrate.Data.Interfaces;
+using Orchestrate.Data.Models;
+using Orchestrate.Data.Repositories;
+using Orchestrate.Data.Repositories.Interfaces;
 using System.Text;
 
 namespace Orchestrate.API
@@ -81,14 +83,14 @@ namespace Orchestrate.API
 
             services.AddScoped<IUserGroupPositionProvider, UserGroupPositionProvider>();
             services.AddScoped<ITokenGenerator, TokenGenerator>();
-            services.AddScoped<IPasswordProvider, PasswordProvider>();
+            services.AddScoped<IPasswordProvider>(sp => new PasswordProvider(sp.GetRequiredService<IOptions<PasswordHashOptions>>().Value.HashIterations));
 
-            BindRepository<User, UsersRepository>(services);
-            BindRepository<Role, RolesRepository>(services);
-            BindRepository<Group, GroupsRepository>(services);
-            BindRepository<Concert, ConcertsRepository>(services);
-            BindRepository<Composition, CompositionsRepository>(services);
-            BindRepository<SheetMusic, SheetMusicRepository>(services);
+            BindRepository<User, IUsersRepository, UsersRepository>(services);
+            BindRepository<Role, IRolesRepository, RolesRepository>(services);
+            BindRepository<Group, IGroupsRepository, GroupsRepository>(services);
+            BindRepository<Concert, IConcertsRepository, ConcertsRepository>(services);
+            BindRepository<Composition, ICompositionsRepository, CompositionsRepository>(services);
+            BindRepository<SheetMusic, ISheetMusicsRepository, SheetMusicRepository>(services);
             services.AddScoped<IEntityRepositoryCreator, EntityRepositoryCreator>();
         }
 
@@ -113,12 +115,13 @@ namespace Orchestrate.API
             app.UseMvc();
         }
 
-        private void BindRepository<T, TRepository>(IServiceCollection services)
-           where T : class
-           where TRepository : EntityRepositoryBase<T>
+        private void BindRepository<TModel, TInterface, TRepository>(IServiceCollection services)
+           where TModel : class
+           where TInterface : class, IEntityRepository<TModel>
+           where TRepository : class, TInterface
         {
-            services.AddScoped<TRepository>();
-            services.AddScoped<IEntityRepository<T>, TRepository>();
+            services.AddScoped<TInterface, TRepository>();
+            services.AddScoped<IEntityRepository<TModel>, TRepository>();
         }
     }
 }

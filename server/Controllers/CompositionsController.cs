@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Authorization;
 using Orchestrate.API.Controllers.Helpers;
-using Orchestrate.API.Data.Repositories;
+using Orchestrate.Data.Repositories.Interfaces;
 using Orchestrate.API.DTOs;
-using Orchestrate.API.Models;
+using Orchestrate.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,12 +17,12 @@ namespace Orchestrate.API.Controllers
     [Route("api/groups/{groupId}/compositions")]
     public class CompositionsController : ApiControllerBase
     {
-        private readonly CompositionsRepository _compositionsRepo;
+        private readonly ICompositionsRepository _compositionsRepo;
 
         [FromRoute]
         public int GroupId { get; set; }
 
-        public CompositionsController(IServiceProvider provider, CompositionsRepository repository) : base(provider)
+        public CompositionsController(IServiceProvider provider, ICompositionsRepository repository) : base(provider)
         {
             _compositionsRepo = repository;
         }

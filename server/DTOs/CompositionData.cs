@@ -1,5 +1,4 @@
-﻿using Orchestrate.API.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Orchestrate.API.DTOs
 {
@@ -18,6 +17,6 @@ namespace Orchestrate.API.DTOs
 
     public class FullCompositionData : CompositionData
     {
-        public IEnumerable<Role> Roles { get; set; }
+        public IEnumerable<RoleData> Roles { get; set; }
     }
 }

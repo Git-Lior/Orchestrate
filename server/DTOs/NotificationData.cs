@@ -14,7 +14,7 @@ namespace Orchestrate.API.DTOs
     {
         public int GroupId { get; set; }
         public BasicCompositionData Composition { get; set; }
-        public BasicGroupRoleData Role { get; set; }
+        public RoleData Role { get; set; }
         public int Comments { get; set; }
     }
 

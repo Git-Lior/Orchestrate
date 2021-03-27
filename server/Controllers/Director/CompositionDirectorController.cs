@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Orchestrate.API.Authorization;
 using Orchestrate.API.Controllers.Helpers;
-using Orchestrate.API.Data.Repositories;
-using Orchestrate.API.Models;
+using Orchestrate.Data.Repositories.Interfaces;
+using Orchestrate.Data.Models;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -15,7 +15,7 @@ namespace Orchestrate.API.Controllers.Director
     [Authorize(Policy = GroupRolesPolicy.DirectorOnly)]
     public class CompositionDirectorController : ApiControllerBase
     {
-        private readonly CompositionsRepository _compositionsRepo;
+        private readonly ICompositionsRepository _compositionsRepo;
 
         [FromRoute]
         public int GroupId { get; set; }
@@ -24,7 +24,7 @@ namespace Orchestrate.API.Controllers.Director
 
         public CompositionIdentifier EntityId => new CompositionIdentifier(GroupId, CompositionId);
 
-        public CompositionDirectorController(IServiceProvider provider, CompositionsRepository repository) : base(provider)
+        public CompositionDirectorController(IServiceProvider provider, ICompositionsRepository repository) : base(provider)
         {
             _compositionsRepo = repository;
         }

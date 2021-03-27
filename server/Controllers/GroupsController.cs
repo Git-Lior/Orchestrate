@@ -2,10 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.API.Controllers.Helpers;
-using Orchestrate.API.Data.Repositories;
-using Orchestrate.API.Data.Repositories.Interfaces;
 using Orchestrate.API.DTOs;
-using Orchestrate.API.Models;
+using Orchestrate.Data.Models;
+using Orchestrate.Data.Interfaces;
 using System;
 using System.Linq;
 using System.Threading.Tasks;

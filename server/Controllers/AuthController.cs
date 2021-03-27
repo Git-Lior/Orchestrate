@@ -4,9 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Orchestrate.API.Authorization;
 using Orchestrate.API.Controllers.Helpers;
-using Orchestrate.API.Data.Repositories;
 using Orchestrate.API.DTOs;
 using Orchestrate.API.Services.Interfaces;
+using Orchestrate.Data.Models;
+using Orchestrate.Data.Repositories.Interfaces;
 using System;
 using System.Threading.Tasks;
 
@@ -17,12 +18,12 @@ namespace Orchestrate.API.Controllers
     {
         private readonly ITokenGenerator _tokenGenerator;
         private readonly AdminOptions _adminOptions;
-        private readonly UsersRepository _usersRepo;
+        private readonly IUsersRepository _usersRepo;
 
         public AuthController(IServiceProvider provider,
                               IOptions<AdminOptions> adminOptions,
                               ITokenGenerator tokenGenerator,
-                              UsersRepository repository) : base(provider)
+                              IUsersRepository repository) : base(provider)
         {
             _adminOptions = adminOptions.Value;
             _tokenGenerator = tokenGenerator;
@@ -43,7 +44,9 @@ namespace Orchestrate.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginPayload info)
         {
-            var userData = await _usersRepo.AuthenticateUser(info.Email, info.Password);
+            var user = await _usersRepo.AuthenticateUser(info.Email, info.Password);
+            
+            var userData = Mapper.Map<LoggedInUserData>(user);
             userData.Token = _tokenGenerator.GenerateUserToken(userData.Id);
 
             return Ok(userData);

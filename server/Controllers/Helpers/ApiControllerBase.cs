@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Orchestrate.API.Data.Repositories.Interfaces;
 using Orchestrate.API.Services.Interfaces;
 using System;
 using System.Linq;

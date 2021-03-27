@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Orchestrate.API.DTOs
+﻿namespace Orchestrate.API.DTOs
 {
     public class SheetMusicCommentData
     {
