@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orchestrate.API", "Orchestrate.API.csproj", "{98D7BB9A-4A8F-479F-8358-7758C4CF0B55}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orchestrate.API", ".\Orchestrate.API\Orchestrate.API.csproj", "{98D7BB9A-4A8F-479F-8358-7758C4CF0B55}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orchestrate.Data", "..\Orchestrate.Data\Orchestrate.Data.csproj", "{5BB360CB-749E-4DDD-9A85-7204BAB0CCE4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orchestrate.Data", ".\Orchestrate.Data\Orchestrate.Data.csproj", "{5BB360CB-749E-4DDD-9A85-7204BAB0CCE4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
