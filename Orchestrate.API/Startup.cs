@@ -83,7 +83,7 @@ namespace Orchestrate.API
 
             services.AddScoped<IUserGroupPositionProvider, UserGroupPositionProvider>();
             services.AddScoped<ITokenGenerator, TokenGenerator>();
-            services.AddScoped<IPasswordProvider>(sp => new PasswordProvider(sp.GetRequiredService<IOptions<PasswordHashOptions>>().Value.HashIterations));
+            services.AddScoped<IStringHasher>(sp => new StringHasher(sp.GetRequiredService<IOptions<PasswordHashOptions>>().Value.HashIterations));
 
             BindRepository<User, IUsersRepository, UsersRepository>(services);
             BindRepository<Role, IRolesRepository, RolesRepository>(services);

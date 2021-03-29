@@ -7,9 +7,9 @@ namespace Orchestrate.Data.Repositories.Interfaces
 {
     public interface IUsersRepository : IEntityRepository<User>
     {
+        IQueryable<User> GetUsersInGroup(int groupId);
+        Task<(string temporaryPassword, User user)> CreateNewUser(UserPayload payload);
         Task<User> AuthenticateUser(string email, string password);
         Task ChangePassword(User user, string oldPassword, string newPassword);
-        IQueryable<User> GetUsersInGroup(int groupId);
-        (string, CompleteUserPayload) GenerateNewUserPayload(UserPayload basePayload);
     }
 }

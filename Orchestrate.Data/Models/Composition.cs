@@ -5,6 +5,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Orchestrate.Data.Models
 {
+    public record CompositionIdentifier(int GroupId, int CompositionId);
+
     public class CompositionPayload
     {
         [Required, StringLength(50, MinimumLength = 1)]
@@ -17,14 +19,14 @@ namespace Orchestrate.Data.Models
         public string Genre { get; set; }
     }
 
-    public class CompleteCompositionPayload : CompositionPayload
+    public class CompositionFields : CompositionPayload
     {
         public int? UploaderId { get; set; }
         public int GroupId { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
     }
 
-    public class Composition : CompleteCompositionPayload
+    public class Composition : CompositionFields
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }

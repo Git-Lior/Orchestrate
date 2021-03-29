@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Orchestrate.Data.Models.Joins;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Orchestrate.Data.Models
 {
+    public record UserIdentifier(int UserId);
+
     public class UserPayload
     {
         [Required, StringLength(20, MinimumLength = 1)]
@@ -16,7 +19,7 @@ namespace Orchestrate.Data.Models
         public string Email { get; set; }
     }
 
-    public class CompleteUserPayload : UserPayload
+    public class UserFields : UserPayload
     {
         [Required]
         public string PasswordHash { get; set; }
@@ -24,7 +27,7 @@ namespace Orchestrate.Data.Models
         public bool IsPasswordTemporary { get; set; }
     }
 
-    public class User : CompleteUserPayload
+    public class User : UserFields
     {
         public int Id { get; set; }
 

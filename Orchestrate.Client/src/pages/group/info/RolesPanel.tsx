@@ -149,7 +149,7 @@ export default function RolesPanel({ user, group, userInfo, setGroup, getAllUser
           <Container key={id} maxWidth="sm" disableGutters className={classes.roleContainer}>
             <div className={classes.roleHeader}>
               <Typography variant="body1" className={classes.roleTitle}>
-                {section} {num}
+                {section} {num || undefined}
               </Typography>
               {userInfo.manager && (
                 <DeleteIcon color="primary" cursor="pointer" onClick={() => removeRole(id)} />

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Orchestrate.Data.Models;
+using Orchestrate.Data.Models.Joins;
 using Orchestrate.Data.Repositories.Interfaces;
 using System;
 using System.Linq;

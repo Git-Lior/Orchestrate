@@ -23,8 +23,6 @@ namespace Orchestrate.Data.Repositories
 
         public abstract IQueryable<T> FindOne(object identifier);
 
-        public IQueryable<T> FindOneNoTracked(object identifier) => FindOne(identifier).AsNoTracking();
-
         public virtual async Task<T> Create(object payload)
         {
             var entity = Mapper.Map<T>(payload);
@@ -33,12 +31,6 @@ namespace Orchestrate.Data.Repositories
             await Context.SaveChangesAsync();
 
             return entity;
-        }
-
-        public async Task<TResult> Create<TResult>(object payload)
-        {
-            var result = await Create(payload);
-            return Mapper.Map<TResult>(result);
         }
 
         public virtual Task Delete(T entity)
@@ -53,12 +45,6 @@ namespace Orchestrate.Data.Repositories
             await Context.SaveChangesAsync();
 
             return entity;
-        }
-
-        public async Task<TResult> Update<TResult>(T entity, object payload)
-        {
-            var result = await Update(entity, payload);
-            return Mapper.Map<TResult>(result);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Orchestrate.API.DTOs;
 using Orchestrate.Data.Models;
+using Orchestrate.Data.Models.Joins;
 using System;
 using System.Linq;
 
@@ -14,16 +15,16 @@ namespace Orchestrate.API
 
             CreateMap<DateTimeOffset, long>().ConvertUsing(d => d.ToUnixTimeSeconds());
 
-            CreateMap<UserPayload, CompleteUserPayload>();
+            CreateMap<UserPayload, UserFields>();
 
             CreateMap<UserPayload, User>();
-            CreateMap<CompleteUserPayload, User>();
+            CreateMap<UserFields, User>();
             CreateMap<RolePayload, Role>();
             CreateMap<GroupPayload, Group>();
             CreateMap<CompositionPayload, Composition>();
-            CreateMap<CompleteCompositionPayload, Composition>();
+            CreateMap<CompositionFields, Composition>();
             CreateMap<ConcertPayload, Concert>();
-            CreateMap<CompleteConcertPayload, Concert>();
+            CreateMap<ConcertFields, Concert>();
 
             CreateMap<User, UserData>();
             CreateMap<User, FullUserData>();

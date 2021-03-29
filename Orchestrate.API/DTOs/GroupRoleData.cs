@@ -6,7 +6,7 @@ namespace Orchestrate.API.DTOs
     {
         public int Id { get; set; }
         public string Section { get; set; }
-        public int? Num { get; set; }
+        public int Num { get; set; }
     }
 
     public class GroupRoleData : RoleData

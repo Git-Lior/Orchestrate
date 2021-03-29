@@ -30,7 +30,7 @@ namespace Orchestrate.API.Controllers.Director
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddComposition([FromBody] CompleteCompositionPayload payload)
+        public async Task<IActionResult> AddComposition([FromBody] CompositionFields payload)
         {
             payload.GroupId = GroupId;
             payload.UploaderId = RequestingUserId;

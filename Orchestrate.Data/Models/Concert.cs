@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Orchestrate.Data.Models.Joins;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Orchestrate.Data.Models
 {
+    public record ConcertIdentifier(int GroupId, int ConcertId);
+
     public class ConcertPayload
     {
         [Required, StringLength(50, MinimumLength = 1)]
@@ -17,7 +20,7 @@ namespace Orchestrate.Data.Models
         public string Description { get; set; }
     }
 
-    public class CompleteConcertPayload : ConcertPayload
+    public class ConcertFields : ConcertPayload
     {
         public int GroupId { get; set; }
 
@@ -25,7 +28,7 @@ namespace Orchestrate.Data.Models
         public DateTimeOffset CreatedAt { get; set; }
     }
 
-    public class Concert : CompleteConcertPayload
+    public class Concert : ConcertFields
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }

@@ -37,10 +37,10 @@ namespace Orchestrate.API.Controllers.Admin
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] UserPayload payload)
         {
-            (var password, var completePayload) = _usersRepo.GenerateNewUserPayload(payload);
+            (var temporaryPassword, var user) = await _usersRepo.CreateNewUser(payload);
 
-            var userData = await _usersRepo.Create<CreatedUserData>(completePayload);
-            userData.TemporaryPassword = password;
+            var userData = Mapper.Map<CreatedUserData>(user);
+            userData.TemporaryPassword = temporaryPassword;
 
             return Ok(userData);
         }
@@ -49,7 +49,9 @@ namespace Orchestrate.API.Controllers.Admin
         public async Task<IActionResult> UpdateUser([FromBody] UserPayload payload)
         {
             var user = await SingleOrError(_usersRepo.FindOne(EntityId));
-            return Ok(await _usersRepo.Update<UserData>(user, payload));
+            var result = await _usersRepo.Update(user, payload);
+            
+            return Ok( Mapper.Map<UserData>(result));
         }
 
         [HttpDelete("{userId}")]

@@ -3,6 +3,7 @@ using Orchestrate.Data.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Orchestrate.Data.Models.Joins;
 
 namespace Orchestrate.Data
 {
@@ -11,12 +12,12 @@ namespace Orchestrate.Data
         private static readonly string[] NAMES = new[] { "One", "Two", "Three", "Four", "Five", "Six" };
 
         private OrchestrateContext _ctx;
-        private readonly IPasswordProvider _passwordProvider;
+        private readonly IStringHasher _stringHasher;
 
-        public OrchestrateDbInitializer(OrchestrateContext ctx, IPasswordProvider passwordProvider)
+        public OrchestrateDbInitializer(OrchestrateContext ctx, IStringHasher stringHasher)
         {
             _ctx = ctx;
-            _passwordProvider = passwordProvider;
+            _stringHasher = stringHasher;
         }
 
         public async Task Initialize()
@@ -24,7 +25,7 @@ namespace Orchestrate.Data
             var manager1 = new User
             {
                 Email = $"manager_one@mail.com",
-                PasswordHash = _passwordProvider.HashPassword("one"),
+                PasswordHash = _stringHasher.Hash("one"),
                 FirstName = "Manager",
                 LastName = "One",
                 IsPasswordTemporary = false
@@ -35,7 +36,7 @@ namespace Orchestrate.Data
             var users = NAMES.Select(name => new User
             {
                 Email = $"user_{name.ToLower()}@mail.com",
-                PasswordHash = _passwordProvider.HashPassword(name.ToLower()),
+                PasswordHash = _stringHasher.Hash(name.ToLower()),
                 FirstName = "User",
                 LastName = name,
                 IsPasswordTemporary = false

@@ -6,6 +6,6 @@ namespace Orchestrate.Data.Repositories.Interfaces
 {
     public interface IRolesRepository : IEntityRepository<Role>
     {
-        Task<Role> GetOrCreate(string section, int? num);
+        Task<Role> GetOrCreate(string section, int num);
     }
 }

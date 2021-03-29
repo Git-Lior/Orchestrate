@@ -38,7 +38,7 @@ export default function AddRoleDialogButton({ user, group, setGroup }: Props) {
         method: "POST",
         body: JSON.stringify({
           section: newRoleSection,
-          num: newRoleNum || undefined,
+          num: newRoleNum || 0,
         }),
       });
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Orchestrate.Data.Models
+namespace Orchestrate.Data.Models.Joins
 {
     public class ConcertAttendance
     {

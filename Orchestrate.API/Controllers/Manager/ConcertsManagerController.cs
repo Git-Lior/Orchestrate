@@ -29,7 +29,7 @@ namespace Orchestrate.API.Controllers.Manager
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateConcert([FromBody] CompleteConcertPayload payload)
+        public async Task<IActionResult> CreateConcert([FromBody] ConcertFields payload)
         {
             payload.GroupId = GroupId;
             payload.CreatedAt = DateTime.UtcNow;

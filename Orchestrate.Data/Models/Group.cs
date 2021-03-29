@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Orchestrate.Data.Models.Joins;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Orchestrate.Data.Models
 {
+    public record GroupIdentifier(int GroupId);
+
     public class GroupPayload
     {
         [Required, StringLength(100, MinimumLength = 2)]

@@ -45,7 +45,7 @@ declare namespace orch {
   interface Role {
     id: number;
     section: string;
-    num?: number;
+    num: number;
   }
 
   interface RoleWithMembers extends Role {

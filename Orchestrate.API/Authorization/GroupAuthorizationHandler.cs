@@ -11,7 +11,7 @@ namespace Orchestrate.API.Authorization
 {
     public class GroupAuthorizationHandler : IAuthorizationHandler
     {
-        private const GroupRoles _allRoles = GroupRoles.Member | GroupRoles.Director | GroupRoles.Manager;
+        private const GroupRoles ALL_ROLES = GroupRoles.Member | GroupRoles.Director | GroupRoles.Manager;
 
         private readonly OrchestrateContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -45,7 +45,7 @@ namespace Orchestrate.API.Authorization
             bool noRequirements = pendingRequirements.Count == 0;
 
             // if route has groupId and no requirements specified, check all roles
-            var roles = noRequirements ? _allRoles : pendingRequirements[0].Roles;
+            var roles = noRequirements ? ALL_ROLES : pendingRequirements[0].Roles;
 
             if (HasRole(roles, GroupRoles.Manager) && _positionProvider.Manager
                 || HasRole(roles, GroupRoles.Director) && _positionProvider.Director

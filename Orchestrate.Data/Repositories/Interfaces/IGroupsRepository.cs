@@ -1,5 +1,6 @@
 ﻿using Orchestrate.Data.Interfaces;
 using Orchestrate.Data.Models;
+using Orchestrate.Data.Models.Joins;
 using System.Threading.Tasks;
 
 namespace Orchestrate.Data.Repositories.Interfaces

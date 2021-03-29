@@ -2,29 +2,28 @@
 using System;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace Orchestrate.Data
 {
-    public class PasswordProvider : IPasswordProvider
+    public class StringHasher : IStringHasher
     {
         private readonly int _hashIterations;
 
-        public PasswordProvider(int hashIterations)
+        public StringHasher(int hashIterations)
         {
             _hashIterations = hashIterations;
         }
 
-        public string HashPassword(string password)
+        public string Hash(string input)
         {
-            using var algorithm = new Rfc2898DeriveBytes(password, 16, 10000, HashAlgorithmName.SHA256);
+            using var algorithm = new Rfc2898DeriveBytes(input, 16, 10000, HashAlgorithmName.SHA256);
 
             var key = Convert.ToBase64String(algorithm.GetBytes(32));
             var salt = Convert.ToBase64String(algorithm.Salt);
             return $"{_hashIterations}.{salt}.{key}";
         }
 
-        public (bool success, bool needsUpgrade) CheckHash(string hash, string password)
+        public (bool success, bool needsUpgrade) CheckHash(string hash, string input)
         {
             var parts = hash.Split(".", 3);
             if (parts.Length != 3) throw new Exception("Unexpected hash format");
@@ -33,25 +32,10 @@ namespace Orchestrate.Data
             var salt = Convert.FromBase64String(parts[1]);
             var key = Convert.FromBase64String(parts[2]);
 
-            using var algorithm = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256);
+            using var algorithm = new Rfc2898DeriveBytes(input, salt, iterations, HashAlgorithmName.SHA256);
             var verified = algorithm.GetBytes(32).SequenceEqual(key);
 
             return (verified, iterations != _hashIterations);
-        }
-
-        public string GenerateTemporaryPassword(int size)
-        {
-            var rnd = new Random();
-            var sb = new StringBuilder(size);
-
-            for (int i = 0; i < size; i++)
-            {
-                int rndInt = rnd.Next(0, 52);
-                int letterCode = rndInt + (rndInt / 26) * 6;
-                sb.Append((char)(letterCode + 65));
-            }
-
-            return sb.ToString();
         }
     }
 }

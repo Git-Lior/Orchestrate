@@ -10,6 +10,10 @@ namespace Orchestrate.Data.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
+        public int GroupId { get; set; }
+        public int CompositionId { get; set; }
+        public int RoleId { get; set; }
+
         public int UserId { get; set; }
         public User User { get; set; }
 

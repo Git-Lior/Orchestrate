@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Orchestrate.Data.Models;
+using Orchestrate.Data.Models.Joins;
 
 namespace Orchestrate.Data
 {
@@ -8,7 +9,6 @@ namespace Orchestrate.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Group> Groups { get; set; }
-        public DbSet<GroupRole> GroupRoles { get; set; }
         public DbSet<Composition> Compositions { get; set; }
         public DbSet<SheetMusic> SheetMusics { get; set; }
         public DbSet<Concert> Concerts { get; set; }
@@ -25,17 +25,25 @@ namespace Orchestrate.Data
             modelBuilder.Entity<ConcertAttendance>().HasKey(c => new { c.GroupId, c.ConcertId, c.UserId });
 
             modelBuilder.Entity<User>().HasAlternateKey(u => u.Email);
-            modelBuilder.Entity<Role>().HasIndex(r => new { r.Section, r.Num }).IsUnique();
+            modelBuilder.Entity<Role>().HasAlternateKey(r => new { r.Section, r.Num });
 
             modelBuilder.Entity<Group>()
                 .HasMany(g => g.Directors)
                 .WithMany(u => u.DirectorOfGroups)
-                .UsingEntity(j => j.ToTable("group_director"));
+                .UsingEntity<GroupDirector>(
+                    j => j.HasOne(gd => gd.User).WithMany().HasForeignKey(gd => new { gd.UserId }),
+                    j => j.HasOne(gd => gd.Group).WithMany().HasForeignKey(gd => new { gd.GroupId }),
+                    j => j.HasKey(gd => new { gd.GroupId, gd.UserId })
+                );
 
             modelBuilder.Entity<GroupRole>()
                 .HasMany(_ => _.Members)
                 .WithMany(_ => _.MemberOfGroups)
-                .UsingEntity(j => j.ToTable("group_role_member"));
+                .UsingEntity<GroupRoleMember>(
+                j => j.HasOne(grm => grm.User).WithMany().HasForeignKey(grm => new { grm.UserId }),
+                j => j.HasOne(grm => grm.GroupRole).WithMany().HasForeignKey(grm => new { grm.GroupId, grm.RoleId }),
+                j => j.HasKey(grm => new { grm.GroupId, grm.RoleId, grm.UserId })
+                );
 
             modelBuilder.Entity<GroupRole>()
                 .HasMany(_ => _.SheetMusics)
@@ -50,7 +58,8 @@ namespace Orchestrate.Data
 
             modelBuilder.Entity<SheetMusic>()
                 .OwnsMany(sm => sm.Comments)
-                .WithOwner();
+                .WithOwner()
+                .HasForeignKey(smc => new { smc.GroupId, smc.CompositionId, smc.RoleId });
 
             modelBuilder.Entity<Concert>()
                 .HasMany(c => c.Attendances)
@@ -60,7 +69,11 @@ namespace Orchestrate.Data
             modelBuilder.Entity<Concert>()
                 .HasMany(c => c.Compositions)
                 .WithMany(c => c.Concerts)
-                .UsingEntity(j => j.ToTable("concert_composition"));
+                .UsingEntity<ConcertComposition>(
+                    j => j.HasOne(_ => _.Composition).WithMany().HasForeignKey(c => new { c.GroupId, c.CompositionId }),
+                    j => j.HasOne(_ => _.Concert).WithMany().HasForeignKey(c => new { c.GroupId, c.ConcertId }),
+                    j => j.HasKey(cc => new { cc.GroupId, cc.ConcertId, cc.CompositionId })
+                );
         }
     }
 }

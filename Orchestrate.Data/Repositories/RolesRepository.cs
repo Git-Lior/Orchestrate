@@ -20,7 +20,7 @@ namespace Orchestrate.Data.Repositories
             return DbEntities.Where(_ => _.Id == r.RoleId);
         }
 
-        public async Task<Role> GetOrCreate(string section, int? num)
+        public async Task<Role> GetOrCreate(string section, int num)
         {
             var dbRole = await DbEntities.Where(_ => _.Section == section && _.Num == num).SingleOrDefaultAsync();
 

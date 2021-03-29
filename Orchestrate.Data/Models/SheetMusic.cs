@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Orchestrate.Data.Models.Joins;
+using System.Collections.Generic;
 
 namespace Orchestrate.Data.Models
 {
+    public record SheetMusicIdentifier(int GroupId, int CompositionId, int RoleId);
+
     public class SheetMusic
     {
         public int CompositionId { get; set; }

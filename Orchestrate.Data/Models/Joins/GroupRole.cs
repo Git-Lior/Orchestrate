@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Orchestrate.Data.Models
+namespace Orchestrate.Data.Models.Joins
 {
     public class GroupRole
     {
