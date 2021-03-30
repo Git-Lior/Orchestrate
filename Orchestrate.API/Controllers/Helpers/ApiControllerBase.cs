@@ -16,7 +16,7 @@ namespace Orchestrate.API.Controllers.Helpers
     {
         protected IMapper Mapper { get; }
         protected IConfigurationProvider MapperConfig => Mapper.ConfigurationProvider;
-        protected IEntityRepositoryCreator Repository { get; }
+        protected IEntityRepositoryProvider Repository { get; }
 
         protected int RequestingUserId => int.Parse(User.Identity.Name);
         protected IUserGroupPositionProvider UserGroupPosition { get; }
@@ -25,7 +25,7 @@ namespace Orchestrate.API.Controllers.Helpers
         {
             Mapper = provider.GetRequiredService<IMapper>();
             UserGroupPosition = provider.GetRequiredService<IUserGroupPositionProvider>();
-            Repository = provider.GetRequiredService<IEntityRepositoryCreator>();
+            Repository = provider.GetRequiredService<IEntityRepositoryProvider>();
         }
 
         protected async Task<T> SingleOrError<T>(IQueryable<T> query, string typeName = null)

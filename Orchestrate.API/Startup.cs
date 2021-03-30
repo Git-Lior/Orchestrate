@@ -44,6 +44,14 @@ namespace Orchestrate.API
                        .UseSnakeCaseNamingConvention());
             services.AddScoped<OrchestrateDbInitializer>();
 
+            BindRepository<User, IUsersRepository, UsersRepository>(services);
+            BindRepository<Role, IRolesRepository, RolesRepository>(services);
+            BindRepository<Group, IGroupsRepository, GroupsRepository>(services);
+            BindRepository<Concert, IConcertsRepository, ConcertsRepository>(services);
+            BindRepository<Composition, ICompositionsRepository, CompositionsRepository>(services);
+            BindRepository<SheetMusic, ISheetMusicsRepository, SheetMusicRepository>(services);
+            services.AddScoped<IEntityRepositoryProvider, EntityRepositoryProvider>();
+
             services.AddAuthentication(c =>
             {
                 c.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -84,14 +92,6 @@ namespace Orchestrate.API
             services.AddScoped<IUserGroupPositionProvider, UserGroupPositionProvider>();
             services.AddScoped<ITokenGenerator, TokenGenerator>();
             services.AddScoped<IStringHasher>(sp => new StringHasher(sp.GetRequiredService<IOptions<PasswordHashOptions>>().Value.HashIterations));
-
-            BindRepository<User, IUsersRepository, UsersRepository>(services);
-            BindRepository<Role, IRolesRepository, RolesRepository>(services);
-            BindRepository<Group, IGroupsRepository, GroupsRepository>(services);
-            BindRepository<Concert, IConcertsRepository, ConcertsRepository>(services);
-            BindRepository<Composition, ICompositionsRepository, CompositionsRepository>(services);
-            BindRepository<SheetMusic, ISheetMusicsRepository, SheetMusicRepository>(services);
-            services.AddScoped<IEntityRepositoryCreator, EntityRepositoryCreator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

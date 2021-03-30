@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Orchestrate.Data;
 using Orchestrate.API.Services.Interfaces;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Orchestrate.Data.Interfaces;
+using Orchestrate.Data.Models;
 
 namespace Orchestrate.API.Authorization
 {
@@ -13,13 +14,13 @@ namespace Orchestrate.API.Authorization
     {
         private const GroupRoles ALL_ROLES = GroupRoles.Member | GroupRoles.Director | GroupRoles.Manager;
 
-        private readonly OrchestrateContext _context;
+        private readonly IEntityRepository<User> _usersRepo;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IUserGroupPositionProvider _positionProvider;
 
-        public GroupAuthorizationHandler(OrchestrateContext context, IHttpContextAccessor httpContextAccessor, IUserGroupPositionProvider userGroupPositionProvider)
+        public GroupAuthorizationHandler(IEntityRepository<User> usersRepo, IHttpContextAccessor httpContextAccessor, IUserGroupPositionProvider userGroupPositionProvider)
         {
-            _context = context;
+            _usersRepo = usersRepo;
             _positionProvider = userGroupPositionProvider;
             _httpContextAccessor = httpContextAccessor;
         }
@@ -31,7 +32,7 @@ namespace Orchestrate.API.Authorization
 
             var userId = int.Parse(userIdStr);
 
-            if (await _context.Users.AllAsync(_ => _.Id != userId)) throw new UserNotExistException();
+            if (await _usersRepo.Entities.AllAsync(_ => _.Id != userId)) throw new UserNotExistException();
 
             if (!TryGetHttpRouteParam("groupId", out int groupId)) return;
             TryGetHttpRouteParam("roleId", out int roleId);

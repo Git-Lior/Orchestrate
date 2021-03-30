@@ -8,7 +8,6 @@ namespace Orchestrate.API.Services.Interfaces
     {
         bool Manager { get; }
         bool Director { get; }
-
         IEnumerable<Role> Roles { get; }
 
         Task Initialize(int userId, int groupId);

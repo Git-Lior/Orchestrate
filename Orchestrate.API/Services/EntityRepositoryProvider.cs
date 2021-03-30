@@ -5,11 +5,11 @@ using System;
 
 namespace Orchestrate.API.Services
 {
-    public class EntityRepositoryCreator : IEntityRepositoryCreator
+    public class EntityRepositoryProvider : IEntityRepositoryProvider
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public EntityRepositoryCreator(IServiceProvider serviceProvider)
+        public EntityRepositoryProvider(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
