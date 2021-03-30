@@ -15,7 +15,7 @@ namespace Orchestrate.API.Controllers
     {
         public NotificationsController(IServiceProvider provider) : base(provider) { }
 
-        [HttpGet]
+        [HttpGet, ProducesOk(typeof(NotificationData))]
         public async Task<IActionResult> GetNotifications([FromQuery] DateTime? lastUpdate)
         {
             var userRoles = Repository.Get<User>().Entities.Where(_ => _.Id == RequestingUserId).SelectMany(_ => _.MemberOfGroups);

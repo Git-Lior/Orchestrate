@@ -10,6 +10,7 @@ using Orchestrate.Data.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Orchestrate.API.Controllers
 {
@@ -26,7 +27,7 @@ namespace Orchestrate.API.Controllers
             _concertsRepo = repository;
         }
 
-        [HttpGet]
+        [HttpGet, ProducesOk(typeof(IEnumerable<ConcertData>))]
         [Authorize(Policy = GroupRolesPolicy.ManagerOrMember)]
         public async Task<IActionResult> GetFutureConcerts([FromQuery] bool hideNotAttending)
         {
@@ -43,7 +44,7 @@ namespace Orchestrate.API.Controllers
             return Ok(await concerts.ProjectTo<ConcertData>(MapperConfig, new { RequestingUserId }).ToListAsync());
         }
 
-        [HttpPost("{concertId}/attendance")]
+        [HttpPost("{concertId}/attendance"), ProducesOk]
         [Authorize(Policy = GroupRolesPolicy.MemberOnly)]
         public async Task<IActionResult> SetAttendance([FromBody] bool attending)
         {

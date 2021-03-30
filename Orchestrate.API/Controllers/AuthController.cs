@@ -30,8 +30,7 @@ namespace Orchestrate.API.Controllers
             _usersRepo = repository;
         }
 
-        [AllowAnonymous]
-        [HttpPost("admin")]
+        [AllowAnonymous, HttpPost("admin"), ProducesOk(typeof(string))]
         public IActionResult Admin([FromBody] string password)
         {
             if (password != _adminOptions.AdminPassword)
@@ -40,19 +39,18 @@ namespace Orchestrate.API.Controllers
             return Ok(_tokenGenerator.GenerateAdminToken());
         }
 
-        [AllowAnonymous]
-        [HttpPost("login")]
+        [AllowAnonymous, HttpPost("login"), ProducesOk(typeof(LoggedInUserData))]
         public async Task<IActionResult> Login([FromBody] LoginPayload info)
         {
             var user = await _usersRepo.AuthenticateUser(info.Email, info.Password);
-            
+
             var userData = Mapper.Map<LoggedInUserData>(user);
             userData.Token = _tokenGenerator.GenerateUserToken(userData.Id);
 
             return Ok(userData);
         }
 
-        [HttpGet("info")]
+        [HttpGet("info"), ProducesOk(typeof(UserData))]
         public async Task<IActionResult> Info()
         {
             try
@@ -67,7 +65,7 @@ namespace Orchestrate.API.Controllers
             }
         }
 
-        [HttpPost("changePassword")]
+        [HttpPost("changePassword"), ProducesOk]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordPayload payload)
         {
             var user = await SingleOrError(_usersRepo.FindOne(new UserIdentifier(RequestingUserId)));

@@ -8,6 +8,7 @@ using Orchestrate.Data.Interfaces;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Orchestrate.API.Controllers
 {
@@ -20,7 +21,7 @@ namespace Orchestrate.API.Controllers
             _groupsRepo = Repository.Get<Group>();
         }
 
-        [HttpGet]
+        [HttpGet, ProducesOk(typeof(IEnumerable<GroupData>))]
         public async Task<IActionResult> GetGroups()
         {
             return Ok(await _groupsRepo.NoTrackedEntities
@@ -32,7 +33,7 @@ namespace Orchestrate.API.Controllers
                         .ToListAsync());
         }
 
-        [HttpGet("{groupId}")]
+        [HttpGet("{groupId}"), ProducesOk(typeof(FullGroupData))]
         public async Task<IActionResult> GetGroupInfo([FromRoute] int groupId)
         {
             return Ok(await SingleOrError(_groupsRepo.FindOne(new GroupIdentifier(groupId)).ProjectTo<FullGroupData>(MapperConfig)));

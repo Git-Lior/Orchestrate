@@ -28,7 +28,7 @@ namespace Orchestrate.API.Controllers.Manager
             _concertsRepo = repository;
         }
 
-        [HttpPost]
+        [HttpPost, ProducesOk]
         public async Task<IActionResult> CreateConcert([FromBody] ConcertFields payload)
         {
             payload.GroupId = GroupId;
@@ -39,7 +39,7 @@ namespace Orchestrate.API.Controllers.Manager
             return Ok();
         }
 
-        [HttpPut("{concertId}")]
+        [HttpPut("{concertId}"), ProducesOk]
         public async Task<IActionResult> UpdateConcert([FromBody] ConcertPayload payload)
         {
             var concert = await SingleOrError(_concertsRepo.FindOne(EntityId));
@@ -48,7 +48,7 @@ namespace Orchestrate.API.Controllers.Manager
             return Ok();
         }
 
-        [HttpDelete("{concertId}")]
+        [HttpDelete("{concertId}"), ProducesOk]
         public async Task<IActionResult> DeleteConcert()
         {
             var concert = await SingleOrError(_concertsRepo.FindOne(EntityId));
@@ -57,7 +57,7 @@ namespace Orchestrate.API.Controllers.Manager
             return Ok();
         }
 
-        [HttpPost("{concertId}/compositions")]
+        [HttpPost("{concertId}/compositions"), ProducesOk]
         public async Task<IActionResult> AddCompositionToConcert([FromBody] int compositionId)
         {
             var concert = await SingleOrError(_concertsRepo
@@ -71,7 +71,7 @@ namespace Orchestrate.API.Controllers.Manager
             return Ok();
         }
 
-        [HttpDelete("{concertId}/compositions/{compositionId}")]
+        [HttpDelete("{concertId}/compositions/{compositionId}"), ProducesOk]
         public async Task<IActionResult> RemoveConcertFromComposition([FromRoute] int compositionId)
         {
             var concert = await SingleOrError(_concertsRepo.FindOne(EntityId).Include(_ => _.Compositions));

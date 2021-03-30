@@ -27,7 +27,7 @@ namespace Orchestrate.API.Controllers
             _compositionsRepo = repository;
         }
 
-        [HttpGet("genres")]
+        [HttpGet("genres"), ProducesOk(typeof(IEnumerable<string>))]
         [Authorize(Policy = GroupRolesPolicy.DirectorOrMember)]
         public async Task<IActionResult> GetGenres()
         {
@@ -37,7 +37,7 @@ namespace Orchestrate.API.Controllers
                 .ToListAsync());
         }
 
-        [HttpGet]
+        [HttpGet, ProducesOk(typeof(IEnumerable<CompositionData>))]
         public async Task<IActionResult> GetCompositions([FromQuery] string title, [FromQuery] string genre, [FromQuery] bool onlyInUpcomingConcert)
         {
             var compositions = _compositionsRepo.Entities
@@ -69,7 +69,7 @@ namespace Orchestrate.API.Controllers
             return Ok(Mapper.Map<IEnumerable<CompositionData>>(result));
         }
 
-        [HttpGet("{compositionId}")]
+        [HttpGet("{compositionId}"), ProducesOk(typeof(FullCompositionData))]
         [Authorize(Policy = GroupRolesPolicy.DirectorOrMember)]
         public async Task<IActionResult> GetFullComposition([FromRoute] int compositionId)
         {

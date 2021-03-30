@@ -34,14 +34,14 @@ namespace Orchestrate.API.Controllers
         }
 
         [HttpGet("file")]
-        public async Task<IActionResult> GetSheetMusicFile()
+        public async Task<FileContentResult> GetSheetMusicFile()
         {
             var sheetMusic = await SingleOrError(_sheetMusicsRepo.FindOne(EntityId), "Sheet Music");
 
             return File(sheetMusic.File, "application/pdf");
         }
 
-        [HttpGet("comments")]
+        [HttpGet("comments"), ProducesOk(typeof(IEnumerable<SheetMusicCommentData>))]
         public async Task<IActionResult> GetComments()
         {
             var sheetMusic = await SingleOrError(_sheetMusicsRepo
@@ -52,7 +52,7 @@ namespace Orchestrate.API.Controllers
             return Ok(Mapper.Map<IEnumerable<SheetMusicCommentData>>(sheetMusic.Comments));
         }
 
-        [HttpPost("comments")]
+        [HttpPost("comments"), ProducesOk]
         public async Task<IActionResult> AddComment([FromBody, StringLength(300, MinimumLength = 1)] string content)
         {
             var sheetMusic = await SingleOrError(_sheetMusicsRepo.FindOne(EntityId), "Sheet Music");
@@ -62,7 +62,7 @@ namespace Orchestrate.API.Controllers
             return Ok();
         }
 
-        [HttpPut("comments/{commentId}")]
+        [HttpPut("comments/{commentId}"), ProducesOk]
         public async Task<IActionResult> UpdateComment([FromRoute] int commentId, [FromBody] string content)
         {
             var sheetMusic = await SingleOrError(_sheetMusicsRepo.FindOne(EntityId), "Sheet Music");
@@ -72,7 +72,7 @@ namespace Orchestrate.API.Controllers
             return Ok();
         }
 
-        [HttpDelete("comments/{commentId}")]
+        [HttpDelete("comments/{commentId}"), ProducesOk]
         public async Task<IActionResult> DeleteComment([FromRoute] int commentId)
         {
             var sheetMusic = await SingleOrError(_sheetMusicsRepo.FindOne(EntityId), "Sheet Music");

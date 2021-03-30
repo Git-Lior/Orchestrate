@@ -29,7 +29,7 @@ namespace Orchestrate.API.Controllers.Director
             _compositionsRepo = repository;
         }
 
-        [HttpPost]
+        [HttpPost, ProducesOk]
         public async Task<IActionResult> AddComposition([FromBody] CompositionFields payload)
         {
             payload.GroupId = GroupId;
@@ -41,7 +41,7 @@ namespace Orchestrate.API.Controllers.Director
             return Ok();
         }
 
-        [HttpPut("{compositionId}")]
+        [HttpPut("{compositionId}"), ProducesOk]
         public async Task<IActionResult> UpdateComposition([FromBody] CompositionPayload payload)
         {
             var composition = await SingleOrError(_compositionsRepo.FindOne(EntityId));
@@ -50,7 +50,7 @@ namespace Orchestrate.API.Controllers.Director
             return Ok();
         }
 
-        [HttpDelete("{compositionId}")]
+        [HttpDelete("{compositionId}"), ProducesOk]
         public async Task<IActionResult> RemoveComposition()
         {
             var composition = await SingleOrError(_compositionsRepo.FindOne(EntityId));
@@ -59,7 +59,7 @@ namespace Orchestrate.API.Controllers.Director
             return Ok();
         }
 
-        [HttpPost("{compositionId}/{roleId}")]
+        [HttpPost("{compositionId}/{roleId}"), ProducesOk]
         public async Task<IActionResult> UploadSheetMusicFile([FromRoute] int roleId, IFormFile file)
         {
             var composition = await SingleOrError(_compositionsRepo.FindOne(EntityId));

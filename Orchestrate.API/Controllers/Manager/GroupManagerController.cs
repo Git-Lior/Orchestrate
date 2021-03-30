@@ -32,13 +32,13 @@ namespace Orchestrate.API.Controllers.Manager
             _rolesRepo = rolesRepo;
         }
 
-        [HttpGet("users")]
+        [HttpGet("users"), ProducesOk(typeof(IEnumerable<UserData>))]
         public async Task<IActionResult> GetAllUsers()
         {
             return Ok(await Repository.Get<User>().NoTrackedEntities.ProjectTo<UserData>(MapperConfig).ToListAsync());
         }
 
-        [HttpGet("updates")]
+        [HttpGet("updates"), ProducesOk(typeof(IEnumerable<GroupUpdateData>))]
         public async Task<IActionResult> GetUpdates()
         {
             var timeBound = DateTime.Today.AddDays(-7);
@@ -64,7 +64,7 @@ namespace Orchestrate.API.Controllers.Manager
             return Ok(concertDatas.Concat(compositions).OrderByDescending(_ => _.Date));
         }
 
-        [HttpPost("directors")]
+        [HttpPost("directors"), ProducesOk]
         public async Task<IActionResult> AddDirector([FromBody] int directorId)
         {
             var director = await SingleOrError(Repository.Get<User>().FindOne(new UserIdentifier(directorId)));
@@ -75,7 +75,7 @@ namespace Orchestrate.API.Controllers.Manager
             return Ok();
         }
 
-        [HttpDelete("directors/{directorId}")]
+        [HttpDelete("directors/{directorId}"), ProducesOk]
         public async Task<IActionResult> RemoveDirector([FromRoute] int directorId)
         {
             var director = await SingleOrError(Repository.Get<User>().FindOne(new UserIdentifier(directorId)));
@@ -86,7 +86,7 @@ namespace Orchestrate.API.Controllers.Manager
             return Ok();
         }
 
-        [HttpPost("roles")]
+        [HttpPost("roles"), ProducesOk(typeof(GroupRoleData))]
         public async Task<IActionResult> AddRole([FromBody] RolePayload payload)
         {
             var group = await SingleOrError(_groupsRepo.FindOne(EntityId).Include(_ => _.Roles));
@@ -97,7 +97,7 @@ namespace Orchestrate.API.Controllers.Manager
             return Ok(Mapper.Map<GroupRoleData>(groupRole));
         }
 
-        [HttpDelete("roles/{roleId}")]
+        [HttpDelete("roles/{roleId}"), ProducesOk]
         public async Task<IActionResult> RemoveRole([FromRoute] int roleId)
         {
             var group = await SingleOrError(_groupsRepo.FindOne(EntityId).Include(_ => _.Roles));
@@ -107,7 +107,7 @@ namespace Orchestrate.API.Controllers.Manager
             return Ok();
         }
 
-        [HttpPost("roles/{roleId}/members")]
+        [HttpPost("roles/{roleId}/members"), ProducesOk]
         public async Task<IActionResult> AddMember([FromRoute] int roleId, [FromBody] int memberId)
         {
             var group = await SingleOrError(_groupsRepo.FindOne(EntityId).Include(_ => _.Roles).ThenInclude(_ => _.Members));
@@ -119,7 +119,7 @@ namespace Orchestrate.API.Controllers.Manager
             return Ok();
         }
 
-        [HttpDelete("roles/{roleId}/members/{memberId}")]
+        [HttpDelete("roles/{roleId}/members/{memberId}"), ProducesOk]
         public async Task<IActionResult> RemoveMember([FromRoute] int roleId, [FromRoute] int memberId)
         {
             var group = await SingleOrError(_groupsRepo.FindOne(EntityId).Include(_ => _.Roles).ThenInclude(_ => _.Members));

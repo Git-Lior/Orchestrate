@@ -9,6 +9,7 @@ using Orchestrate.API.DTOs;
 using Orchestrate.Data.Models;
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Orchestrate.API.Controllers.Admin
 {
@@ -28,13 +29,13 @@ namespace Orchestrate.API.Controllers.Admin
             _usersRepo = repository;
         }
 
-        [HttpGet]
+        [HttpGet, ProducesOk(typeof(IEnumerable<FullUserData>))]
         public async Task<IActionResult> Users([FromQuery] int groupId)
         {
             return Ok(await _usersRepo.GetUsersInGroup(groupId).ProjectTo<FullUserData>(MapperConfig).ToListAsync());
         }
 
-        [HttpPost]
+        [HttpPost, ProducesOk(typeof(CreatedUserData))]
         public async Task<IActionResult> CreateUser([FromBody] UserPayload payload)
         {
             (var temporaryPassword, var user) = await _usersRepo.CreateNewUser(payload);
@@ -45,16 +46,16 @@ namespace Orchestrate.API.Controllers.Admin
             return Ok(userData);
         }
 
-        [HttpPut("{userId}")]
+        [HttpPut("{userId}"), ProducesOk(typeof(UserData))]
         public async Task<IActionResult> UpdateUser([FromBody] UserPayload payload)
         {
             var user = await SingleOrError(_usersRepo.FindOne(EntityId));
             var result = await _usersRepo.Update(user, payload);
-            
-            return Ok( Mapper.Map<UserData>(result));
+
+            return Ok(Mapper.Map<UserData>(result));
         }
 
-        [HttpDelete("{userId}")]
+        [HttpDelete("{userId}"), ProducesOk]
         public async Task<IActionResult> DeleteUser()
         {
             var user = await SingleOrError(_usersRepo.FindOne(EntityId));

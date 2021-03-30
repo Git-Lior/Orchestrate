@@ -8,6 +8,7 @@ using Orchestrate.API.DTOs;
 using Orchestrate.Data.Interfaces;
 using Orchestrate.Data.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Orchestrate.API.Controllers.Admin
@@ -28,20 +29,20 @@ namespace Orchestrate.API.Controllers.Admin
             _groupsRepo = Repository.Get<Group>();
         }
 
-        [HttpGet]
+        [HttpGet, ProducesOk(typeof(IEnumerable<GroupData>))]
         public async Task<IActionResult> GetGroups()
         {
             return Ok(await _groupsRepo.NoTrackedEntities.ProjectTo<GroupData>(MapperConfig).ToListAsync());
         }
 
-        [HttpPost]
+        [HttpPost, ProducesOk]
         public async Task<IActionResult> CreateGroup([FromBody] GroupPayload payload)
         {
             await _groupsRepo.Create(payload);
             return Ok();
         }
 
-        [HttpPut("{groupId}")]
+        [HttpPut("{groupId}"), ProducesOk]
         public async Task<IActionResult> UpdateGroup([FromBody] GroupPayload payload)
         {
             var group = await SingleOrError(_groupsRepo.FindOne(EntityId));
@@ -49,7 +50,7 @@ namespace Orchestrate.API.Controllers.Admin
             return Ok();
         }
 
-        [HttpDelete("{groupId}")]
+        [HttpDelete("{groupId}"), ProducesOk]
         public async Task<IActionResult> DeleteGroup()
         {
             var group = await SingleOrError(_groupsRepo.FindOne(EntityId));
