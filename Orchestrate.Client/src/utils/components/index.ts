@@ -1,6 +1,7 @@
 export { textAutocompleteOptions } from "./textAutocompleteOptions";
 export { AsyncAutocomplete } from "./AsyncAutocomplete";
 export { EditableTable } from "./EditableTable";
+export { LoadingMessage } from "./LoadingMessage";
 export { UserAvatar } from "./UserAvatar";
 export type { ColDef } from "./EditableTable";
 

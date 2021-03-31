@@ -2,9 +2,11 @@ import React from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
+import Typography from "@material-ui/core/Typography";
 
 import badNotes from "assets/bad-notes.png";
-import Typography from "@material-ui/core/Typography";
+
+import { LoadingMessage } from "utils/components";
 
 const useStyles = makeStyles({
   root: {
@@ -21,15 +23,13 @@ const useStyles = makeStyles({
 export default function HomePage({ groups }: orch.PageProps) {
   const classes = useStyles();
 
-  if (!groups) return <div>loading groups...</div>;
-
-  if (groups.length > 0) return null; // not supposed to happen
+  if (!groups) return <LoadingMessage text="Loading groups..." />;
 
   return (
     <Container maxWidth="md" className={classes.root}>
       <div>
         <Typography variant="h4" color="primary">
-          Look like you are not part of any group :(
+          It seems that you're not a member of a group :(
         </Typography>
         <Typography variant="h5" color="primary" className={classes.secondaryText}>
           please contact your group's manager

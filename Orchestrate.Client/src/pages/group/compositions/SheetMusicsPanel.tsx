@@ -10,12 +10,13 @@ import ListItemText from "@material-ui/core/ListItemText";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import IconButton from "@material-ui/core/IconButton";
 import PublishIcon from "@material-ui/icons/Publish";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 import { useApiFetch } from "utils/hooks";
 import { roleToText } from "utils/general";
+import { LoadingMessage } from "utils/components";
 
 import SheetMusicViewer from "./SheetMusicViewer";
-import CircularProgress from "@material-ui/core/CircularProgress";
 
 const useStyles = makeStyles({
   container: { display: "flex", height: "100%" },
@@ -101,7 +102,7 @@ export default function SheetMusicsPanel({ user, group, userInfo }: Props) {
     [apiFetch, uploadRoleIds, availableRoleIds, setRolePage]
   );
 
-  if (!composition || !roles) return <div>loading composition...</div>;
+  if (!composition || !roles) return <LoadingMessage text="loading composition" />;
 
   // ensure roleId appears in available roles
   if (params.roleId && !availableRoleIds.has(Number(params.roleId)))

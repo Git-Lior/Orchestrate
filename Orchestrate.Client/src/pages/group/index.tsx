@@ -1,6 +1,7 @@
 import React from "react";
 import { Redirect, useParams } from "react-router-dom";
 
+import { LoadingMessage } from "utils/components";
 import { groupPages, defaultGroupPage } from "./pages";
 
 export default function GroupPage({ user, group, userInfo, groups, setGroup }: orch.PageProps) {
@@ -8,9 +9,9 @@ export default function GroupPage({ user, group, userInfo, groups, setGroup }: o
 
   const page = groupPages.find(_ => _.route === groupPage);
 
-  if (!groups) return <div>loading groups...</div>;
+  if (!groups) return <LoadingMessage text="loading groups..." />;
 
-  if (!group) return <div>loading group info...</div>;
+  if (!group) return <LoadingMessage text="loading group info..." />;
 
   if (!page || !page.isEnabled(userInfo!))
     return <Redirect to={`/group/${groupId}/${defaultGroupPage}`} />;
