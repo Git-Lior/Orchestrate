@@ -13,6 +13,7 @@ export interface AsyncAutocompleteProps<
   FreeSolo extends boolean | undefined = undefined
 > extends Partial<AutocompleteProps<T, Multiple, DisableClearable, FreeSolo>> {
   optionsProvider: (text: string) => Promise<T[]>;
+  error?: orch.Error;
 }
 
 export function AsyncAutocomplete<
@@ -24,6 +25,7 @@ export function AsyncAutocomplete<
   optionsProvider,
   inputValue,
   onInputChange,
+  error,
   ...otherProps
 }: AsyncAutocompleteProps<T, Multiple, DisableClearable, FreeSolo>) {
   const [open, setOpen] = useState(false);

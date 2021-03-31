@@ -9,6 +9,7 @@ using Orchestrate.API.Services.Interfaces;
 using Orchestrate.Data.Models;
 using Orchestrate.Data.Repositories.Interfaces;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
 namespace Orchestrate.API.Controllers
@@ -77,13 +78,19 @@ namespace Orchestrate.API.Controllers
 
     public class LoginPayload
     {
+        [Required, EmailAddress]
         public string Email { get; set; }
+
+        [Required, StringLength(16, MinimumLength = 2)]
         public string Password { get; set; }
     }
 
     public class ChangePasswordPayload
     {
+        [Required, StringLength(16, MinimumLength = 2)]
         public string OldPassword { get; set; }
+
+        [Required, StringLength(16, MinimumLength = 2)]
         public string NewPassword { get; set; }
     }
 }

@@ -8,6 +8,8 @@ import Typography, { TypographyProps } from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
+import { ErrorText } from "../error/ServerError";
+
 const useStyles = makeStyles(theme => ({
   dialogContainer: {
     position: "relative",
@@ -25,7 +27,7 @@ const useStyles = makeStyles(theme => ({
     alignItems: "center",
     overflow: "hidden",
   },
-  dialogError: { width: "100%", maxHeight: 125 },
+  dialogError: { marginTop: "1rem", width: "100%", maxHeight: 125 },
 }));
 
 interface Props {
@@ -92,11 +94,7 @@ export function FormDialog({
           </div>
           <div className={classes.dialogStatus}>
             {loading && <CircularProgress size="2rem" color="primary" />}
-            {error && (
-              <Typography variant="body1" color="primary" className={classes.dialogError}>
-                {error.error}
-              </Typography>
-            )}
+            {error && <ErrorText error={error} className={classes.dialogError} />}
           </div>
         </div>
       )}

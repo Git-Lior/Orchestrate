@@ -23,6 +23,9 @@ const styles: Styles<AppTheme, {}> = {
     textAlign: "center",
     marginTop: "15px",
   },
+  loginError: {
+    marginTop: "1rem",
+  },
 };
 
 export default styles;

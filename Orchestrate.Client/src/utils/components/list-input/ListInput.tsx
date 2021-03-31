@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { classnames } from "@material-ui/data-grid";
+import classnames from "classnames";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
@@ -27,7 +27,7 @@ const useStyles = makeStyles({
 
 interface Props<T> extends AsyncAutocompleteProps<T> {
   items: T[] | undefined;
-  disabled?: boolean;
+  readonly?: boolean;
   children: (item: T) => React.ReactNode;
   onAdded: (item: T) => Promise<any>;
   onRemoved: (item: T) => Promise<any>;
@@ -35,7 +35,7 @@ interface Props<T> extends AsyncAutocompleteProps<T> {
 
 export function ListInput<T extends { id: number }>({
   items,
-  disabled,
+  readonly,
   className,
   children,
   onAdded,
@@ -68,7 +68,7 @@ export function ListInput<T extends { id: number }>({
         {items?.map(item => (
           <ListItem key={item.id}>
             {children(item)}
-            {!disabled && (
+            {!readonly && (
               <ListItemSecondaryAction>
                 <IconButton edge="end" aria-label="remove" onClick={() => onItemRemoved(item)}>
                   <CloseIcon />
@@ -78,13 +78,14 @@ export function ListInput<T extends { id: number }>({
           </ListItem>
         ))}
       </List>
-      {!disabled && (
+      {!readonly && (
         <AsyncAutocomplete
           {...autocompleteProps}
           optionsProvider={filteredOptionsProvider}
           value={null}
           inputValue={inputValue}
           onInputChange={setInputValue as any}
+          error={error}
           onChange={(_, item) => {
             if (item) {
               setInputValue();

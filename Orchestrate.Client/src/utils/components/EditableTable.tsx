@@ -16,6 +16,7 @@ import { useInputState, usePromiseStatus } from "utils/hooks";
 import { AppTheme } from "AppTheme";
 
 import { FormDialog } from "./dialog/FormDialog";
+import { ErrorIconTootlip } from "./error/ErrorIconTooltip";
 
 export type { ColDef } from "@material-ui/data-grid";
 
@@ -34,7 +35,6 @@ const useStyles = makeStyles<AppTheme, Props<any>>(theme => ({
     backgroundColor: theme.palette.primary.light,
   },
   tableTitle: { display: "flex", alignItems: "center", "& > *": { marginRight: "2rem" } },
-  titleError: { maxWidth: 250, whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" },
   addRowButton: { cursor: "pointer" },
   cancelEdit: { position: "absolute", left: 0, top: 0 },
   dialogTitle: { marginBottom: "1em", textAlign: "center" },
@@ -174,11 +174,7 @@ export function EditableTable<T extends RowModel>(props: Props<T>) {
           {!editedRow && (
             <div>
               {loading && <CircularProgress size="2rem" color="secondary" />}
-              {error && (
-                <Typography variant="body1" color="secondary" className={classes.titleError}>
-                  {error.error}
-                </Typography>
-              )}
+              {error && <ErrorIconTootlip color="secondary" error={error} />}
             </div>
           )}
           {!disableActions && (

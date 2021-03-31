@@ -9,6 +9,7 @@ using Orchestrate.Data.Interfaces;
 using Orchestrate.Data.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Orchestrate.API.Controllers.Admin
@@ -32,7 +33,7 @@ namespace Orchestrate.API.Controllers.Admin
         [HttpGet, ProducesOk(typeof(IEnumerable<GroupData>))]
         public async Task<IActionResult> GetGroups()
         {
-            return Ok(await _groupsRepo.NoTrackedEntities.ProjectTo<GroupData>(MapperConfig).ToListAsync());
+            return Ok(await _groupsRepo.NoTrackedEntities.ProjectTo<GroupData>(MapperConfig).OrderBy(_ => _.Id).ToListAsync());
         }
 
         [HttpPost, ProducesOk]

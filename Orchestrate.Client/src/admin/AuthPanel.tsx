@@ -5,6 +5,8 @@ import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import Card from "@material-ui/core/Card";
 import Button from "@material-ui/core/Button";
+
+import { ErrorText } from "utils/components";
 import { useApiFetch, useInputState, usePromiseStatus } from "utils/hooks";
 
 const useStyles = makeStyles({
@@ -79,11 +81,7 @@ export default function AuthPanel({ onTokenRecieved }: Props) {
           Log in
         </Button>
         {tokenLoading && <Typography variant="body1">loading...</Typography>}
-        {tokenError && (
-          <Typography variant="body1" color="primary">
-            {tokenError.error}
-          </Typography>
-        )}
+        {tokenError && <ErrorText error={tokenError} />}
       </Card>
     </div>
   );

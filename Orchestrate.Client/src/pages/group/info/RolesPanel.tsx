@@ -156,7 +156,7 @@ export default function RolesPanel({ user, group, userInfo, setGroup, getAllUser
               )}
             </div>
             <UsersListInput
-              disabled={!userInfo.manager}
+              readonly={!userInfo.manager}
               users={members}
               optionsProvider={getAllUsers}
               onAdded={user => addMember(id, user)}

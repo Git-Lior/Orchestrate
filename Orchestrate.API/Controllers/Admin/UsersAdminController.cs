@@ -10,6 +10,7 @@ using Orchestrate.Data.Models;
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Orchestrate.API.Controllers.Admin
 {
@@ -32,7 +33,7 @@ namespace Orchestrate.API.Controllers.Admin
         [HttpGet, ProducesOk(typeof(IEnumerable<FullUserData>))]
         public async Task<IActionResult> Users([FromQuery] int groupId)
         {
-            return Ok(await _usersRepo.GetUsersInGroup(groupId).ProjectTo<FullUserData>(MapperConfig).ToListAsync());
+            return Ok(await _usersRepo.GetUsersInGroup(groupId).ProjectTo<FullUserData>(MapperConfig).OrderBy(_ => _.Id).ToListAsync());
         }
 
         [HttpPost, ProducesOk(typeof(CreatedUserData))]

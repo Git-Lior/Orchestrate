@@ -38,7 +38,7 @@ export default function DirectorsPanel({ user, group, userInfo, setGroup, getAll
 
   return (
     <UsersListInput
-      disabled={!userInfo.manager}
+      readonly={!userInfo.manager}
       users={group.directors}
       optionsProvider={getAllUsers}
       onAdded={addDirector}

@@ -5,10 +5,12 @@ import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 
+import { ErrorText } from "utils/components";
 import { useApiFetch, usePromiseStatus } from "utils/hooks";
-import logo from "assets/logo.png";
-import styles from "./styles";
 
+import logo from "assets/logo.png";
+
+import styles from "./styles";
 import LoginForm from "./LoginForm";
 import ChangePasswordForm from "./ChangePasswordForm";
 
@@ -72,11 +74,7 @@ function LoginPage({ onLogin }: LoginProps) {
               {!user ? "Logging in..." : "Changing Password..."}
             </Typography>
           )}
-          {error && (
-            <Typography variant="body1" color="error" className={classes.loginMessage}>
-              {error.error}
-            </Typography>
-          )}
+          {error && <ErrorText error={error} className={classes.loginError} />}
         </Paper>
       </Container>
     </div>
