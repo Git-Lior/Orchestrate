@@ -44,7 +44,7 @@ namespace Orchestrate.API.Controllers
                 .ToListAsync();
 
             var newConcerts = await userRoles.SelectMany(_ => _.Group.Concerts)
-                .Where(_ => _.CreatedAt > relevanceDate)
+                .Where(_ => _.CreatedAt > relevanceDate && !_.Attendances.Any(_ => _.UserId == RequestingUserId))
                 .ToListAsync();
 
             IEnumerable<dynamic> sheetMusicNotifications = sheetMusics.Where(_ => _.Comments.Count > 0)
@@ -57,13 +57,21 @@ namespace Orchestrate.API.Controllers
                     Comments = s.Comments.Count
                 });
 
-            var concertNotifications = upcomingConcerts.Concat(newConcerts)
+            var concertNotifications = upcomingConcerts
                 .Select(c => new ConcertNotificationData
                 {
                     Date = Mapper.Map<long>((DateTimeOffset)c.Date.Date),
                     GroupId = c.GroupId,
                     Concert = Mapper.Map<BasicConcertData>(c)
-                });
+                })
+                .Concat(
+                    newConcerts.Select(c => new ConcertNotificationData
+                    {
+                        Date = Mapper.Map<long>(c.CreatedAt),
+                        GroupId = c.GroupId,
+                        Concert = Mapper.Map<BasicConcertData>(c)
+                    })
+                );
 
             return Ok(concertNotifications.Concat(sheetMusicNotifications).OrderByDescending(_ => _.Date));
         }

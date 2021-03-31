@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState } from "react";
-import moment from "moment";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
@@ -20,6 +19,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 
 import { useApiFetch, useInputState } from "utils/hooks";
 import { UserAvatar } from "utils/components";
+import { getFullTimeText } from "utils/general";
 
 const MAX_MESSAGE_LENGTH = 300;
 const MAX_LINE_BREAKS = 3;
@@ -207,7 +207,7 @@ export default function SheetMusicViewer({
                     primary={content ?? "[Comment deleted by user]"}
                     secondary={
                       <>
-                        {moment.unix(updatedAt ?? createdAt).format("DD/MM/yyyy HH:mm:ss")}
+                        {getFullTimeText(updatedAt ?? createdAt)}
                         {updatedAt && " (edited)"}
                       </>
                     }

@@ -1,9 +1,10 @@
 import React from "react";
-import moment from "moment";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import PlaceIcon from "@material-ui/icons/Place";
+
+import { getDateText, getTimeText } from "utils/general";
 
 const useStyles = makeStyles({
   root: {
@@ -27,8 +28,8 @@ export default function CardInfo({ concert }: Props) {
   return (
     <div className={classes.root}>
       <div className={classes.concertTime}>
-        <Typography variant="body1">{moment.unix(concert.date).format("DD/MM/yyyy")}</Typography>
-        <Typography variant="body1">{moment.unix(concert.date).format("HH:mm")}</Typography>
+        <Typography variant="body1">{getDateText(concert.date)}</Typography>
+        <Typography variant="body1">{getTimeText(concert.date)}</Typography>
       </div>
       <div className={classes.concertLocation}>
         <PlaceIcon />

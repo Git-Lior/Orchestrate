@@ -23,8 +23,19 @@ export function useApiFetch(user?: { token?: string }, baseUrl: string = "") {
         },
       })
         .then(async result => {
-          if (!result.ok) throw await result.json();
-          return result;
+          if (result.ok) return result;
+
+          const errText = await result.text();
+          let errJson: orch.Error = {
+            error:
+              result.status >= 500 ? "An error occured in the server, try again later" : errText,
+          };
+
+          try {
+            errJson = JSON.parse(errText);
+          } catch {}
+
+          throw errJson;
         })
         .then(result => (type === "none" ? result : result[type as ResultTypes]())) as any;
     },

@@ -155,7 +155,7 @@ export default function Layout({ user, onLogout, onPasswordChange, page: Page }:
             <PersonIcon />
             <Typography>{userToText(user)}</Typography>
           </div>
-          <Notifications user={user} />
+          {groups && <Notifications user={user} groups={groups} />}
           <Menu
             anchorEl={appBarRef.current}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}

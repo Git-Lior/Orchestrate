@@ -11,19 +11,20 @@ import NotificationsIcon from "@material-ui/icons/Notifications";
 import ListItem from "@material-ui/core/ListItem";
 import Typography from "@material-ui/core/Typography";
 
-import { roleToText } from "utils/general";
+import { getTimeText, roleToText, timeFromNow } from "utils/general";
 import { useApiFetch, useAutoRefresh, useLocalStorage } from "utils/hooks";
 
-const useStyles = makeStyles({
-  popoverContent: { maxWidth: "30rem" },
-  newNotification: { backgroundColor: "yellow" },
-});
+const useStyles = makeStyles(theme => ({
+  popoverContent: { maxWidth: "30rem", padding: "1rem" },
+  newNotification: { borderLeft: `5px solid ${theme.palette.primary.main}` },
+}));
 
 interface Props {
   user: orch.User;
+  groups: orch.GroupData[];
 }
 
-export default function Notificatons({ user }: Props) {
+export default function Notificatons({ user, groups }: Props) {
   const classes = useStyles();
 
   const storageKey = useMemo(() => `${user.id}_notifications_last_update`, [user]);
@@ -85,7 +86,7 @@ export default function Notificatons({ user }: Props) {
           classes={{ paper: classes.popoverContent }}
         >
           {notifications.length === 0 ? (
-            <Typography variant="body1">No notifications</Typography>
+            <Typography variant="body1">No new notifications</Typography>
           ) : (
             <List>
               {notifications.map((n, i) => (
@@ -95,13 +96,19 @@ export default function Notificatons({ user }: Props) {
                   className={i < newNotificationsIndex ? classes.newNotification : undefined}
                 >
                   {_isConcertNotification(n) ? (
-                    <ListItemText
-                      primary={`you have a concert coming up at ${moment
-                        .unix(n.concert.date)
-                        .format("HH:mm")}, click for more info`}
-                      secondary="today"
-                      // {moment(new Date(n.date)).format("DD/MM/yyyy")}
-                    />
+                    n.date === n.concert.date ? (
+                      <ListItemText
+                        primary={`You have a concert coming up at ${getTimeText(n.concert.date)}`}
+                        secondary="today"
+                      />
+                    ) : (
+                      <ListItemText
+                        primary={`A new concert was scheduled in group "${
+                          groups.find(_ => _.id === n.groupId)?.name
+                        }". please update your attendance.`}
+                        secondary={timeFromNow(n.date)}
+                      />
+                    )
                   ) : (
                     <ListItemText
                       primary={`${
@@ -109,7 +116,7 @@ export default function Notificatons({ user }: Props) {
                       } added to part "${roleToText(n.role)}" in composition "${
                         n.composition.title
                       }"`}
-                      secondary={moment.unix(n.date).fromNow(true)}
+                      secondary={timeFromNow(n.date)}
                     />
                   )}
                 </ListItem>
