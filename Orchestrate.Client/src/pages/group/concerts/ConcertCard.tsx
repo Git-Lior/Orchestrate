@@ -1,42 +1,48 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
-import Divider from "@material-ui/core/Divider";
-import IconButton from "@material-ui/core/IconButton";
 import EditIcon from "@material-ui/icons/Edit";
-import DoneIcon from "@material-ui/icons/Done";
 import DeleteIcon from "@material-ui/icons/Delete";
-import CloseIcon from "@material-ui/icons/Close";
-import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import AvatarGroup from "@material-ui/lab/AvatarGroup";
+import Link from "@material-ui/core/Link";
+import Dialog from "@material-ui/core/Dialog";
 
 import { AppTheme } from "AppTheme";
 import { usePromiseStatus } from "utils/hooks";
 import { ListInput, UserAvatar } from "utils/components";
 
-import CardInfoInput from "./CardInfoInput";
 import CardInfo from "./CardInfo";
-import Paper from "@material-ui/core/Paper";
+import CardLayout from "./CardLayout";
 
-const useStyles = makeStyles<AppTheme, Props>(theme => ({
-  cardContainer: {
-    height: "20rem",
-    display: "flex",
-    padding: "1.5rem",
-    backgroundColor: `${theme.palette.background.paper} !important`,
-  },
-  actions: { marginBottom: "3px" },
-  cardInfo: { width: "25%" },
-  divider: { width: "2px", margin: "1.5rem" },
-  cardContent: { overflow: "hidden", flex: 1, display: "flex", flexDirection: "column" },
-  concertDescription: { width: "100%", flex: 1 },
-  moreInfo: { display: "flex", justifyContent: "space-between", alignItems: "center" },
+const useStyles = makeStyles<AppTheme, Props>({
   compositionsInput: { width: "100%" },
-}));
+  cardCenter: {
+    padding: "2rem 0",
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+  },
+  description: { whiteSpace: "pre-wrap" },
+  italic: { fontStyle: "italic" },
+  centerBottom: { display: "flex", justifyContent: "space-between", alignItems: "center" },
+  compositions: { maxWidth: "15rem" },
+  compositionsText: { cursor: "pointer" },
+  attendance: { display: "flex", "& > :not(:last-child)": { marginRight: "2rem" } },
+  avatarGroup: { "& > *": { marginLeft: "-1rem" } },
+  actions: { height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" },
+  actionsContent: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-evenly",
+  },
+  compositionsDialog: {},
+});
 
 interface Props {
   concert: orch.Concert;
@@ -63,94 +69,160 @@ export default function ConcertCard(props: Props) {
   const classes = useStyles(props);
 
   const [loading, error, setPromise] = usePromiseStatus();
+  const [compositionsDialogOpen, setCompositionsDialogOpen] = useState<boolean>(false);
 
   const onAccept = useCallback(() => {
-    if (onAttendanceChange && !concert?.attending) setPromise(onAttendanceChange(concert!, true));
+    if (onAttendanceChange && !concert.attending) setPromise(onAttendanceChange(concert, true));
   }, [concert, setPromise, onAttendanceChange]);
   const onReject = useCallback(() => {
-    if (onAttendanceChange && concert?.attending !== false)
-      setPromise(onAttendanceChange(concert!, false));
+    if (onAttendanceChange && concert.attending !== false)
+      setPromise(onAttendanceChange(concert, false));
   }, [concert, setPromise, onAttendanceChange]);
 
-  const deleteHandler = useCallback(() => onDelete && setPromise(onDelete(concert!.id)), [
+  const deleteHandler = useCallback(() => onDelete && setPromise(onDelete(concert.id)), [
     onDelete,
-    concert?.id,
+    concert.id,
     setPromise,
   ]);
-  const editHandler = useCallback(() => onEditRequested?.(concert!), [onEditRequested, concert]);
+  const editHandler = useCallback(() => onEditRequested?.(concert), [onEditRequested, concert]);
+
+  const compositionsClickHandler = useCallback(() => {
+    setCompositionsDialogOpen(true);
+  }, []);
+
+  const closeCompositionsDialog = useCallback(() => setCompositionsDialogOpen(false), []);
 
   const compositionAddedHandler = useCallback(
-    (composition: orch.CompositionData) => onCompositionAdded?.(concert!, composition)!,
+    (composition: orch.CompositionData) => onCompositionAdded?.(concert, composition)!,
     [concert]
   );
   const compositionRemovedHandler = useCallback(
-    (composition: orch.CompositionData) => onCompositionRemoved?.(concert!, composition)!,
+    (composition: orch.CompositionData) => onCompositionRemoved?.(concert, composition)!,
     [concert]
   );
 
   return (
     <>
-      {userInfo.manager && (
-        <div className={classes.actions}>
-          {concert?.id && (
-            <IconButton size="small" onClick={deleteHandler}>
-              <DeleteIcon fontSize="inherit" />
-            </IconButton>
-          )}
-          <IconButton size="small" onClick={editHandler}>
-            <EditIcon fontSize="inherit" />
-          </IconButton>
-        </div>
-      )}
-      <Paper className={classes.cardContainer}>
-        <div className={classes.cardInfo}>
-          <CardInfo concert={concert!} />
-        </div>
-        <Divider flexItem orientation="vertical" className={classes.divider} />
-        {concert && (
-          <div className={classes.cardContent}>
-            <div className={classes.concertDescription}>
-              <Typography variant="body1">{concert.description}</Typography>
+      <CardLayout
+        left={<CardInfo concert={concert} />}
+        center={
+          <div className={classes.cardCenter}>
+            <div>
+              {concert.description ? (
+                <Typography variant="body1" className={classes.description}>
+                  {concert.description}
+                </Typography>
+              ) : (
+                <Typography variant="body1" className={classes.italic}>
+                  No description available
+                </Typography>
+              )}
             </div>
-            <div className={classes.moreInfo}>
-              <div>
-                {userInfo.roles.length > 0 && (
-                  <>
-                    <Button variant="contained" size="small" onClick={onAccept}>
-                      Accept
-                    </Button>
-                    <Button variant="contained" size="small" onClick={onReject}>
-                      Reject
-                    </Button>
-                  </>
-                )}
-              </div>
-              <div>
-                {userInfo.manager && (
-                  <>
-                    <div>
-                      <Typography variant="body1">Attending:</Typography>
-                      <AvatarGroup max={4}>
-                        {concert.attendingUsers.map(user => (
-                          <UserAvatar key={user.id} user={user} />
-                        ))}
-                      </AvatarGroup>
-                    </div>
-                    <div>
-                      <Typography variant="body1">Not attending:</Typography>
-                      <AvatarGroup max={4}>
-                        {concert.notAttendingUsers.map(user => (
-                          <UserAvatar key={user.id} user={user} />
-                        ))}
-                      </AvatarGroup>
-                    </div>
-                  </>
-                )}
-              </div>
+            <div className={classes.centerBottom}>
+              {(userInfo.manager || concert.compositions.length > 0) && (
+                <div className={classes.compositions}>
+                  <Link
+                    variant="body1"
+                    color="textSecondary"
+                    underline="always"
+                    onClick={compositionsClickHandler}
+                    className={classes.compositionsText}
+                  >
+                    {concert.compositions.length > 0
+                      ? `${concert.compositions.length} compositions - click here to view`
+                      : "Click to add compositions"}
+                  </Link>
+                </div>
+              )}
+              {userInfo.manager && (
+                <div className={classes.attendance}>
+                  <div>
+                    <Typography variant="body1">Attending</Typography>
+                    <AvatarGroup max={4} className={classes.avatarGroup}>
+                      {concert.attendingUsers.map(user => (
+                        <UserAvatar key={user.id} user={user} />
+                      ))}
+                    </AvatarGroup>
+                    {concert.attendingUsers.length === 0 && (
+                      <Typography variant="body1" color="textSecondary" className={classes.italic}>
+                        0 members
+                      </Typography>
+                    )}
+                  </div>
+                  <div>
+                    <Typography variant="body1">Not attending</Typography>
+                    <AvatarGroup max={4} className={classes.avatarGroup}>
+                      {concert.notAttendingUsers.map(user => (
+                        <UserAvatar key={user.id} user={user} />
+                      ))}
+                    </AvatarGroup>
+                    {concert.notAttendingUsers.length === 0 && (
+                      <Typography variant="body1" color="textSecondary" className={classes.italic}>
+                        0 members
+                      </Typography>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
-      </Paper>
+        }
+        right={
+          <div className={classes.actions}>
+            {userInfo.manager && (
+              <div className={classes.actionsContent}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<EditIcon />}
+                  onClick={editHandler}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<DeleteIcon />}
+                  onClick={deleteHandler}
+                >
+                  Delete
+                </Button>
+              </div>
+            )}
+            {userInfo.roles.length > 0 && (
+              <div className={classes.actionsContent}>
+                <Button variant="contained" size="small" onClick={onAccept}>
+                  Accept
+                </Button>
+                <Button variant="contained" size="small" onClick={onReject}>
+                  Reject
+                </Button>
+              </div>
+            )}
+          </div>
+        }
+      />
+      <Dialog
+        open={compositionsDialogOpen}
+        onClose={closeCompositionsDialog}
+        className={classes.compositionsDialog}
+      >
+        <ListInput
+          className={classes.compositionsInput}
+          disabled={!userInfo.manager}
+          items={concert?.compositions}
+          onAdded={compositionAddedHandler}
+          onRemoved={compositionRemovedHandler}
+          optionsProvider={compositionProvider!}
+          getOptionLabel={getCompositionText}
+        >
+          {c => (
+            <ListItem key={c.id}>
+              <ListItemText primary={c.title} secondary={`by ${c.composer} (${c.genre})`} />
+            </ListItem>
+          )}
+        </ListInput>
+      </Dialog>
     </>
   );
 }

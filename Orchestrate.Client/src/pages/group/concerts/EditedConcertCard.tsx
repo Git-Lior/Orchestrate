@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from "react";
 import classnames from "classnames";
 
-import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/Save";
 import CloseIcon from "@material-ui/icons/Close";
@@ -15,10 +14,10 @@ import { MultilineInput } from "utils/components";
 
 const useStyles = makeStyles({
   cardActions: {
-    position: "absolute",
-    bottom: "2rem",
-    right: "2rem",
-    "& > :not(:last-child)": { marginRight: "3rem" },
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-evenly",
+    height: "100%",
   },
   button: {
     transition: "opacity 0.2s ease-in",
@@ -30,7 +29,7 @@ const useStyles = makeStyles({
 });
 
 interface Props {
-  concert?: orch.Concert;
+  concert?: orch.ConcertData;
   onEditDone: (concert: orch.OptionalId<orch.ConcertData>) => Promise<any>;
   onEditCancel: () => void;
 }
@@ -41,7 +40,7 @@ export function EditedConcertCard({ concert, onEditDone, onEditCancel }: Props) 
   const [loading, error, setPromise] = usePromiseStatus();
   const [[description, isDescriptionValid], setDescription] = useState<[string, boolean]>([
     concert?.description ?? "",
-    !!concert?.description,
+    true,
   ]);
   const [updatedData, setUpdatedData] = useState<orch.OptionalId<orch.ConcertData>>(
     concert ?? ({} as any)
@@ -72,29 +71,32 @@ export function EditedConcertCard({ concert, onEditDone, onEditCancel }: Props) 
           maxLineBreaks={1}
         />
       }
-    >
-      <div className={classes.cardActions}>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<SaveIcon />}
-          className={classnames(classes.button, {
-            [classes.buttonDisabled]:
-              !updatedData.date || !updatedData.location || !isDescriptionValid,
-          })}
-          onClick={doneHandler}
-        >
-          Save
-        </Button>
-        <Button
-          variant="contained"
-          startIcon={<CloseIcon />}
-          className={classes.button}
-          onClick={onEditCancel}
-        >
-          Cancel
-        </Button>
-      </div>
-    </CardLayout>
+      right={
+        <div className={classes.cardActions}>
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<CloseIcon />}
+            className={classes.button}
+            onClick={onEditCancel}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            size="small"
+            color="primary"
+            startIcon={<SaveIcon />}
+            className={classnames(classes.button, {
+              [classes.buttonDisabled]:
+                !updatedData.date || !updatedData.location || !isDescriptionValid,
+            })}
+            onClick={doneHandler}
+          >
+            Save
+          </Button>
+        </div>
+      }
+    />
   );
 }

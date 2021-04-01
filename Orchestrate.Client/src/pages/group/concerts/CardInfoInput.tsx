@@ -11,9 +11,10 @@ import {
 import TextField from "@material-ui/core/TextField";
 
 import { useInputState } from "utils/hooks";
+import Box from "@material-ui/core/Box";
 
 interface Props {
-  concert: orch.Concert | undefined;
+  concert: orch.ConcertData | undefined;
   onDataUpdated: React.Dispatch<React.SetStateAction<orch.OptionalId<orch.ConcertData>>>;
 }
 
@@ -36,28 +37,30 @@ export default function CardInfoInput({ concert, onDataUpdated }: Props) {
 
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <KeyboardDatePicker
-        disableToolbar
-        helperText=""
-        disablePast
-        variant="inline"
-        label="Date"
-        format="DD/MM/yyyy"
-        value={date}
-        onChange={setDate}
-      />
-      <KeyboardTimePicker
-        disableToolbar
-        helperText=""
-        initialFocusedDate={moment(0)}
-        ampm={false}
-        minutesStep={5}
-        variant="inline"
-        label="Start time"
-        value={date}
-        onChange={setDate}
-      />
-      <TextField fullWidth label="Location" value={location} onChange={setLocation} />
+      <Box display="flex" flexDirection="column" justifyContent="space-evenly" height="100%">
+        <KeyboardDatePicker
+          disableToolbar
+          helperText=""
+          disablePast
+          variant="inline"
+          label="Date"
+          format="DD/MM/yyyy"
+          value={date}
+          onChange={setDate}
+        />
+        <KeyboardTimePicker
+          disableToolbar
+          helperText=""
+          initialFocusedDate={moment(0)}
+          ampm={false}
+          minutesStep={5}
+          variant="inline"
+          label="Start time"
+          value={date}
+          onChange={setDate}
+        />
+        <TextField fullWidth label="Location" value={location} onChange={setLocation} />
+      </Box>
     </MuiPickersUtilsProvider>
   );
 }

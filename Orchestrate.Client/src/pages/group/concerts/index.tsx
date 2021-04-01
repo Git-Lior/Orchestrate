@@ -15,9 +15,9 @@ import ConcertCard from "./ConcertCard";
 import { EditedConcertCard } from "./EditedConcertCard";
 
 const useStyles = makeStyles({
-  header: { display: "flex", justifyContent: "space-between", marginBottom: "2rem" },
-  content: {},
-  newConcert: { marginBottom: "1rem" },
+  header: { display: "flex", justifyContent: "space-between", marginBottom: "3rem" },
+  content: { "& > :not(:last-child)": { marginBottom: "3rem" } },
+  newConcert: { marginBottom: "3rem" },
 });
 
 type Props = Required<orch.PageProps>;
@@ -108,7 +108,11 @@ export default function GroupConcertsPage({ user, userInfo, group }: Props) {
       </div>
       {editedConcert && !editedConcert.id && (
         <div className={classes.newConcert}>
-          <EditedConcertCard onEditCancel={clearEditedConcert} onEditDone={changeEditedConcert} />
+          <EditedConcertCard
+            concert={editedConcert}
+            onEditCancel={clearEditedConcert}
+            onEditDone={changeEditedConcert}
+          />
         </div>
       )}
       <div className={classes.content}>
@@ -118,6 +122,7 @@ export default function GroupConcertsPage({ user, userInfo, group }: Props) {
           concerts?.map(concert =>
             concert.id === editedConcert?.id ? (
               <EditedConcertCard
+                concert={concert}
                 onEditCancel={clearEditedConcert}
                 onEditDone={changeEditedConcert}
                 key={concert.id}

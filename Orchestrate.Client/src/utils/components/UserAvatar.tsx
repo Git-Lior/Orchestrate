@@ -7,17 +7,17 @@ import Tooltip from "@material-ui/core/Tooltip";
 import { AppTheme } from "AppTheme";
 import { userToText } from "utils/general";
 
-const useStyles = makeStyles<AppTheme, Props>(({ palette }) => {
-  const bgColor = palette.background.default;
-  const textColor = ({ color }: Props) => palette[color ?? "primary"].main;
+const useStyles = makeStyles<AppTheme, Props>(({ palette }) => ({
+  avatar: props => {
+    const bgColor = palette.background.default;
+    const textColor = palette[props.color ?? "primary"].main;
 
-  return {
-    avatar: props => ({
-      backgroundColor: props.invertColors ? bgColor : textColor(props),
-      color: props.invertColors ? textColor(props) : bgColor,
-    }),
-  };
-});
+    const backgroundColor = props.invertColors ? bgColor : textColor;
+    const color = props.invertColors ? textColor : bgColor;
+
+    return { backgroundColor, color, border: `2px solid ${backgroundColor}` };
+  },
+}));
 
 type ColorsWithMain<T> = {
   [K in keyof T]: T[K] extends { main: string } ? K : never;

@@ -7,7 +7,7 @@ import Divider from "@material-ui/core/Divider";
 const useStyles = makeStyles({
   cardContainer: {
     position: "relative",
-    height: "20rem",
+    height: "24rem",
     display: "flex",
     padding: "1.5rem",
     // backgroundColor: `${theme.palette.background.paper} !important`,
@@ -15,7 +15,7 @@ const useStyles = makeStyles({
   cardInfo: { width: "25%" },
   divider: { width: "2px", margin: "1.5rem" },
   cardContent: { overflow: "hidden", flex: 1, display: "flex", flexDirection: "column" },
-  cardRight: { width: "10%" },
+  cardRight: { width: "10rem" },
 });
 
 interface Props {

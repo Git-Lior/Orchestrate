@@ -68,14 +68,14 @@ namespace Orchestrate.API.Controllers
             return Ok(Mapper.Map<IEnumerable<CompositionData>>(result));
         }
 
-        [HttpGet("list"), ProducesOk(typeof(IEnumerable<BasicCompositionData>))]
+        [HttpGet("list"), ProducesOk(typeof(IEnumerable<CompositionData>))]
         [Authorize(Policy = GroupRolesPolicy.ManagerOnly)]
         public async Task<IActionResult> GetCompositionsList([FromQuery] string title)
         {
             return Ok(await _compositionsRepo.NoTrackedEntities
                 .Where(_ => title == null || _.Title.Contains(title))
                 .OrderBy(_ => _.Id)
-                .ProjectTo<BasicCompositionData>(MapperConfig)
+                .ProjectTo<CompositionData>(MapperConfig)
                 .ToListAsync());
         }
 
