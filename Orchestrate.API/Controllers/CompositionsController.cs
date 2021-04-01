@@ -54,8 +54,7 @@ namespace Orchestrate.API.Controllers
                 );
             }
 
-            if (UserGroupPosition.Director || UserGroupPosition.Manager)
-                return Ok(await compositions.ProjectTo<CompositionData>(MapperConfig).ToListAsync());
+            if (UserGroupPosition.Director) return Ok(await compositions.ProjectTo<CompositionData>(MapperConfig).ToListAsync());
 
             IEnumerable<Composition> result = await compositions.AsNoTracking()
                 .Include(_ => _.Uploader)
@@ -67,6 +66,17 @@ namespace Orchestrate.API.Controllers
             result = result.Where(c => c.SheetMusics.Any(s => rolesSet.Contains(s.RoleId)));
 
             return Ok(Mapper.Map<IEnumerable<CompositionData>>(result));
+        }
+
+        [HttpGet("list"), ProducesOk(typeof(IEnumerable<BasicCompositionData>))]
+        [Authorize(Policy = GroupRolesPolicy.ManagerOnly)]
+        public async Task<IActionResult> GetCompositionsList([FromQuery] string title)
+        {
+            return Ok(await _compositionsRepo.NoTrackedEntities
+                .Where(_ => title == null || _.Title.Contains(title))
+                .OrderBy(_ => _.Id)
+                .ProjectTo<BasicCompositionData>(MapperConfig)
+                .ToListAsync());
         }
 
         [HttpGet("{compositionId}"), ProducesOk(typeof(FullCompositionData))]

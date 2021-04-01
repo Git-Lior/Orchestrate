@@ -12,11 +12,12 @@ import AddIcon from "@material-ui/icons/Add";
 import { useApiFetch, useCRUDApi } from "utils/hooks";
 
 import ConcertCard from "./ConcertCard";
+import { EditedConcertCard } from "./EditedConcertCard";
 
 const useStyles = makeStyles({
   header: { display: "flex", justifyContent: "space-between", marginBottom: "2rem" },
   content: {},
-  newConcert: {},
+  newConcert: { marginBottom: "1rem" },
 });
 
 type Props = Required<orch.PageProps>;
@@ -69,7 +70,7 @@ export default function GroupConcertsPage({ user, userInfo, group }: Props) {
   );
 
   const getCompositions = useCallback(
-    (title: string) => apiFetch(`/groups/${group.id}/compositions?title=${title}`),
+    (title: string) => apiFetch(`/groups/${group.id}/compositions/list?title=${title}`),
     [apiFetch, group.id]
   );
 
@@ -107,34 +108,34 @@ export default function GroupConcertsPage({ user, userInfo, group }: Props) {
       </div>
       {editedConcert && !editedConcert.id && (
         <div className={classes.newConcert}>
-          <ConcertCard
-            editMode
-            userInfo={userInfo}
-            onEditCancel={clearEditedConcert}
-            onEditDone={changeEditedConcert}
-          />
+          <EditedConcertCard onEditCancel={clearEditedConcert} onEditDone={changeEditedConcert} />
         </div>
       )}
       <div className={classes.content}>
         {!concerts ? (
           <CircularProgress />
         ) : (
-          concerts?.map(concert => (
-            <ConcertCard
-              key={concert.id}
-              editMode={concert.id === editedConcert?.id}
-              concert={concert}
-              userInfo={userInfo}
-              compositionProvider={getCompositions}
-              onEditRequested={setEditedConcert}
-              onEditCancel={clearEditedConcert}
-              onEditDone={changeEditedConcert}
-              onDelete={removeConcert}
-              onAttendanceChange={changeAttendance}
-              onCompositionAdded={addComposition}
-              onCompositionRemoved={removeComposition}
-            />
-          ))
+          concerts?.map(concert =>
+            concert.id === editedConcert?.id ? (
+              <EditedConcertCard
+                onEditCancel={clearEditedConcert}
+                onEditDone={changeEditedConcert}
+                key={concert.id}
+              />
+            ) : (
+              <ConcertCard
+                key={concert.id}
+                concert={concert}
+                userInfo={userInfo}
+                compositionProvider={getCompositions}
+                onEditRequested={setEditedConcert}
+                onDelete={removeConcert}
+                onAttendanceChange={changeAttendance}
+                onCompositionAdded={addComposition}
+                onCompositionRemoved={removeComposition}
+              />
+            )
+          )
         )}
       </div>
     </Container>

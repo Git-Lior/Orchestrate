@@ -2,7 +2,7 @@ import React, { useState, useCallback } from "react";
 import { Route, Switch, useHistory, useRouteMatch } from "react-router-dom";
 
 import CompositionsPanel from "./CompositionsPanel";
-import SheetMusicsPanel from "./SheetMusicsPanel";
+import SheetMusicsPanel from "./sheet-music/SheetMusicsPanel";
 
 type Props = Required<orch.PageProps>;
 

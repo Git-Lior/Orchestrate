@@ -5,6 +5,7 @@ import Autocomplete, { AutocompleteProps } from "@material-ui/lab/Autocomplete";
 
 import { useInputState } from "utils/hooks";
 import { textAutocompleteOptions } from "./textAutocompleteOptions";
+import { TextFieldProps } from "@material-ui/core/TextField";
 
 export interface AsyncAutocompleteProps<
   T,
@@ -13,6 +14,7 @@ export interface AsyncAutocompleteProps<
   FreeSolo extends boolean | undefined = undefined
 > extends Partial<AutocompleteProps<T, Multiple, DisableClearable, FreeSolo>> {
   optionsProvider: (text: string) => Promise<T[]>;
+  variant?: TextFieldProps["variant"];
   error?: orch.Error;
 }
 
@@ -26,6 +28,7 @@ export function AsyncAutocomplete<
   inputValue,
   onInputChange,
   error,
+  variant,
   ...otherProps
 }: AsyncAutocompleteProps<T, Multiple, DisableClearable, FreeSolo>) {
   const [open, setOpen] = useState(false);
@@ -48,7 +51,7 @@ export function AsyncAutocomplete<
 
   return (
     <Autocomplete<T, Multiple, DisableClearable, FreeSolo>
-      {...textAutocompleteOptions(options)}
+      {...textAutocompleteOptions(options, { size: "small", variant })}
       {...otherProps}
       inputValue={textValue}
       onInputChange={(e, value, r) => {

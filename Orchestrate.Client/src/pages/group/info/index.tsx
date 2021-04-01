@@ -12,6 +12,7 @@ import RolesPanel from "./RolesPanel";
 import UpdatesPanel from "./UpdatesPanel";
 
 import changeGroupImage from "assets/change-group.png";
+import Hidden from "@material-ui/core/Hidden";
 
 const useStyles = makeStyles({
   title: {
@@ -47,7 +48,7 @@ const useStyles = makeStyles({
   updatesPanel: {
     flex: 1,
   },
-  rolesPanelContent: { flex: 1 },
+  rolesPanelContent: { flex: 1, marginBottom: "2px" },
 });
 
 type Props = Required<orch.PageProps>;
@@ -68,7 +69,11 @@ export default function GroupInfoPage(props: Props) {
       <Typography variant="h4" color="primary" className={classes.title}>
         Group Info - {group.name}
       </Typography>
-      {groups.length > 1 && <img className={classes.changeGroupImage} src={changeGroupImage} />}
+      {groups.length > 1 && (
+        <Hidden mdDown>
+          <img className={classes.changeGroupImage} src={changeGroupImage} />
+        </Hidden>
+      )}
       <div className={classes.container}>
         <div className={classes.sidePanel}>
           <Typography variant="h5" className={classes.title}>

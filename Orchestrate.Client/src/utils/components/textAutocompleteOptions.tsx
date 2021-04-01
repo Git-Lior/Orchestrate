@@ -1,8 +1,11 @@
 import React from "react";
 
-import TextField from "@material-ui/core/TextField";
+import TextField, { TextFieldProps } from "@material-ui/core/TextField";
 
-export function textAutocompleteOptions<T>(options: T[] | undefined) {
+export function textAutocompleteOptions<T>(
+  options: T[] | undefined,
+  textFieldProps: Partial<TextFieldProps> = {}
+) {
   return {
     fullWidth: true,
     clearOnBlur: true,
@@ -11,7 +14,7 @@ export function textAutocompleteOptions<T>(options: T[] | undefined) {
     loadingText: "loading items...",
     options: options ?? [],
     getOptionSelected: isOptionSelected,
-    renderInput: (params: any) => <TextField {...params} />,
+    renderInput: (params: any) => <TextField {...params} {...textFieldProps} />,
   };
 }
 

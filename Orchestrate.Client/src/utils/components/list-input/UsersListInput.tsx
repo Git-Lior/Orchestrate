@@ -11,6 +11,7 @@ interface Props {
   users: orch.UserData[] | undefined;
   optionsProvider: (text: string) => Promise<orch.UserData[]>;
   readonly?: boolean;
+  elevation?: number;
   onAdded: (user: orch.UserData) => Promise<any>;
   onRemoved: (user: orch.UserData) => Promise<any>;
 }

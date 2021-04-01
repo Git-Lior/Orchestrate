@@ -10,9 +10,6 @@ import CloseIcon from "@material-ui/icons/Close";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
-import Accordion from "@material-ui/core/Accordion";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import AvatarGroup from "@material-ui/lab/AvatarGroup";
@@ -23,15 +20,14 @@ import { ListInput, UserAvatar } from "utils/components";
 
 import CardInfoInput from "./CardInfoInput";
 import CardInfo from "./CardInfo";
+import Paper from "@material-ui/core/Paper";
 
 const useStyles = makeStyles<AppTheme, Props>(theme => ({
-  root: { background: "none" },
   cardContainer: {
     height: "20rem",
     display: "flex",
     padding: "1.5rem",
     backgroundColor: `${theme.palette.background.paper} !important`,
-    cursor: props => (!props.editMode ? "pointer" : "default !important"),
   },
   actions: { marginBottom: "3px" },
   cardInfo: { width: "25%" },
@@ -43,13 +39,10 @@ const useStyles = makeStyles<AppTheme, Props>(theme => ({
 }));
 
 interface Props {
-  editMode?: boolean;
-  concert?: orch.Concert;
+  concert: orch.Concert;
   userInfo: orch.group.UserInfo;
   compositionProvider?: (title: string) => Promise<orch.CompositionData[]>;
   onEditRequested?: (concert: orch.Concert) => void;
-  onEditDone?: (concert: orch.OptionalId<orch.ConcertData>) => Promise<any>;
-  onEditCancel?: () => void;
   onDelete?: (concertId: number) => Promise<any>;
   onAttendanceChange?: (concert: orch.Concert, attending: boolean) => Promise<any>;
   onCompositionAdded?: (concert: orch.Concert, composition: orch.CompositionData) => Promise<any>;
@@ -58,13 +51,10 @@ interface Props {
 
 export default function ConcertCard(props: Props) {
   const {
-    editMode,
     userInfo,
     concert,
     compositionProvider,
     onEditRequested,
-    onEditCancel,
-    onEditDone,
     onDelete,
     onAttendanceChange,
     onCompositionAdded,
@@ -72,30 +62,7 @@ export default function ConcertCard(props: Props) {
   } = props;
   const classes = useStyles(props);
 
-  const [updatedData, setUpdatedData] = useState<orch.OptionalId<orch.ConcertData>>(
-    concert ?? ({} as any)
-  );
-
-  const [expanded, setExpanded] = useState(false);
   const [loading, error, setPromise] = usePromiseStatus();
-
-  useEffect(() => {
-    if (editMode) {
-      setUpdatedData(concert ?? ({} as any));
-      setExpanded(false);
-    }
-  }, [editMode]);
-
-  const handleExpand = useCallback((_, expanded: boolean) => !editMode && setExpanded(expanded), [
-    editMode,
-  ]);
-
-  const onDescriptionChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setUpdatedData({ ...updatedData, description: e.target.value });
-    },
-    [updatedData]
-  );
 
   const onAccept = useCallback(() => {
     if (onAttendanceChange && !concert?.attending) setPromise(onAttendanceChange(concert!, true));
@@ -111,10 +78,6 @@ export default function ConcertCard(props: Props) {
     setPromise,
   ]);
   const editHandler = useCallback(() => onEditRequested?.(concert!), [onEditRequested, concert]);
-  const doneHandler = useCallback(() => {
-    if (onEditDone && updatedData.date && updatedData.location)
-      setPromise(onEditDone({ id: concert?.id, ...updatedData }));
-  }, [concert, updatedData, setPromise, onEditDone]);
 
   const compositionAddedHandler = useCallback(
     (composition: orch.CompositionData) => onCompositionAdded?.(concert!, composition)!,
@@ -134,105 +97,60 @@ export default function ConcertCard(props: Props) {
               <DeleteIcon fontSize="inherit" />
             </IconButton>
           )}
-          {!editMode ? (
-            <IconButton size="small" onClick={editHandler}>
-              <EditIcon fontSize="inherit" />
-            </IconButton>
-          ) : (
-            <>
-              <IconButton size="small" onClick={doneHandler} disabled={!updatedData}>
-                <DoneIcon fontSize="inherit" />
-              </IconButton>
-              <IconButton size="small" onClick={onEditCancel}>
-                <CloseIcon fontSize="inherit" />
-              </IconButton>
-            </>
-          )}
+          <IconButton size="small" onClick={editHandler}>
+            <EditIcon fontSize="inherit" />
+          </IconButton>
         </div>
       )}
-      <Accordion expanded={expanded} onChange={handleExpand} className={classes.root}>
-        <AccordionSummary className={classes.cardContainer}>
-          <div className={classes.cardInfo}>
-            {editMode ? (
-              <CardInfoInput concert={concert} onDataUpdated={setUpdatedData} />
-            ) : (
-              <CardInfo concert={concert!} />
-            )}
-          </div>
-          <Divider flexItem orientation="vertical" className={classes.divider} />
-          {concert && (
-            <div className={classes.cardContent}>
-              <div className={classes.concertDescription}>
-                {editMode ? (
-                  <TextField
-                    fullWidth
-                    disabled={!userInfo.manager}
-                    value={updatedData.description}
-                    onChange={onDescriptionChange}
-                  />
-                ) : (
-                  <Typography variant="body1">{concert.description}</Typography>
+      <Paper className={classes.cardContainer}>
+        <div className={classes.cardInfo}>
+          <CardInfo concert={concert!} />
+        </div>
+        <Divider flexItem orientation="vertical" className={classes.divider} />
+        {concert && (
+          <div className={classes.cardContent}>
+            <div className={classes.concertDescription}>
+              <Typography variant="body1">{concert.description}</Typography>
+            </div>
+            <div className={classes.moreInfo}>
+              <div>
+                {userInfo.roles.length > 0 && (
+                  <>
+                    <Button variant="contained" size="small" onClick={onAccept}>
+                      Accept
+                    </Button>
+                    <Button variant="contained" size="small" onClick={onReject}>
+                      Reject
+                    </Button>
+                  </>
                 )}
               </div>
-              {!editMode && (
-                <div className={classes.moreInfo}>
-                  <div>
-                    {userInfo.roles.length > 0 && (
-                      <>
-                        <Button variant="contained" size="small" onClick={onAccept}>
-                          Accept
-                        </Button>
-                        <Button variant="contained" size="small" onClick={onReject}>
-                          Reject
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                  <div>
-                    {userInfo.manager && (
-                      <>
-                        <div>
-                          <Typography variant="body1">Attending:</Typography>
-                          <AvatarGroup max={4}>
-                            {concert.attendingUsers.map(user => (
-                              <UserAvatar key={user.id} user={user} />
-                            ))}
-                          </AvatarGroup>
-                        </div>
-                        <div>
-                          <Typography variant="body1">Not attending:</Typography>
-                          <AvatarGroup max={4}>
-                            {concert.notAttendingUsers.map(user => (
-                              <UserAvatar key={user.id} user={user} />
-                            ))}
-                          </AvatarGroup>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
+              <div>
+                {userInfo.manager && (
+                  <>
+                    <div>
+                      <Typography variant="body1">Attending:</Typography>
+                      <AvatarGroup max={4}>
+                        {concert.attendingUsers.map(user => (
+                          <UserAvatar key={user.id} user={user} />
+                        ))}
+                      </AvatarGroup>
+                    </div>
+                    <div>
+                      <Typography variant="body1">Not attending:</Typography>
+                      <AvatarGroup max={4}>
+                        {concert.notAttendingUsers.map(user => (
+                          <UserAvatar key={user.id} user={user} />
+                        ))}
+                      </AvatarGroup>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-          )}
-        </AccordionSummary>
-        <AccordionDetails>
-          <ListInput
-            className={classes.compositionsInput}
-            disabled={!userInfo.manager}
-            items={concert?.compositions}
-            onAdded={compositionAddedHandler}
-            onRemoved={compositionRemovedHandler}
-            optionsProvider={compositionProvider!}
-            getOptionLabel={getCompositionText}
-          >
-            {c => (
-              <ListItem key={c.id}>
-                <ListItemText primary={c.title} secondary={`by ${c.composer} (${c.genre})`} />
-              </ListItem>
-            )}
-          </ListInput>
-        </AccordionDetails>
-      </Accordion>
+          </div>
+        )}
+      </Paper>
     </>
   );
 }

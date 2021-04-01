@@ -23,11 +23,15 @@ const useStyles = makeStyles({
     minHeight: 0,
     overflowY: "auto",
   },
+  autocomplete: {
+    padding: "1rem",
+  },
 });
 
 interface Props<T> extends AsyncAutocompleteProps<T> {
   items: T[] | undefined;
   readonly?: boolean;
+  elevation?: number;
   children: (item: T) => React.ReactNode;
   onAdded: (item: T) => Promise<any>;
   onRemoved: (item: T) => Promise<any>;
@@ -37,6 +41,7 @@ export function ListInput<T extends { id: number }>({
   items,
   readonly,
   className,
+  elevation,
   children,
   onAdded,
   onRemoved,
@@ -63,7 +68,7 @@ export function ListInput<T extends { id: number }>({
   ]);
 
   return (
-    <Paper className={classnames(classes.container, className)}>
+    <Paper className={classnames(classes.container, className)} elevation={elevation}>
       <List className={classes.list}>
         {items?.map(item => (
           <ListItem key={item.id}>
@@ -81,6 +86,8 @@ export function ListInput<T extends { id: number }>({
       {!readonly && (
         <AsyncAutocomplete
           {...autocompleteProps}
+          className={classes.autocomplete}
+          variant="outlined"
           optionsProvider={filteredOptionsProvider}
           value={null}
           inputValue={inputValue}

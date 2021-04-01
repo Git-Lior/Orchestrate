@@ -28,6 +28,7 @@ const layoutStyles: Styles<AppTheme, {}> = theme => ({
     display: "flex",
     cursor: "pointer",
   },
+  userText: { marginLeft: "0.5rem", [theme.breakpoints.down("md")]: { display: "none" } },
   groupTabs: {
     "&[disabled]": { pointerEvents: "none" },
   },

@@ -56,8 +56,10 @@ const useStyles = makeStyles(theme => ({
   roleTitle: { fontWeight: "bold" },
   roleFilter: {
     position: "absolute",
-    top: "3rem",
-    left: "4rem",
+    top: "2.5rem",
+    left: "2rem",
+    width: "25%",
+    minWidth: "11rem",
   },
 }));
 
@@ -156,6 +158,7 @@ export default function RolesPanel({ user, group, userInfo, setGroup, getAllUser
               )}
             </div>
             <UsersListInput
+              elevation={5}
               readonly={!userInfo.manager}
               users={members}
               optionsProvider={getAllUsers}

@@ -153,7 +153,7 @@ export default function Layout({ user, onLogout, onPasswordChange, page: Page }:
           <div className={classes.spacer} />
           <div onClick={handleMenuClick} className={classes.user}>
             <PersonIcon />
-            <Typography>{userToText(user)}</Typography>
+            <Typography className={classes.userText}>{userToText(user)}</Typography>
           </div>
           {groups && <Notifications user={user} groups={groups} />}
           <Menu
