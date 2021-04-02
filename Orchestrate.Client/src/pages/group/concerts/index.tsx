@@ -6,6 +6,7 @@ import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Container from "@material-ui/core/Container";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Collapse from "@material-ui/core/Collapse";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
 
@@ -15,8 +16,15 @@ import ConcertCard from "./ConcertCard";
 import { EditedConcertCard } from "./EditedConcertCard";
 
 const useStyles = makeStyles({
+  root: { display: "flex", flexDirection: "column", overflow: "hidden" },
   header: { display: "flex", justifyContent: "space-between", marginBottom: "3rem" },
-  content: { "& > :not(:last-child)": { marginBottom: "3rem" } },
+  content: {
+    paddingRight: "19px",
+    width: "calc(100% + 19px)",
+    overflowY: "auto",
+    flex: 1,
+    "& > :not(:last-child)": { marginBottom: "3rem" },
+  },
   newConcert: { marginBottom: "3rem" },
 });
 
@@ -92,7 +100,7 @@ export default function GroupConcertsPage({ user, userInfo, group }: Props) {
   );
 
   return (
-    <Container maxWidth="md">
+    <Container maxWidth="md" className={classes.root}>
       <div className={classes.header}>
         <Typography variant="h4">Upcoming Concerts</Typography>
         {userInfo.manager ? (
@@ -106,15 +114,17 @@ export default function GroupConcertsPage({ user, userInfo, group }: Props) {
           />
         )}
       </div>
-      {editedConcert && !editedConcert.id && (
-        <div className={classes.newConcert}>
-          <EditedConcertCard
-            concert={editedConcert}
-            onEditCancel={clearEditedConcert}
-            onEditDone={changeEditedConcert}
-          />
-        </div>
-      )}
+      <Collapse
+        unmountOnExit
+        in={editedConcert && !editedConcert.id}
+        className={classes.newConcert}
+      >
+        <EditedConcertCard
+          concert={editedConcert}
+          onEditCancel={clearEditedConcert}
+          onEditDone={changeEditedConcert}
+        />
+      </Collapse>
       <div className={classes.content}>
         {!concerts ? (
           <CircularProgress />

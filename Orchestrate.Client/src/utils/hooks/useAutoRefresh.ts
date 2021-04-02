@@ -31,11 +31,9 @@ export function useAutoRefresh<T>(
       setTimeout(() => {
         setPromise(
           itemProviderRef.current().then(item => {
-            if (!isMounted.current) return;
-            setItem(item);
-            setTimeoutRef(undefined);
+            if (isMounted.current) setItem(item);
           })
-        );
+        ).then(() => setTimeoutRef(undefined));
       }, timeout)
     );
   }, [loading, timeoutRef]);

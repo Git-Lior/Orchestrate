@@ -10,6 +10,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import AvatarGroup from "@material-ui/lab/AvatarGroup";
 import Link from "@material-ui/core/Link";
 import Dialog from "@material-ui/core/Dialog";
+import { yellow, red, green } from "@material-ui/core/colors";
 
 import { AppTheme } from "AppTheme";
 import { usePromiseStatus } from "utils/hooks";
@@ -17,6 +18,16 @@ import { ListInput, UserAvatar } from "utils/components";
 
 import CardInfo from "./CardInfo";
 import CardLayout from "./CardLayout";
+
+function buttonCss(bgColor: string, hoverColor: string, active: boolean = true) {
+  return !active
+    ? {}
+    : {
+        color: "white",
+        backgroundColor: bgColor,
+        "&:hover": { backgroundColor: hoverColor },
+      };
+}
 
 const useStyles = makeStyles<AppTheme, Props>({
   compositionsInput: { width: "100%" },
@@ -41,6 +52,10 @@ const useStyles = makeStyles<AppTheme, Props>({
     flexDirection: "column",
     justifyContent: "space-evenly",
   },
+  editButton: buttonCss(yellow[700], yellow[800]),
+  deleteButton: buttonCss(red[500], red[700]),
+  acceptButton: props => buttonCss(green[500], green[700], !!props.concert.attending),
+  declineButton: props => buttonCss(red[500], red[700], !props.concert.attending),
   compositionsDialog: {},
 });
 
@@ -74,7 +89,7 @@ export default function ConcertCard(props: Props) {
   const onAccept = useCallback(() => {
     if (onAttendanceChange && !concert.attending) setPromise(onAttendanceChange(concert, true));
   }, [concert, setPromise, onAttendanceChange]);
-  const onReject = useCallback(() => {
+  const onDecline = useCallback(() => {
     if (onAttendanceChange && concert.attending !== false)
       setPromise(onAttendanceChange(concert, false));
   }, [concert, setPromise, onAttendanceChange]);
@@ -137,10 +152,10 @@ export default function ConcertCard(props: Props) {
               {userInfo.manager && (
                 <div className={classes.attendance}>
                   <div>
-                    <Typography variant="body1">Attending</Typography>
+                    <Typography variant="body1">Accepted</Typography>
                     <AvatarGroup max={4} className={classes.avatarGroup}>
                       {concert.attendingUsers.map(user => (
-                        <UserAvatar key={user.id} user={user} />
+                        <UserAvatar key={user.id} user={user} small />
                       ))}
                     </AvatarGroup>
                     {concert.attendingUsers.length === 0 && (
@@ -150,10 +165,10 @@ export default function ConcertCard(props: Props) {
                     )}
                   </div>
                   <div>
-                    <Typography variant="body1">Not attending</Typography>
+                    <Typography variant="body1">Declined</Typography>
                     <AvatarGroup max={4} className={classes.avatarGroup}>
                       {concert.notAttendingUsers.map(user => (
-                        <UserAvatar key={user.id} user={user} />
+                        <UserAvatar key={user.id} user={user} small />
                       ))}
                     </AvatarGroup>
                     {concert.notAttendingUsers.length === 0 && (
@@ -174,6 +189,7 @@ export default function ConcertCard(props: Props) {
                 <Button
                   variant="contained"
                   size="small"
+                  className={classes.editButton}
                   startIcon={<EditIcon />}
                   onClick={editHandler}
                 >
@@ -182,6 +198,7 @@ export default function ConcertCard(props: Props) {
                 <Button
                   variant="contained"
                   size="small"
+                  className={classes.deleteButton}
                   startIcon={<DeleteIcon />}
                   onClick={deleteHandler}
                 >
@@ -191,11 +208,21 @@ export default function ConcertCard(props: Props) {
             )}
             {userInfo.roles.length > 0 && (
               <div className={classes.actionsContent}>
-                <Button variant="contained" size="small" onClick={onAccept}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={onAccept}
+                  className={classes.acceptButton}
+                >
                   Accept
                 </Button>
-                <Button variant="contained" size="small" onClick={onReject}>
-                  Reject
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={onDecline}
+                  className={classes.declineButton}
+                >
+                  Decline
                 </Button>
               </div>
             )}

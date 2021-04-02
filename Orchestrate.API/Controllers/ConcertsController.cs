@@ -46,9 +46,11 @@ namespace Orchestrate.API.Controllers
 
         [HttpPost("{concertId}/attendance"), ProducesOk]
         [Authorize(Policy = GroupRolesPolicy.MemberOnly)]
-        public async Task<IActionResult> SetAttendance([FromBody] bool attending)
+        public async Task<IActionResult> SetAttendance([FromRoute] int concertId, [FromBody] bool attending)
         {
-            var concert = await SingleOrError(_concertsRepo.Entities.Include(_ => _.Attendances.Where(a => a.UserId == RequestingUserId)));
+            var concert = await SingleOrError(_concertsRepo
+                .FindOne(new ConcertIdentifier(GroupId, concertId))
+                .Include(_ => _.Attendances.Where(a => a.UserId == RequestingUserId)));
 
             await _concertsRepo.SetUserAttendance(concert, RequestingUserId, attending);
 

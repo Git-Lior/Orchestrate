@@ -15,7 +15,19 @@ const useStyles = makeStyles<AppTheme, Props>(({ palette }) => ({
     const backgroundColor = props.invertColors ? bgColor : textColor;
     const color = props.invertColors ? textColor : bgColor;
 
-    return { backgroundColor, color, border: `2px solid ${backgroundColor}` };
+    return {
+      backgroundColor,
+      color,
+      border: `2px solid ${color}`,
+      fontSize: "18px",
+      ...(!props.small
+        ? {}
+        : {
+            width: "3rem",
+            height: "3rem",
+            fontSize: "14px",
+          }),
+    };
   },
 }));
 
@@ -27,6 +39,7 @@ interface Props {
   user: orch.UserData;
   color?: ColorsWithMain<AppTheme["palette"]>;
   invertColors?: boolean;
+  small?: boolean;
 }
 
 export function UserAvatar(props: Props) {

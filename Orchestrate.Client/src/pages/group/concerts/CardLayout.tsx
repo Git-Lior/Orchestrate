@@ -7,7 +7,7 @@ import Divider from "@material-ui/core/Divider";
 const useStyles = makeStyles({
   cardContainer: {
     position: "relative",
-    height: "24rem",
+    height: "23rem",
     display: "flex",
     padding: "1.5rem",
     // backgroundColor: `${theme.palette.background.paper} !important`,

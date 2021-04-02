@@ -16,19 +16,11 @@ namespace Orchestrate.API.Controllers
         public NotificationsController(IServiceProvider provider) : base(provider) { }
 
         [HttpGet, ProducesOk(typeof(NotificationData))]
-        public async Task<IActionResult> GetNotifications([FromQuery] DateTime? lastUpdate)
+        public async Task<IActionResult> GetNotifications()
         {
-            var userRoles = Repository.Get<User>().Entities.Where(_ => _.Id == RequestingUserId).SelectMany(_ => _.MemberOfGroups);
+            var relevanceDate = DateTime.Today.AddDays(-3);
 
-            var relevanceDate = new DateTime(
-                Math.Min(
-                    Math.Max(
-                        lastUpdate?.Ticks ?? 0,
-                        DateTime.Today.AddDays(-7).Ticks
-                    ),
-                    DateTime.Today.AddDays(-1).Ticks
-                )
-            );
+            var userRoles = Repository.Get<User>().Entities.Where(_ => _.Id == RequestingUserId).SelectMany(_ => _.MemberOfGroups);
 
             var sheetMusics = await Repository.Get<SheetMusic>().Entities
                 .Where(_ => _.Group.Directors.Any(_ => _.Id == RequestingUserId))

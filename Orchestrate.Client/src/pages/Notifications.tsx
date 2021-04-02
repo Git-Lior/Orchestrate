@@ -34,7 +34,7 @@ export default function Notificatons({ user, groups }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [lastUpdate, setLastUpdate] = useLocalStorage(storageKey);
   const [notifications, loading, error] = useAutoRefresh<orch.NotificationData[]>(() =>
-    apiFetch("?lastUpdate=" + (lastUpdate ?? ""))
+    apiFetch("")
   );
 
   const newNotificationsIndex: number = useMemo(() => {
@@ -60,8 +60,6 @@ export default function Notificatons({ user, groups }: Props) {
     setLastUpdate(new Date().toISOString());
     setMenuOpen(false);
   }, [setLastUpdate]);
-
-  const handleNotificationClick = useCallback((n: orch.NotificationData) => {}, []);
 
   return (
     <>
@@ -92,7 +90,6 @@ export default function Notificatons({ user, groups }: Props) {
               {notifications.map((n, i) => (
                 <ListItem
                   key={n.date}
-                  onClick={() => handleNotificationClick(n)}
                   className={i < newNotificationsIndex ? classes.newNotification : undefined}
                 >
                   {_isConcertNotification(n) ? (
