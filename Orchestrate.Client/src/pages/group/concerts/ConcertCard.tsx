@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 
-import { makeStyles } from "@material-ui/core/styles";
+import { fade, makeStyles } from "@material-ui/core/styles";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 import Button from "@material-ui/core/Button";
@@ -10,7 +10,8 @@ import ListItemText from "@material-ui/core/ListItemText";
 import AvatarGroup from "@material-ui/lab/AvatarGroup";
 import Link from "@material-ui/core/Link";
 import Dialog from "@material-ui/core/Dialog";
-import { yellow, red, green } from "@material-ui/core/colors";
+import IconButton from "@material-ui/core/IconButton";
+import { red, green } from "@material-ui/core/colors";
 
 import { AppTheme } from "AppTheme";
 import { usePromiseStatus } from "utils/hooks";
@@ -19,14 +20,12 @@ import { ListInput, UserAvatar } from "utils/components";
 import CardInfo from "./CardInfo";
 import CardLayout from "./CardLayout";
 
-function buttonCss(bgColor: string, hoverColor: string, active: boolean = true) {
-  return !active
-    ? {}
-    : {
-        color: "white",
-        backgroundColor: bgColor,
-        "&:hover": { backgroundColor: hoverColor },
-      };
+function buttonCss(color: string, active: boolean = false) {
+  return {
+    borderColor: color,
+    "&:hover": { backgroundColor: fade(color, 0.2) },
+    ...(!active ? {} : { color }),
+  };
 }
 
 const useStyles = makeStyles<AppTheme, Props>({
@@ -52,11 +51,12 @@ const useStyles = makeStyles<AppTheme, Props>({
     flexDirection: "column",
     justifyContent: "space-evenly",
   },
-  editButton: buttonCss(yellow[700], yellow[800]),
-  deleteButton: buttonCss(red[500], red[700]),
-  acceptButton: props => buttonCss(green[500], green[700], !!props.concert.attending),
-  declineButton: props => buttonCss(red[500], red[700], !props.concert.attending),
+  acceptButton: props => buttonCss(green[500], !!props.concert.attending),
+  declineButton: props => buttonCss(red[500], !props.concert.attending),
+  managerActions: { position: "absolute", right: "1rem", top: "1rem" },
   compositionsDialog: {},
+  dialogContainer: { padding: "2rem" },
+  dialogTitle: { marginBottom: "1rem" },
 });
 
 interface Props {
@@ -183,33 +183,11 @@ export default function ConcertCard(props: Props) {
           </div>
         }
         right={
-          <div className={classes.actions}>
-            {userInfo.manager && (
+          userInfo.roles.length > 0 && (
+            <div className={classes.actions}>
               <div className={classes.actionsContent}>
                 <Button
-                  variant="contained"
-                  size="small"
-                  className={classes.editButton}
-                  startIcon={<EditIcon />}
-                  onClick={editHandler}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="contained"
-                  size="small"
-                  className={classes.deleteButton}
-                  startIcon={<DeleteIcon />}
-                  onClick={deleteHandler}
-                >
-                  Delete
-                </Button>
-              </div>
-            )}
-            {userInfo.roles.length > 0 && (
-              <div className={classes.actionsContent}>
-                <Button
-                  variant="contained"
+                  variant="outlined"
                   size="small"
                   onClick={onAccept}
                   className={classes.acceptButton}
@@ -217,7 +195,7 @@ export default function ConcertCard(props: Props) {
                   Accept
                 </Button>
                 <Button
-                  variant="contained"
+                  variant="outlined"
                   size="small"
                   onClick={onDecline}
                   className={classes.declineButton}
@@ -225,30 +203,48 @@ export default function ConcertCard(props: Props) {
                   Decline
                 </Button>
               </div>
-            )}
-          </div>
+            </div>
+          )
         }
-      />
+      >
+        {userInfo.manager && (
+          <div className={classes.managerActions}>
+            <IconButton size="small" onClick={editHandler}>
+              <EditIcon fontSize="small" />
+            </IconButton>
+            <IconButton size="small" onClick={deleteHandler}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </div>
+        )}
+      </CardLayout>
       <Dialog
         open={compositionsDialogOpen}
         onClose={closeCompositionsDialog}
         className={classes.compositionsDialog}
+        color="secondary"
       >
-        <ListInput
-          className={classes.compositionsInput}
-          disabled={!userInfo.manager}
-          items={concert?.compositions}
-          onAdded={compositionAddedHandler}
-          onRemoved={compositionRemovedHandler}
-          optionsProvider={compositionProvider!}
-          getOptionLabel={getCompositionText}
-        >
-          {c => (
-            <ListItem key={c.id}>
-              <ListItemText primary={c.title} secondary={`by ${c.composer} (${c.genre})`} />
-            </ListItem>
-          )}
-        </ListInput>
+        <div className={classes.dialogContainer}>
+          <Typography variant="h5" className={classes.dialogTitle}>
+            Concert compositions
+          </Typography>
+          <ListInput
+            placeholder="Add composition..."
+            className={classes.compositionsInput}
+            readonly={!userInfo.manager}
+            items={concert?.compositions}
+            onAdded={compositionAddedHandler}
+            onRemoved={compositionRemovedHandler}
+            optionsProvider={compositionProvider!}
+            getOptionLabel={getCompositionText}
+          >
+            {c => (
+              <ListItem key={c.id}>
+                <ListItemText primary={c.title} secondary={`by ${c.composer} (${c.genre})`} />
+              </ListItem>
+            )}
+          </ListInput>
+        </div>
       </Dialog>
     </>
   );

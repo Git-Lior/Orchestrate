@@ -20,6 +20,7 @@ export function UsersListInput({ users, optionsProvider, ...listProps }: Props) 
   return (
     <ListInput
       {...listProps}
+      placeholder="Add user..."
       items={users}
       optionsProvider={optionsProvider}
       getOptionLabel={userToText}

@@ -29,6 +29,7 @@ export function AsyncAutocomplete<
   onInputChange,
   error,
   variant,
+  placeholder,
   ...otherProps
 }: AsyncAutocompleteProps<T, Multiple, DisableClearable, FreeSolo>) {
   const [open, setOpen] = useState(false);
@@ -51,7 +52,7 @@ export function AsyncAutocomplete<
 
   return (
     <Autocomplete<T, Multiple, DisableClearable, FreeSolo>
-      {...textAutocompleteOptions(options, { size: "small", variant })}
+      {...textAutocompleteOptions(options, { size: "small", variant, placeholder })}
       {...otherProps}
       inputValue={textValue}
       onInputChange={(e, value, r) => {

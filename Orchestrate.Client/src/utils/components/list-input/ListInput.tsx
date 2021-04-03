@@ -7,6 +7,7 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
+import Divider from "@material-ui/core/Divider";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 
 import { useInputState, usePromiseStatus } from "utils/hooks";
@@ -70,17 +71,20 @@ export function ListInput<T extends { id: number }>({
   return (
     <Paper className={classnames(classes.container, className)} elevation={elevation}>
       <List className={classes.list}>
-        {items?.map(item => (
-          <ListItem key={item.id}>
-            {children(item)}
-            {!readonly && (
-              <ListItemSecondaryAction>
-                <IconButton edge="end" aria-label="remove" onClick={() => onItemRemoved(item)}>
-                  <CloseIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            )}
-          </ListItem>
+        {items?.map((item, i) => (
+          <React.Fragment key={item.id}>
+            {i > 0 && <Divider variant="middle" component="li" />}
+            <ListItem>
+              {children(item)}
+              {!readonly && (
+                <ListItemSecondaryAction>
+                  <IconButton edge="end" aria-label="remove" onClick={() => onItemRemoved(item)}>
+                    <CloseIcon />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              )}
+            </ListItem>
+          </React.Fragment>
         ))}
       </List>
       {!readonly && (

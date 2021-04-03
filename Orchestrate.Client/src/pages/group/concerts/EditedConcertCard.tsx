@@ -1,11 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import classnames from "classnames";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/Save";
 import CloseIcon from "@material-ui/icons/Close";
-import { blue } from "@material-ui/core/colors";
 
 import { usePromiseStatus } from "utils/hooks";
 
@@ -22,9 +21,6 @@ const useStyles = makeStyles({
   },
   saveButton: {
     transition: "opacity 0.2s ease-in",
-    color: "white",
-    backgroundColor: blue[500],
-    "&:hover": { backgroundColor: blue[700] },
   },
   buttonDisabled: {
     opacity: 0.6,
@@ -77,11 +73,12 @@ export function EditedConcertCard({ concert, onEditDone, onEditCancel }: Props) 
       }
       right={
         <div className={classes.cardActions}>
-          <Button variant="contained" size="small" startIcon={<CloseIcon />} onClick={onEditCancel}>
+          <Button variant="outlined" size="small" startIcon={<CloseIcon />} onClick={onEditCancel}>
             Cancel
           </Button>
           <Button
             variant="contained"
+            color="primary"
             size="small"
             startIcon={<SaveIcon />}
             className={classnames(classes.saveButton, {
