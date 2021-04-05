@@ -19,7 +19,7 @@ export default function GroupPage({ user, group, userInfo, groups, setGroup }: o
   return (
     <page.Component
       user={user}
-      groups={groups!}
+      groups={groups}
       group={group}
       userInfo={userInfo!}
       setGroup={setGroup}

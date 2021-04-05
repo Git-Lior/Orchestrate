@@ -47,8 +47,7 @@ export default function UsersTable({
       onRowDelete={onUserDelete}
       filters={
         <Autocomplete
-          {...textAutocompleteOptions(groups)}
-          placeholder="group..."
+          {...textAutocompleteOptions(groups, { placeholder: "group..." })}
           getOptionLabel={g => g.name}
           onChange={onGroupFilterChange}
         />

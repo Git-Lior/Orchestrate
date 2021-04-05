@@ -1,7 +1,6 @@
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 
-// TODO: responsive font size?
 const theme = createMuiTheme({
   typography: {
     htmlFontSize: 10,
@@ -17,9 +16,6 @@ const theme = createMuiTheme({
     background: {
       default: "#f5f3ed",
     },
-  },
-  props: {
-    // change default props of components
   },
   overrides: {
     MuiSelect: {

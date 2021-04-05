@@ -3,16 +3,16 @@ import React, { useCallback } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
+import Hidden from "@material-ui/core/Hidden";
 
 import { useApiFetch } from "utils/hooks";
+
+import changeGroupImage from "assets/change-group.png";
 
 import DirectorsPanel from "./DirectorsPanel";
 import AddRoleDialogButton from "./AddRoleDialogButton";
 import RolesPanel from "./RolesPanel";
 import UpdatesPanel from "./UpdatesPanel";
-
-import changeGroupImage from "assets/change-group.png";
-import Hidden from "@material-ui/core/Hidden";
 
 const useStyles = makeStyles({
   title: {

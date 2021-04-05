@@ -18,7 +18,7 @@ namespace Orchestrate.API.Controllers.Admin
     [Authorize(Policy = GroupRolesPolicy.AdministratorOnly)]
     public class UsersAdminController : ApiControllerBase
     {
-        protected IUsersRepository _usersRepo { get; }
+        private readonly IUsersRepository _usersRepo;
 
         [FromRoute]
         public int UserId { get; set; }
