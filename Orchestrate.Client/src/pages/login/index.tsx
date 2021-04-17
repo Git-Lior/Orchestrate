@@ -45,17 +45,24 @@ function LoginPage({ onLogin }: LoginProps) {
   );
 
   const handleChangePassword = useCallback(
-    (newPassword: string) =>
-      setPromise(
-        apiFetch(
+    (newPassword: string, confirmPassword: string) => {
+      async function changePassword() {
+        if (newPassword !== confirmPassword) throw { error: "Passwords must match" } as orch.Error;
+
+        await apiFetch(
           "changePassword",
           {
             method: "POST",
             body: JSON.stringify({ oldPassword: loginOptions.current?.password, newPassword }),
           },
           "none"
-        ).then(() => setUser(u => ({ ...u!, isPasswordTemporary: false })))
-      ),
+        );
+
+        setUser(u => ({ ...u!, isPasswordTemporary: false }));
+      }
+
+      setPromise(changePassword());
+    },
     [apiFetch, setPromise]
   );
 

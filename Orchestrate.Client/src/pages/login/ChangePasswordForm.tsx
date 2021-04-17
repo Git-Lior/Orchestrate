@@ -9,7 +9,7 @@ import { useInputState } from "utils/hooks";
 
 interface Props {
   user: orch.UserData;
-  onChangePassword: (newPassword: string) => void;
+  onChangePassword: (newPassword: string, confirmPassword: string) => void;
 }
 
 const useStyles = makeStyles({
@@ -24,10 +24,12 @@ const useStyles = makeStyles({
 export default function ChangePasswordForm({ onChangePassword, user }: Props) {
   const classes = useStyles();
   const [newPassword, setNewPassword] = useInputState();
+  const [confirmPassword, setConfirmPassword] = useInputState();
 
-  const onChangePasswordClick = useCallback(() => onChangePassword(newPassword), [
+  const onChangePasswordClick = useCallback(() => onChangePassword(newPassword, confirmPassword), [
     onChangePassword,
     newPassword,
+    confirmPassword,
   ]);
 
   return (
@@ -45,6 +47,16 @@ export default function ChangePasswordForm({ onChangePassword, user }: Props) {
         variant="outlined"
         margin="normal"
         label="New password"
+        type="password"
+      />
+      <TextField
+        value={confirmPassword}
+        onChange={setConfirmPassword}
+        required
+        fullWidth
+        variant="outlined"
+        margin="normal"
+        label="Confirm password"
         type="password"
       />
       <Button

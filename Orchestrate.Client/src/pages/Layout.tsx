@@ -207,27 +207,33 @@ function PasswordDialog({ open, onPasswordChange, onClose }: PasswordDialogProps
 
   const [oldPassword, setOldPassword] = useInputState();
   const [newPassword, setNewPassword] = useInputState();
+  const [confirmPassword, setConfirmPassword] = useInputState();
   const [passwordLoading, passwordError, setPasswordLoading] = usePromiseStatus();
 
-  const changePassword = useCallback(
-    () =>
-      setPasswordLoading(
-        onPasswordChange(oldPassword, newPassword).then(() => {
-          setOldPassword();
-          setNewPassword();
-          onClose();
-        })
-      ),
-    [
-      setPasswordLoading,
-      onPasswordChange,
-      oldPassword,
-      newPassword,
-      setOldPassword,
-      setNewPassword,
-      onClose,
-    ]
-  );
+  const changePassword = useCallback(() => {
+    async function changePassword() {
+      if (newPassword !== confirmPassword)
+        throw { error: "New passwords must match" } as orch.Error;
+
+      await onPasswordChange(oldPassword, newPassword);
+
+      setOldPassword();
+      setNewPassword();
+      setConfirmPassword();
+      onClose();
+    }
+
+    setPasswordLoading(changePassword());
+  }, [
+    setPasswordLoading,
+    onPasswordChange,
+    oldPassword,
+    newPassword,
+    confirmPassword,
+    setOldPassword,
+    setNewPassword,
+    onClose,
+  ]);
 
   return (
     <FormDialog
@@ -249,6 +255,12 @@ function PasswordDialog({ open, onPasswordChange, onClose }: PasswordDialogProps
           New password
         </Typography>
         <TextField type="password" value={newPassword} onChange={setNewPassword} />
+      </div>
+      <div className={classes.formRow}>
+        <Typography variant="body1" className={classes.formRowLabel}>
+          Confirm new password
+        </Typography>
+        <TextField type="password" value={confirmPassword} onChange={setConfirmPassword} />
       </div>
     </FormDialog>
   );
