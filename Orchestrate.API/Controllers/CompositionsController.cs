@@ -85,12 +85,19 @@ namespace Orchestrate.API.Controllers
         {
             var composition = await SingleOrError(
                 _compositionsRepo.FindOne(new CompositionIdentifier(GroupId, compositionId))
+                    .AsNoTracking()
                     .Include(c => c.Uploader)
-                    .Include(c => c.SheetMusics
-                        .Where(s => UserGroupPosition.Director
-                                 || UserGroupPosition.Roles.Any(r => r.Id == s.RoleId)))
-                    .ThenInclude(_ => _.Role)
+                    .Include(c => c.SheetMusics).ThenInclude(_ => _.Role)
                 );
+
+            if (!UserGroupPosition.Director)
+            {
+                composition.SheetMusics = composition.SheetMusics
+                   .Where(s => UserGroupPosition.Roles.Any(r => r.Id == s.RoleId))
+                   .ToList();
+
+                if (composition.SheetMusics.Count == 0) throw new ArgumentException("Composition has no relevant sheet musics");
+            }
 
             return Ok(Mapper.Map<FullCompositionData>(composition));
         }

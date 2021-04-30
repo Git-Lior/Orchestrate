@@ -50,7 +50,7 @@ namespace Orchestrate.API.Controllers.Manager
 
             var concerts = await Repository.Get<Concert>().NoTrackedEntities
                 .Include(c => c.Attendances.Where(_ => _.UpdatedAt > timeBound))
-                .Where(c => c.Attendances.Count > 0)
+                .Where(c => c.Attendances.Where(_ => _.UpdatedAt > timeBound).Any())
                 .ToListAsync();
 
             IEnumerable<dynamic> concertDatas = concerts

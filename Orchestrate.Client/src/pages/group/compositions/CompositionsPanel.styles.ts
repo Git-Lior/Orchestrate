@@ -22,6 +22,7 @@ const compositionsPanelStyles: Styles<AppTheme, {}> = {
   },
   filterRow: {
     display: "flex",
+    "& > :not(:last-child)": { marginRight: "1rem" },
   },
 };
 
