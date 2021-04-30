@@ -21,10 +21,12 @@ import CardInfo from "./CardInfo";
 import CardLayout from "./CardLayout";
 
 function buttonCss(color: string, active: boolean = false) {
+  const activeAmount = active ? 0.4 : 0;
+
   return {
     borderColor: color,
-    "&:hover": { backgroundColor: fade(color, 0.2) },
-    ...(!active ? {} : { color }),
+    backgroundColor: fade(color, activeAmount),
+    "&:hover": { backgroundColor: fade(color, activeAmount + 0.2) },
   };
 }
 
@@ -51,8 +53,8 @@ const useStyles = makeStyles<AppTheme, Props>({
     flexDirection: "column",
     justifyContent: "space-evenly",
   },
-  acceptButton: props => buttonCss(green[500], !!props.concert.attending),
-  declineButton: props => buttonCss(red[500], !props.concert.attending),
+  acceptButton: props => buttonCss(green[500], props.concert.attending === true),
+  declineButton: props => buttonCss(red[500], props.concert.attending === false),
   managerActions: { position: "absolute", right: "1rem", top: "1rem" },
   compositionsDialog: {},
   dialogContainer: { padding: "2rem" },

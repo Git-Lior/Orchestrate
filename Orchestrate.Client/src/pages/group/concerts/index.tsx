@@ -20,6 +20,7 @@ const useStyles = makeStyles({
   header: { display: "flex", justifyContent: "space-between", marginBottom: "3rem" },
   content: {
     paddingRight: "19px",
+    paddingBottom: "3px",
     width: "calc(100% + 19px)",
     overflowY: "auto",
     flex: 1,

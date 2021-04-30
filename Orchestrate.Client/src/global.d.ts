@@ -69,7 +69,7 @@ declare namespace orch {
 
   interface SheetMusicComment {
     id: number;
-    user: UserData; // TODO: can be null
+    user: UserData;
     createdAt: number;
     updatedAt?: number;
     content: string;
